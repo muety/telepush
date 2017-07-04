@@ -1,0 +1,4 @@
+debug
+.vscode
+*.exe
+*.json
