@@ -14,7 +14,7 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-const BOT_API_TOKEN = "263649871:AAFkTFZYrDhOfb718Cw_VNnXz9tH5ea8-Pk"
+const BOT_API_TOKEN = "<YOUR_BOT_TOKEN>"
 const BASE_URL = "https://api.telegram.org/bot"
 
 //const BOT_API_TOKEN = ""
