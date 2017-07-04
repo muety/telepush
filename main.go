@@ -3,38 +3,56 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"strings"
+	"io/ioutil"
+	"strconv"
+	"time"
+	"github.com/satori/go.uuid"
 )
 
-//const BOT_API_TOKEN = "439545547:AAEiymDgV-ahktWxWs8dgTazanCmbenOTSg"
-//const BASE_URL = "https://api.telegram.org/bot"
-const BOT_API_TOKEN = ""
-const BASE_URL = "https://requestb.in/19mgpmo1"
+const BOT_API_TOKEN = "439545547:AAHIOyAdKrZD6hxBmL8yjED4rNmJ-fcIiUI"
+const BASE_URL = "https://api.telegram.org/bot"
+
+//const BOT_API_TOKEN = ""
+//const BASE_URL = "https://requestb.in/19mgpmo1"
 const API_URL = BASE_URL + BOT_API_TOKEN
 const STORE_FILE = "store.json"
+const POLL_TIMEOUT_SEC = 180
+const STORE_KEY_UPDATE_ID = "latestUpdateId"
 
-func sendMessage(recipientId, text string, isMarkdown bool) error {
-	parseMode := ""
-	if isMarkdown {
-		parseMode = "Markdown"
-	}
-	m, err := json.Marshal(&TelegramOutMessage{ChatId: recipientId, Text: text, ParseMode: parseMode})
+func sendMessage(recipientId, text string) error {
+	m, err := json.Marshal(&TelegramOutMessage{ChatId: recipientId, Text: text, ParseMode: "Markdown"})
 	if err != nil {
 		return err
 	}
 	reader := strings.NewReader(string(m))
-	_, err = http.Post(API_URL, "application/json", reader)
+	_, err = http.Post(API_URL + "/sendMessage", "application/json", reader)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
+func invalidateUserToken(userChatId int) {
+	for k, v := range StoreGetMap() {
+		entry, ok := v.(StoreObject)
+		if ok && entry.ChatId == userChatId {
+			StoreDelete(k)
+		}
+	}
+} 
+
 func resolveToken(token string) string {
-	return "1234"
+	value := StoreGet(token)
+	log.Println(value)
+	if value != nil {
+		return strconv.Itoa((value.(StoreObject)).ChatId)
+	}
+	return ""
 }
 
 func messageHandler(w http.ResponseWriter, r *http.Request) {
@@ -47,17 +65,25 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 	var m InMessage
 	err := dec.Decode(&m)
 	if err != nil {
+		w.Write([]byte(err.Error()))
+		w.WriteHeader(400)
+		return
+	}
+
+	if len(m.RecipientToken) == 0 || len(m.Text) == 0 {
+		w.Write([]byte("You need to pass a recipient_token parameter some message text."))
 		w.WriteHeader(400)
 		return
 	}
 
 	recipientId := resolveToken(m.RecipientToken)
-	if len(recipientId) == 0 || len(m.Text) == 0 {
-		w.WriteHeader(400)
+	if len(recipientId) == 0  {
+		w.Write([]byte("The token you passed doesn't seem to relate to a valid user."))
+		w.WriteHeader(404)
 		return
 	}
 
-	err = sendMessage(recipientId, m.Text, m.IsMarkdown)
+	err = sendMessage(recipientId, "__" + m.Origin + "__ wrote:\n\n" + m.Text)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -66,11 +92,68 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-// TODO: get updates
-// https://stackoverflow.com/questions/10152478/how-to-make-a-long-connection-with-http-client
+func getUpdate() (*[]TelegramUpdate, error) {
+	offset := 0
+	if StoreGet(STORE_KEY_UPDATE_ID) != nil {
+		offset = int(StoreGet(STORE_KEY_UPDATE_ID).(float64)) + 1
+	}
+	url := API_URL + string("/getUpdates?timeout=" + strconv.Itoa(POLL_TIMEOUT_SEC) + "&offset=" + strconv.Itoa(offset))
+	log.Println("Polling for updates.")
+	request, _ := http.NewRequest("GET", url, nil)
+	client := &http.Client{Timeout: (POLL_TIMEOUT_SEC + 10) * time.Second}
+
+	response, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var update TelegramUpdateResponse
+	err = json.Unmarshal(data, &update)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(update.Result) > 0 {
+		var latestUpdateId interface{} = float64(update.Result[len(update.Result) - 1].UpdateId)
+		StorePut(STORE_KEY_UPDATE_ID, latestUpdateId)
+	}
+	return &update.Result, nil
+}
+
+func startPolling() {
+	for {
+		updates, err := getUpdate()
+		if err == nil {
+			for _, update := range (*updates) {
+				var text string
+				chatId := update.Message.Chat.Id
+				if (strings.HasPrefix(update.Message.Text, "/start")) {
+					id := uuid.NewV4().String()
+					invalidateUserToken(chatId)
+					StorePut(id, StoreObject{User: update.Message.From, ChatId: chatId})
+					text = "Here is your token you can use to send messages to your Telegram account:\n\n_" + id + "_"
+					log.Println("Sending new token to", strconv.Itoa(chatId))
+				} else {
+					text = "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/n1try/telegram-middleman-bot."
+				}
+				err = sendMessage(strconv.Itoa(chatId), text)
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}
+	}
+}
 
 func main() {
 	ReadStoreFromJSON(STORE_FILE)
+
+	go startPolling()
 
 	// Exit handler
 	c := make(chan os.Signal, 1)

@@ -6,10 +6,10 @@ import (
 	"io/ioutil"
 )
 
-var store map[string]StoreObject
+var store map[string]interface{}
 
 func InitEmpty() {
-	store = make(map[string]StoreObject)
+	store = make(map[string]interface{})
 }
 
 func ReadStoreFromJSON(filePath string) {
@@ -35,10 +35,18 @@ func FlushStoreToJSON(filePath string) error {
 	return ioutil.WriteFile(filePath, []byte(data), 0644)
 }
 
-func StoreGet(key string) StoreObject {
+func StoreGet(key string) interface{} {
 	return store[key]
 }
 
-func StorePut(key string, value StoreObject) {
+func StorePut(key string, value interface{}) {
 	store[key] = value
+}
+
+func StoreDelete(key string) {
+	delete(store, key)
+}
+
+func StoreGetMap() map[string]interface{} {
+	return store
 }

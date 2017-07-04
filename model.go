@@ -1,14 +1,14 @@
 package main
 
 type StoreObject struct {
-	User   TelegramUser
-	ChatId int
+	User   TelegramUser `json:"user"`
+	ChatId int `json:"chat_id"`
 }
 
 type InMessage struct {
 	RecipientToken string `json:"recipient_token"`
 	Text           string `json:"text"`
-	IsMarkdown     bool   `json:"is_markdown"`
+	Origin string `json:"origin"`
 }
 
 // Only required fields are implemented
@@ -34,14 +34,20 @@ type TelegramOutMessage struct {
 
 // Only required fields are implemented
 type TelegramInMessage struct {
-	MessageId string       `json:"message_id"`
+	MessageId int       `json:"message_id"`
 	From      TelegramUser `json:"from"`
 	Date      int          `json:"date"`
 	Chat      TelegramChat `json:"chat"`
+	Text 		string `json:"text"`
 }
 
 // Only required fields are implemented
 type TelegramUpdate struct {
 	UpdateId int               `json:"update_id"`
 	Message  TelegramInMessage `json:"message"`
+}
+
+type TelegramUpdateResponse struct {
+	Ok bool `json:"ok"`
+	Result []TelegramUpdate `json:"result"`
 }
