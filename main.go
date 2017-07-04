@@ -20,7 +20,7 @@ const BASE_URL = "https://api.telegram.org/bot"
 //const BOT_API_TOKEN = ""
 //const BASE_URL = "https://requestb.in/19mgpmo1"
 const API_URL = BASE_URL + BOT_API_TOKEN
-const STORE_FILE = "store.json"
+const STORE_FILE = "store.gob"
 const POLL_TIMEOUT_SEC = 180
 const STORE_KEY_UPDATE_ID = "latestUpdateId"
 
@@ -48,7 +48,6 @@ func invalidateUserToken(userChatId int) {
 
 func resolveToken(token string) string {
 	value := StoreGet(token)
-	log.Println(value)
 	if value != nil {
 		return strconv.Itoa((value.(StoreObject)).ChatId)
 	}
@@ -60,7 +59,6 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(415)
 		return
 	}
-
 	dec := json.NewDecoder(r.Body)
 	var m InMessage
 	err := dec.Decode(&m)
@@ -70,8 +68,8 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(m.RecipientToken) == 0 || len(m.Text) == 0 {
-		w.Write([]byte("You need to pass a recipient_token parameter some message text."))
+	if len(m.RecipientToken) == 0 || len(m.Text) == 0 || len(m.Origin) == 0 {
+		w.Write([]byte("You need to pass recipient_token, origin and text parameters."))
 		w.WriteHeader(400)
 		return
 	}
@@ -83,7 +81,7 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sendMessage(recipientId, "__" + m.Origin + "__ wrote:\n\n" + m.Text)
+	err = sendMessage(recipientId, "*" + m.Origin + "* wrote:\n\n" + m.Text)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -151,7 +149,8 @@ func startPolling() {
 }
 
 func main() {
-	ReadStoreFromJSON(STORE_FILE)
+	InitStore()
+	ReadStoreFromBinary(STORE_FILE)
 
 	go startPolling()
 
@@ -162,7 +161,7 @@ func main() {
 	go func() {
 		for _ = range c {
 			fmt.Println("Flushing store.")
-			FlushStoreToJSON(STORE_FILE)
+			FlushStoreToBinary(STORE_FILE)
 			os.Exit(0)
 		}
 	}()

@@ -2,3 +2,4 @@ debug
 .vscode
 *.exe
 *.json
+*.gob

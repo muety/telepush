@@ -1,38 +1,48 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
+	"encoding/gob"
+	"os"
+	"log"
 )
 
 var store map[string]interface{}
 
-func InitEmpty() {
+func InitStore() {
+	gob.Register(StoreObject{})
+}
+
+func initNewEmptyStore() {
 	store = make(map[string]interface{})
 }
 
-func ReadStoreFromJSON(filePath string) {
-	data, err := ioutil.ReadFile(filePath)
+func ReadStoreFromBinary(filePath string) {
+	file, err := os.Open(filePath)
+	defer file.Close()
 	if err != nil {
-		fmt.Println("Could not read store from file. Initializing empty one.")
-		InitEmpty()
+		log.Println("Could not read store from file. Initializing empty one.")
+		initNewEmptyStore()
 		return
 	}
-	err = json.Unmarshal(data, &store)
+	decoder := gob.NewDecoder(file)
+	err = decoder.Decode(&store)
 	if err != nil {
-		fmt.Println("Could not read store from file. Initializing empty one.")
-		InitEmpty()
-		return
+		log.Fatal(err)
 	}
 }
 
-func FlushStoreToJSON(filePath string) error {
-	data, err := json.Marshal(&store)
+func FlushStoreToBinary(filePath string) {
+	file, err := os.Create(filePath)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return ioutil.WriteFile(filePath, []byte(data), 0644)
+	defer file.Close()
+
+	encoder := gob.NewEncoder(file)
+	err = encoder.Encode(&store)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func StoreGet(key string) interface{} {
