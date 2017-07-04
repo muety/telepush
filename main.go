@@ -2,19 +2,19 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
-	"io/ioutil"
 	"strconv"
+	"strings"
 	"time"
+
 	"github.com/satori/go.uuid"
 )
 
-const BOT_API_TOKEN = "<YOUR_API_TOKEN>"
+const BOT_API_TOKEN = "263649871:AAFkTFZYrDhOfb718Cw_VNnXz9tH5ea8-Pk"
 const BASE_URL = "https://api.telegram.org/bot"
 
 //const BOT_API_TOKEN = ""
@@ -30,7 +30,7 @@ func sendMessage(recipientId, text string) error {
 		return err
 	}
 	reader := strings.NewReader(string(m))
-	_, err = http.Post(API_URL + "/sendMessage", "application/json", reader)
+	_, err = http.Post(API_URL+"/sendMessage", "application/json", reader)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func invalidateUserToken(userChatId int) {
 			StoreDelete(k)
 		}
 	}
-} 
+}
 
 func resolveToken(token string) string {
 	value := StoreGet(token)
@@ -75,13 +75,13 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	recipientId := resolveToken(m.RecipientToken)
-	if len(recipientId) == 0  {
+	if len(recipientId) == 0 {
 		w.Write([]byte("The token you passed doesn't seem to relate to a valid user."))
 		w.WriteHeader(404)
 		return
 	}
 
-	err = sendMessage(recipientId, "*" + m.Origin + "* wrote:\n\n" + m.Text)
+	err = sendMessage(recipientId, "*"+m.Origin+"* wrote:\n\n"+m.Text)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -95,7 +95,7 @@ func getUpdate() (*[]TelegramUpdate, error) {
 	if StoreGet(STORE_KEY_UPDATE_ID) != nil {
 		offset = int(StoreGet(STORE_KEY_UPDATE_ID).(float64)) + 1
 	}
-	url := API_URL + string("/getUpdates?timeout=" + strconv.Itoa(POLL_TIMEOUT_SEC) + "&offset=" + strconv.Itoa(offset))
+	url := API_URL + string("/getUpdates?timeout="+strconv.Itoa(POLL_TIMEOUT_SEC)+"&offset="+strconv.Itoa(offset))
 	log.Println("Polling for updates.")
 	request, _ := http.NewRequest("GET", url, nil)
 	client := &http.Client{Timeout: (POLL_TIMEOUT_SEC + 10) * time.Second}
@@ -117,7 +117,7 @@ func getUpdate() (*[]TelegramUpdate, error) {
 	}
 
 	if len(update.Result) > 0 {
-		var latestUpdateId interface{} = float64(update.Result[len(update.Result) - 1].UpdateId)
+		var latestUpdateId interface{} = float64(update.Result[len(update.Result)-1].UpdateId)
 		StorePut(STORE_KEY_UPDATE_ID, latestUpdateId)
 	}
 	return &update.Result, nil
@@ -127,10 +127,10 @@ func startPolling() {
 	for {
 		updates, err := getUpdate()
 		if err == nil {
-			for _, update := range (*updates) {
+			for _, update := range *updates {
 				var text string
 				chatId := update.Message.Chat.Id
-				if (strings.HasPrefix(update.Message.Text, "/start")) {
+				if strings.HasPrefix(update.Message.Text, "/start") {
 					id := uuid.NewV4().String()
 					invalidateUserToken(chatId)
 					StorePut(id, StoreObject{User: update.Message.From, ChatId: chatId})
@@ -151,8 +151,13 @@ func startPolling() {
 func main() {
 	InitStore()
 	ReadStoreFromBinary(STORE_FILE)
-
 	go startPolling()
+	go func() {
+		for {
+			time.Sleep(30 * time.Minute)
+			FlushStoreToBinary(STORE_FILE)
+		}
+	}()
 
 	// Exit handler
 	c := make(chan os.Signal, 1)
@@ -160,7 +165,6 @@ func main() {
 	signal.Notify(c, os.Kill)
 	go func() {
 		for _ = range c {
-			fmt.Println("Flushing store.")
 			FlushStoreToBinary(STORE_FILE)
 			os.Exit(0)
 		}

@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/gob"
-	"os"
 	"log"
+	"os"
 )
 
 var store map[string]interface{}
@@ -17,6 +17,7 @@ func initNewEmptyStore() {
 }
 
 func ReadStoreFromBinary(filePath string) {
+	log.Println("Loading store.")
 	file, err := os.Open(filePath)
 	defer file.Close()
 	if err != nil {
@@ -32,6 +33,7 @@ func ReadStoreFromBinary(filePath string) {
 }
 
 func FlushStoreToBinary(filePath string) {
+	log.Println("Flushing store.")
 	file, err := os.Create(filePath)
 	if err != nil {
 		log.Fatal(err)
