@@ -14,7 +14,7 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-const BOT_API_TOKEN = "<YOUR_BOT_TOKEN>"
+const BOT_API_TOKEN = "70237270:AAEK7ofUt-eSQKFqyGHJLGZqOtQjJOj-k28"
 const BASE_URL = "https://api.telegram.org/bot"
 
 //const BOT_API_TOKEN = ""
@@ -23,6 +23,7 @@ const API_URL = BASE_URL + BOT_API_TOKEN
 const STORE_FILE = "store.gob"
 const POLL_TIMEOUT_SEC = 180
 const STORE_KEY_UPDATE_ID = "latestUpdateId"
+const STORE_KEY_REQUESTS = "totalRequests"
 
 func sendMessage(recipientId, text string) error {
 	m, err := json.Marshal(&TelegramOutMessage{ChatId: recipientId, Text: text, ParseMode: "Markdown"})
@@ -59,6 +60,7 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(415)
 		return
 	}
+	StorePut(STORE_KEY_REQUESTS, StoreGet(STORE_KEY_REQUESTS).(int)+1)
 	dec := json.NewDecoder(r.Body)
 	var m InMessage
 	err := dec.Decode(&m)
@@ -148,14 +150,34 @@ func startPolling() {
 	}
 }
 
+func toJson(filePath string, data interface{}) {
+	log.Println("Saving json.")
+	file, err := os.Create(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(&data)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
 	InitStore()
 	ReadStoreFromBinary(STORE_FILE)
+	if StoreGet(STORE_KEY_REQUESTS) == nil {
+		StorePut(STORE_KEY_REQUESTS, 0)
+	}
 	go startPolling()
 	go func() {
 		for {
-			time.Sleep(30 * time.Minute)
+			time.Sleep(10 * time.Second)
 			FlushStoreToBinary(STORE_FILE)
+			stats := Stats{TotalRequests: StoreGet(STORE_KEY_REQUESTS).(int), Timestamp: int(time.Now().Unix())}
+			toJson("stats.json", stats)
 		}
 	}()
 

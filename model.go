@@ -51,3 +51,8 @@ type TelegramUpdateResponse struct {
 	Ok     bool             `json:"ok"`
 	Result []TelegramUpdate `json:"result"`
 }
+
+type Stats struct {
+	TotalRequests int `json:"total_requests"`
+	Timestamp     int `json:"timestamp"`
+}
