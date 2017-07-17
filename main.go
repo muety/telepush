@@ -14,7 +14,7 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-const BOT_API_TOKEN = "<YOUR_API_TOKEN_HERE>"
+const BOT_API_TOKEN = "439545547:AAFBkRktGKTYnXKY-7Zr5TMIwF9RO1fl43M"
 const BASE_URL = "https://api.telegram.org/bot"
 
 //const BOT_API_TOKEN = ""
@@ -174,7 +174,7 @@ func main() {
 	go startPolling()
 	go func() {
 		for {
-			time.Sleep(10 * time.Second)
+			time.Sleep(30 * time.Minute)
 			FlushStoreToBinary(STORE_FILE)
 			stats := Stats{TotalRequests: StoreGet(STORE_KEY_REQUESTS).(int), Timestamp: int(time.Now().Unix())}
 			toJson("stats.json", stats)
