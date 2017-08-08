@@ -15,10 +15,12 @@ import (
 	"flag"
 )
 
+const BOT_API_TOKEN = "439545547:AAFBkRktGKTYnXKY-7Zr5TMIwF9RO1fl43M"
 const BASE_URL = "https://api.telegram.org/bot"
 const STORE_FILE = "store.gob"
 const POLL_TIMEOUT_SEC = 180
 const STORE_KEY_UPDATE_ID = "latestUpdateId"
+const STORE_KEY_REQUESTS = "totalRequests"
 var token string
 
 func getApiUrl() string {
@@ -60,6 +62,7 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(415)
 		return
 	}
+	StorePut(STORE_KEY_REQUESTS, StoreGet(STORE_KEY_REQUESTS).(int)+1)
 	dec := json.NewDecoder(r.Body)
 	var m InMessage
 	err := dec.Decode(&m)
@@ -189,13 +192,36 @@ func getConfig() (BotConfig) {
 		Port: *portPtr}
 }
 
+func toJson(filePath string, data interface{}) {
+	log.Println("Saving json.")
+	file, err := os.Create(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(&data)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
 	InitStore()
 	ReadStoreFromBinary(STORE_FILE)
+
+	go func() {
+		for {
+			time.Sleep(30 * time.Minute)
+			FlushStoreToBinary(STORE_FILE)
+			stats := Stats{TotalRequests: StoreGet(STORE_KEY_REQUESTS).(int), Timestamp: int(time.Now().Unix())}
+			toJson("stats.json", stats)
+		}
+	}()
+
 	config := getConfig()
 	token = config.Token
-
-	fmt.Println(getApiUrl())
 
 	http.HandleFunc("/api/messages", messageHandler)
 
@@ -206,6 +232,9 @@ func main() {
 		fmt.Println("Using long-polling mode.")
 		go startPolling()
 	}
+	if StoreGet(STORE_KEY_REQUESTS) == nil {
+		StorePut(STORE_KEY_REQUESTS, 0)
+	}
 
 	// Exit handler
 	c := make(chan os.Signal, 1)
@@ -213,7 +242,6 @@ func main() {
 	signal.Notify(c, os.Kill)
 	go func() {
 		for _ = range c {
-			fmt.Println("Flushing store.")
 			FlushStoreToBinary(STORE_FILE)
 			os.Exit(0)
 		}

@@ -2,13 +2,13 @@ package main
 
 type StoreObject struct {
 	User   TelegramUser `json:"user"`
-	ChatId int `json:"chat_id"`
+	ChatId int          `json:"chat_id"`
 }
 
 type InMessage struct {
 	RecipientToken string `json:"recipient_token"`
 	Text           string `json:"text"`
-	Origin string `json:"origin"`
+	Origin         string `json:"origin"`
 }
 
 // Only required fields are implemented
@@ -34,11 +34,11 @@ type TelegramOutMessage struct {
 
 // Only required fields are implemented
 type TelegramInMessage struct {
-	MessageId int       `json:"message_id"`
+	MessageId int          `json:"message_id"`
 	From      TelegramUser `json:"from"`
 	Date      int          `json:"date"`
 	Chat      TelegramChat `json:"chat"`
-	Text 		string `json:"text"`
+	Text      string       `json:"text"`
 }
 
 // Only required fields are implemented
@@ -48,7 +48,7 @@ type TelegramUpdate struct {
 }
 
 type TelegramUpdateResponse struct {
-	Ok bool `json:"ok"`
+	Ok     bool             `json:"ok"`
 	Result []TelegramUpdate `json:"result"`
 }
 
@@ -59,4 +59,9 @@ type BotConfig struct {
 	CertPath string
 	KeyPath string
 	Port int
+}
+
+type Stats struct {
+	TotalRequests int `json:"total_requests"`
+	Timestamp     int `json:"timestamp"`
 }

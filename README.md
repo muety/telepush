@@ -2,7 +2,7 @@
 
 ![](http://i.imgur.com/lvshgaj.png)
 
-__I'm the [@MiddleMan](https://telegram.me/MiddleManBot) bot! I sit in the middle between whatever you want to send you a message and your Telegram.__
+__I'm the [@MiddleMan](https://telegram.me/MiddleManBot) bot! I sit in the middle between whatever you want to send yourself as a message and your Telegram.__
 
 I translate simple JSON HTTP requests into Telegram push messages that you will get on your Smartphone, PC or whatever Telegram client you have.
 
