@@ -6,6 +6,10 @@ __I'm the [@MiddleMan](https://telegram.me/MiddleManBot) bot! I sit in the middl
 
 I translate simple JSON HTTP requests into Telegram push messages that you will get on your Smartphone, PC or whatever Telegram client you have.
 
+## What's new (2017-08-08) ?
+* Support for webhook mode
+* Read token and further config parameters from command-line arguments
+
 ## Why might this be useful?
 This is especially useful for __developers or sysadmins__. Imagine you want some kind of reporting from your application or server, like a daily report including some statistics. You don't want to actively look it up on a website but you want to receive it in a __passive fashion__. Just like getting an e-mail. But come on, let's be honest. __E-Mails are so 2010__. And they require your little server-side script to include some SMTP library and connect to a mail server. That's __too heavyweight__ just to __get some short information__. Personally, I have a Python script running on my server which gathers some statistics from log files and databases and regularly sends me a Telegram message.
 
