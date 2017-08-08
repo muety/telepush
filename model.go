@@ -51,3 +51,12 @@ type TelegramUpdateResponse struct {
 	Ok bool `json:"ok"`
 	Result []TelegramUpdate `json:"result"`
 }
+
+type BotConfig struct {
+	Token string
+	Mode string
+	UseHTTPS bool
+	CertPath string
+	KeyPath string
+	Port int
+}

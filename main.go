@@ -3,26 +3,27 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/satori/go.uuid"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
-	"io/ioutil"
 	"strconv"
+	"strings"
 	"time"
-	"github.com/satori/go.uuid"
+	"flag"
 )
 
-const BOT_API_TOKEN = "<YOUR_API_TOKEN>"
 const BASE_URL = "https://api.telegram.org/bot"
-
-//const BOT_API_TOKEN = ""
-//const BASE_URL = "https://requestb.in/19mgpmo1"
-const API_URL = BASE_URL + BOT_API_TOKEN
 const STORE_FILE = "store.gob"
 const POLL_TIMEOUT_SEC = 180
 const STORE_KEY_UPDATE_ID = "latestUpdateId"
+var token string
+
+func getApiUrl() string {
+	return BASE_URL + token
+}
 
 func sendMessage(recipientId, text string) error {
 	m, err := json.Marshal(&TelegramOutMessage{ChatId: recipientId, Text: text, ParseMode: "Markdown"})
@@ -30,7 +31,7 @@ func sendMessage(recipientId, text string) error {
 		return err
 	}
 	reader := strings.NewReader(string(m))
-	_, err = http.Post(API_URL + "/sendMessage", "application/json", reader)
+	_, err = http.Post(getApiUrl()+"/sendMessage", "application/json", reader)
 	if err != nil {
 		return err
 	}
@@ -44,7 +45,7 @@ func invalidateUserToken(userChatId int) {
 			StoreDelete(k)
 		}
 	}
-} 
+}
 
 func resolveToken(token string) string {
 	value := StoreGet(token)
@@ -75,13 +76,13 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	recipientId := resolveToken(m.RecipientToken)
-	if len(recipientId) == 0  {
+	if len(recipientId) == 0 {
 		w.Write([]byte("The token you passed doesn't seem to relate to a valid user."))
 		w.WriteHeader(404)
 		return
 	}
 
-	err = sendMessage(recipientId, "*" + m.Origin + "* wrote:\n\n" + m.Text)
+	err = sendMessage(recipientId, "*"+m.Origin+"* wrote:\n\n"+m.Text)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -90,12 +91,29 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
+func webhookUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(415)
+		return
+	}
+	dec := json.NewDecoder(r.Body)
+	var u TelegramUpdate
+	err := dec.Decode(&u)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		w.WriteHeader(400)
+		return
+	}
+	processUpdate(u)
+	w.WriteHeader(200)
+}
+
 func getUpdate() (*[]TelegramUpdate, error) {
 	offset := 0
 	if StoreGet(STORE_KEY_UPDATE_ID) != nil {
 		offset = int(StoreGet(STORE_KEY_UPDATE_ID).(float64)) + 1
 	}
-	url := API_URL + string("/getUpdates?timeout=" + strconv.Itoa(POLL_TIMEOUT_SEC) + "&offset=" + strconv.Itoa(offset))
+	url := getApiUrl() + string("/getUpdates?timeout="+strconv.Itoa(POLL_TIMEOUT_SEC)+"&offset="+strconv.Itoa(offset))
 	log.Println("Polling for updates.")
 	request, _ := http.NewRequest("GET", url, nil)
 	client := &http.Client{Timeout: (POLL_TIMEOUT_SEC + 10) * time.Second}
@@ -117,42 +135,77 @@ func getUpdate() (*[]TelegramUpdate, error) {
 	}
 
 	if len(update.Result) > 0 {
-		var latestUpdateId interface{} = float64(update.Result[len(update.Result) - 1].UpdateId)
+		var latestUpdateId interface{} = float64(update.Result[len(update.Result)-1].UpdateId)
 		StorePut(STORE_KEY_UPDATE_ID, latestUpdateId)
 	}
 	return &update.Result, nil
+}
+
+func processUpdate(update TelegramUpdate) {
+	var text string
+	chatId := update.Message.Chat.Id
+	if strings.HasPrefix(update.Message.Text, "/start") {
+		id := uuid.NewV4().String()
+		invalidateUserToken(chatId)
+		StorePut(id, StoreObject{User: update.Message.From, ChatId: chatId})
+		text = "Here is your token you can use to send messages to your Telegram account:\n\n_" + id + "_"
+		log.Println("Sending new token to", strconv.Itoa(chatId))
+	} else {
+		text = "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/n1try/telegram-middleman-bot."
+	}
+	err := sendMessage(strconv.Itoa(chatId), text)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func startPolling() {
 	for {
 		updates, err := getUpdate()
 		if err == nil {
-			for _, update := range (*updates) {
-				var text string
-				chatId := update.Message.Chat.Id
-				if (strings.HasPrefix(update.Message.Text, "/start")) {
-					id := uuid.NewV4().String()
-					invalidateUserToken(chatId)
-					StorePut(id, StoreObject{User: update.Message.From, ChatId: chatId})
-					text = "Here is your token you can use to send messages to your Telegram account:\n\n_" + id + "_"
-					log.Println("Sending new token to", strconv.Itoa(chatId))
-				} else {
-					text = "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/n1try/telegram-middleman-bot."
-				}
-				err = sendMessage(strconv.Itoa(chatId), text)
-				if err != nil {
-					log.Println(err)
-				}
+			for _, update := range *updates {
+				processUpdate(update)
 			}
 		}
 	}
 }
 
+func getConfig() (BotConfig) {
+	tokenPtr := flag.String("token", "", "Your Telegram Bot Token from Botfather")
+	modePtr := flag.String("mode", "poll", "Update mode ('poll' for development, 'webhook' for production)")
+	useHttpsPtr := flag.Bool("useHttps", false, "Whether or not to use TLS for webserver. Required for webhook mode if not using a reverse proxy")
+	certPathPtr := flag.String("certPath", "", "Path of your SSL certificate when using webhook mode")
+	keyPathPtr := flag.String("keyPath", "", "Path of your private SSL key when using webhook mode")
+	portPtr := flag.Int("port", 8080, "Port for the webserver to listen on")
+	
+	flag.Parse()
+
+	return BotConfig{
+		Token: *tokenPtr,
+		Mode: *modePtr,
+		UseHTTPS: *useHttpsPtr,
+		CertPath: *certPathPtr,
+		KeyPath: *keyPathPtr,
+		Port: *portPtr}
+}
+
 func main() {
 	InitStore()
 	ReadStoreFromBinary(STORE_FILE)
+	config := getConfig()
+	token = config.Token
 
-	go startPolling()
+	fmt.Println(getApiUrl())
+
+	http.HandleFunc("/api/messages", messageHandler)
+
+	if config.Mode == "webhook" {
+		fmt.Println("Using webhook mode.")
+		http.HandleFunc("/api/updates", webhookUpdateHandler)
+	} else {
+		fmt.Println("Using long-polling mode.")
+		go startPolling()
+	}
 
 	// Exit handler
 	c := make(chan os.Signal, 1)
@@ -166,6 +219,12 @@ func main() {
 		}
 	}()
 
-	http.HandleFunc("/api/messages", messageHandler)
-	http.ListenAndServe(":8080", nil)
+	portString := ":" + strconv.Itoa(config.Port)
+	if config.UseHTTPS {
+		fmt.Printf("Listening for HTTPS on port %d.\n", config.Port)
+		http.ListenAndServeTLS(portString, config.CertPath, config.KeyPath, nil)
+	} else {
+		fmt.Printf("Listening for HTTP on port %d.\n", config.Port)
+		http.ListenAndServe(portString, nil)
+	}
 }

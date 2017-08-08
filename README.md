@@ -12,15 +12,22 @@ This is especially useful for __developers or sysadmins__. Imagine you want some
 If you develop those thoughts further, this could potentially __replace any kind of e-mail notifications__ - be it the message that someone has answered to your __forum post__, your favorite game is __now on sale at Steam__, and so on. It's __lightweight and easy__, unlike e-mails that have way too much overhead.
 
 ## How to run it?
-You can either set up your own instance or use mine, which is running at [http://middleman.ferdinand-muetsch.de](http://middleman.ferdinand-muetsch.de). If you want to set this up on your own, do the following.
-
+You can either set up your own instance or use mine, which is running at [http://middleman.ferdinand-muetsch.de](https://middleman.ferdinand-muetsch.de). If you want to set this up on your own, do the following. You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and s (self-signed) SSL certificate. 
 1. Make sure u have the latest version of Go installed.
 2. `go get github.com/n1try/telegram-middleman-bot`
 3. `cd <YOUR_GO_WORKSPACE_PATH>/src/github.com/n1try/telegram-middleman-bot`
 4. `go get ./...`
-5. Insert your `BOT_API_TOKEN`, which you got from the [@BotFather](https://telegram.me/BotFather) when registering your bot, in `main.go`
-6. `go build .`
-7. `./telegram-middleman-bot`
+5. `go build .`
+
+### Using long-polling mode
+1. `./telegram-middleman-bot --token <TOKEN_YOU_GOT_FROM_BOTFATHER> --port 8080` (of course you can use a different port)
+
+### Using webhook mode 
+1. If you don't have an official, verified certificate, create one doing `openssl req -newkey rsa:2048 -sha256 -nodes -keyout middleman.key -x509 -days 365 -out middleman.pem` (the CN must match your server's IP address)
+2. Tell Telegram to use webhooks to send updates to your bot. `curl -F "url=https://<YOUR_DOMAIN_OR_IP>/api/updates" -F "certificate=@<YOUR_CERTS_PATH>.pem" https://api.telegram.org/bot<TOKEN_YOU_GOT_FROM_BOTFATHER>/setWebhook`
+3. `./telegram-middleman-bot --token <TOKEN_YOU_GOT_FROM_BOTFATHER> --mode webhook --certPath middleman.pem --keyPath middleman.key --port 8443 --useHttps` (of course you can use a different port)
+
+Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](https://caddyserver.com) to handle encryption. In that case you would set the `mode` to _webhook_, but `useHttps` to _false_ and your bot wouldn't need any certificate.
 
 ## How to use it?
 1. You need to get a token from the bot. Send a message with `/start` to the [@MiddleManBot](https://telegram.me/MiddleManBot) therefore.
