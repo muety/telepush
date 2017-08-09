@@ -194,15 +194,15 @@ func getConfig() (BotConfig) {
 func toJson(filePath string, data interface{}) {
 	log.Println("Saving json.")
 	file, err := os.Create(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
 	defer file.Close()
+	if err != nil {
+		log.Println(err)
+	}
 
 	encoder := json.NewEncoder(file)
 	err = encoder.Encode(&data)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 

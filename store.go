@@ -28,22 +28,22 @@ func ReadStoreFromBinary(filePath string) {
 	decoder := gob.NewDecoder(file)
 	err = decoder.Decode(&store)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
 func FlushStoreToBinary(filePath string) {
 	log.Println("Flushing store.")
 	file, err := os.Create(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
 	defer file.Close()
+	if err != nil {
+		log.Println(err)
+	}
 
 	encoder := gob.NewEncoder(file)
 	err = encoder.Encode(&store)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
