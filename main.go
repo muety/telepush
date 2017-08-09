@@ -32,7 +32,8 @@ func sendMessage(recipientId, text string) error {
 		return err
 	}
 	reader := strings.NewReader(string(m))
-	_, err = http.Post(getApiUrl()+"/sendMessage", "application/json", reader)
+	resp, err := http.Post(getApiUrl()+"/sendMessage", "application/json", reader)
+	defer resp.Body.Close()
 	if err != nil {
 		return err
 	}
@@ -66,21 +67,21 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 	var m InMessage
 	err := dec.Decode(&m)
 	if err != nil {
-		w.Write([]byte(err.Error()))
 		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
 	if len(m.RecipientToken) == 0 || len(m.Text) == 0 || len(m.Origin) == 0 {
-		w.Write([]byte("You need to pass recipient_token, origin and text parameters."))
 		w.WriteHeader(400)
+		w.Write([]byte("You need to pass recipient_token, origin and text parameters."))
 		return
 	}
 
 	recipientId := resolveToken(m.RecipientToken)
 	if len(recipientId) == 0 {
-		w.Write([]byte("The token you passed doesn't seem to relate to a valid user."))
 		w.WriteHeader(404)
+		w.Write([]byte("The token you passed doesn't seem to relate to a valid user."))
 		return
 	}
 
@@ -102,8 +103,8 @@ func webhookUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	var u TelegramUpdate
 	err := dec.Decode(&u)
 	if err != nil {
-		w.Write([]byte(err.Error()))
 		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
 		return
 	}
 	processUpdate(u)
@@ -121,6 +122,8 @@ func getUpdate() (*[]TelegramUpdate, error) {
 	client := &http.Client{Timeout: (POLL_TIMEOUT_SEC + 10) * time.Second}
 
 	response, err := client.Do(request)
+	defer response.Body.Close()
+	
 	if err != nil {
 		return nil, err
 	}
@@ -140,6 +143,7 @@ func getUpdate() (*[]TelegramUpdate, error) {
 		var latestUpdateId interface{} = float64(update.Result[len(update.Result)-1].UpdateId)
 		StorePut(STORE_KEY_UPDATE_ID, latestUpdateId)
 	}
+
 	return &update.Result, nil
 }
 
