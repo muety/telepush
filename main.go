@@ -119,6 +119,7 @@ func getUpdate() (*[]TelegramUpdate, error) {
 	url := getApiUrl() + string("/getUpdates?timeout="+strconv.Itoa(POLL_TIMEOUT_SEC)+"&offset="+strconv.Itoa(offset))
 	log.Println("Polling for updates.")
 	request, _ := http.NewRequest("GET", url, nil)
+	request.Close = true
 	client := &http.Client{Timeout: (POLL_TIMEOUT_SEC + 10) * time.Second}
 
 	response, err := client.Do(request)
@@ -251,11 +252,16 @@ func main() {
 	}()
 
 	portString := ":" + strconv.Itoa(config.Port)
+	s := &http.Server{
+		Addr: portString,
+		ReadTimeout: 10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
 	if config.UseHTTPS {
 		fmt.Printf("Listening for HTTPS on port %d.\n", config.Port)
-		http.ListenAndServeTLS(portString, config.CertPath, config.KeyPath, nil)
+		s.ListenAndServeTLS(config.CertPath, config.KeyPath)
 	} else {
 		fmt.Printf("Listening for HTTP on port %d.\n", config.Port)
-		http.ListenAndServe(portString, nil)
+		s.ListenAndServe()
 	}
 }
