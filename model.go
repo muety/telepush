@@ -1,9 +1,11 @@
 package main
 
-type StoreObject struct {
+type StoreUserObject struct {
 	User   TelegramUser `json:"user"`
 	ChatId int          `json:"chat_id"`
 }
+
+type StoreMessageObject []string
 
 type InMessage struct {
 	RecipientToken string `json:"recipient_token"`
@@ -53,12 +55,12 @@ type TelegramUpdateResponse struct {
 }
 
 type BotConfig struct {
-	Token string
-	Mode string
+	Token    string
+	Mode     string
 	UseHTTPS bool
 	CertPath string
-	KeyPath string
-	Port int
+	KeyPath  string
+	Port     int
 }
 
 type Stats struct {

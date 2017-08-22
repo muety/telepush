@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
-	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,7 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"flag"
+
+	"github.com/satori/go.uuid"
 )
 
 const BASE_URL = "https://api.telegram.org/bot"
@@ -20,6 +21,8 @@ const STORE_FILE = "store.gob"
 const POLL_TIMEOUT_SEC = 180
 const STORE_KEY_UPDATE_ID = "latestUpdateId"
 const STORE_KEY_REQUESTS = "totalRequests"
+const STORE_KEY_MESSAGES = "messages"
+
 var token string
 
 func getApiUrl() string {
@@ -42,7 +45,7 @@ func sendMessage(recipientId, text string) error {
 
 func invalidateUserToken(userChatId int) {
 	for k, v := range StoreGetMap() {
-		entry, ok := v.(StoreObject)
+		entry, ok := v.(StoreUserObject)
 		if ok && entry.ChatId == userChatId {
 			StoreDelete(k)
 		}
@@ -52,7 +55,7 @@ func invalidateUserToken(userChatId int) {
 func resolveToken(token string) string {
 	value := StoreGet(token)
 	if value != nil {
-		return strconv.Itoa((value.(StoreObject)).ChatId)
+		return strconv.Itoa((value.(StoreUserObject)).ChatId)
 	}
 	return ""
 }
@@ -91,6 +94,10 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	storedMessages := StoreGet(STORE_KEY_MESSAGES).(StoreMessageObject)
+	storedMessages = append(storedMessages, m.Text)
+	StorePut(STORE_KEY_MESSAGES, storedMessages)
+
 	w.WriteHeader(200)
 }
 
@@ -124,7 +131,7 @@ func getUpdate() (*[]TelegramUpdate, error) {
 
 	response, err := client.Do(request)
 	defer response.Body.Close()
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +161,7 @@ func processUpdate(update TelegramUpdate) {
 	if strings.HasPrefix(update.Message.Text, "/start") {
 		id := uuid.NewV4().String()
 		invalidateUserToken(chatId)
-		StorePut(id, StoreObject{User: update.Message.From, ChatId: chatId})
+		StorePut(id, StoreUserObject{User: update.Message.From, ChatId: chatId})
 		text = "Here is your token you can use to send messages to your Telegram account:\n\n_" + id + "_"
 		log.Println("Sending new token to", strconv.Itoa(chatId))
 	} else {
@@ -177,23 +184,23 @@ func startPolling() {
 	}
 }
 
-func getConfig() (BotConfig) {
+func getConfig() BotConfig {
 	tokenPtr := flag.String("token", "", "Your Telegram Bot Token from Botfather")
 	modePtr := flag.String("mode", "poll", "Update mode ('poll' for development, 'webhook' for production)")
 	useHttpsPtr := flag.Bool("useHttps", false, "Whether or not to use TLS for webserver. Required for webhook mode if not using a reverse proxy")
 	certPathPtr := flag.String("certPath", "", "Path of your SSL certificate when using webhook mode")
 	keyPathPtr := flag.String("keyPath", "", "Path of your private SSL key when using webhook mode")
 	portPtr := flag.Int("port", 8080, "Port for the webserver to listen on")
-	
+
 	flag.Parse()
 
 	return BotConfig{
-		Token: *tokenPtr,
-		Mode: *modePtr,
+		Token:    *tokenPtr,
+		Mode:     *modePtr,
 		UseHTTPS: *useHttpsPtr,
 		CertPath: *certPathPtr,
-		KeyPath: *keyPathPtr,
-		Port: *portPtr}
+		KeyPath:  *keyPathPtr,
+		Port:     *portPtr}
 }
 
 func toJson(filePath string, data interface{}) {
@@ -236,8 +243,13 @@ func main() {
 		fmt.Println("Using long-polling mode.")
 		go startPolling()
 	}
+
 	if StoreGet(STORE_KEY_REQUESTS) == nil {
 		StorePut(STORE_KEY_REQUESTS, 0)
+	}
+
+	if StoreGet(STORE_KEY_MESSAGES) == nil {
+		StorePut(STORE_KEY_MESSAGES, StoreMessageObject{})
 	}
 
 	// Exit handler
@@ -253,8 +265,8 @@ func main() {
 
 	portString := ":" + strconv.Itoa(config.Port)
 	s := &http.Server{
-		Addr: portString,
-		ReadTimeout: 10 * time.Second,
+		Addr:         portString,
+		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 	if config.UseHTTPS {
