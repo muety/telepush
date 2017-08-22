@@ -45,7 +45,7 @@ func sendMessage(recipientId, text string) error {
 
 func invalidateUserToken(userChatId int) {
 	for k, v := range StoreGetMap() {
-		entry, ok := v.(StoreUserObject)
+		entry, ok := v.(StoreObject)
 		if ok && entry.ChatId == userChatId {
 			StoreDelete(k)
 		}
@@ -55,7 +55,7 @@ func invalidateUserToken(userChatId int) {
 func resolveToken(token string) string {
 	value := StoreGet(token)
 	if value != nil {
-		return strconv.Itoa((value.(StoreUserObject)).ChatId)
+		return strconv.Itoa((value.(StoreObject)).ChatId)
 	}
 	return ""
 }
@@ -161,7 +161,7 @@ func processUpdate(update TelegramUpdate) {
 	if strings.HasPrefix(update.Message.Text, "/start") {
 		id := uuid.NewV4().String()
 		invalidateUserToken(chatId)
-		StorePut(id, StoreUserObject{User: update.Message.From, ChatId: chatId})
+		StorePut(id, StoreObject{User: update.Message.From, ChatId: chatId})
 		text = "Here is your token you can use to send messages to your Telegram account:\n\n_" + id + "_"
 		log.Println("Sending new token to", strconv.Itoa(chatId))
 	} else {

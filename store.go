@@ -9,7 +9,7 @@ import (
 var store map[string]interface{}
 
 func InitStore() {
-	gob.Register(StoreUserObject{})
+	gob.Register(StoreObject{})
 	gob.Register(StoreMessageObject{})
 }
 

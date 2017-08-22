@@ -1,6 +1,6 @@
 package main
 
-type StoreUserObject struct {
+type StoreObject struct {
 	User   TelegramUser `json:"user"`
 	ChatId int          `json:"chat_id"`
 }
