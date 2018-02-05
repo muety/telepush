@@ -55,12 +55,13 @@ type TelegramUpdateResponse struct {
 }
 
 type BotConfig struct {
-	Token    string
-	Mode     string
-	UseHTTPS bool
-	CertPath string
-	KeyPath  string
-	Port     int
+	Token     string
+	Mode      string
+	UseHTTPS  bool
+	CertPath  string
+	KeyPath   string
+	Port      int
+	RateLimit int
 }
 
 type Stats struct {

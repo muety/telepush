@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"errors"
 
 	"github.com/satori/go.uuid"
 )
@@ -24,6 +25,8 @@ const STORE_KEY_REQUESTS = "totalRequests"
 const STORE_KEY_MESSAGES = "messages"
 
 var token string
+var limiterMap map[string]int
+var maxReqsPerHous int
 
 func getApiUrl() string {
 	return BASE_URL + token
@@ -65,7 +68,6 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(415)
 		return
 	}
-	StorePut(STORE_KEY_REQUESTS, StoreGet(STORE_KEY_REQUESTS).(int)+1)
 	dec := json.NewDecoder(r.Body)
 	var m InMessage
 	err := dec.Decode(&m)
@@ -88,6 +90,17 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, hasKey := limiterMap[recipientId]
+	if !hasKey {
+		limiterMap[recipientId] = 0
+	}
+	if limiterMap[recipientId] >= maxReqsPerHous {
+		w.WriteHeader(429)
+		w.Write([]byte(fmt.Sprintf("Request rate of %d per hour exceeded.", maxReqsPerHous)))
+		return
+	}
+	limiterMap[recipientId] += 1
+
 	err = sendMessage(recipientId, "*"+m.Origin+"* wrote:\n\n"+m.Text)
 	if err != nil {
 		w.WriteHeader(500)
@@ -97,6 +110,7 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 	storedMessages := StoreGet(STORE_KEY_MESSAGES).(StoreMessageObject)
 	storedMessages = append(storedMessages, m.Text)
 	StorePut(STORE_KEY_MESSAGES, storedMessages)
+	StorePut(STORE_KEY_REQUESTS, StoreGet(STORE_KEY_REQUESTS).(int)+1)
 
 	w.WriteHeader(200)
 }
@@ -140,6 +154,9 @@ func getUpdate() (*[]TelegramUpdate, error) {
 	if err != nil {
 		return nil, err
 	}
+	if response.StatusCode != 200 {
+		return nil, errors.New(string(data))
+	}
 
 	var update TelegramUpdateResponse
 	err = json.Unmarshal(data, &update)
@@ -180,6 +197,9 @@ func startPolling() {
 			for _, update := range *updates {
 				processUpdate(update)
 			}
+		} else {
+			log.Printf("ERROR getting updates: %s\n", err)
+			time.Sleep(POLL_TIMEOUT_SEC * time.Second)
 		}
 	}
 }
@@ -191,16 +211,18 @@ func getConfig() BotConfig {
 	certPathPtr := flag.String("certPath", "", "Path of your SSL certificate when using webhook mode")
 	keyPathPtr := flag.String("keyPath", "", "Path of your private SSL key when using webhook mode")
 	portPtr := flag.Int("port", 8080, "Port for the webserver to listen on")
+	rateLimitPtr := flag.Int("rateLimit", 10, "Max number of requests per recipient per hour")
 
 	flag.Parse()
 
 	return BotConfig{
-		Token:    *tokenPtr,
-		Mode:     *modePtr,
-		UseHTTPS: *useHttpsPtr,
-		CertPath: *certPathPtr,
-		KeyPath:  *keyPathPtr,
-		Port:     *portPtr}
+		Token:     *tokenPtr,
+		Mode:      *modePtr,
+		UseHTTPS:  *useHttpsPtr,
+		CertPath:  *certPathPtr,
+		KeyPath:   *keyPathPtr,
+		Port:      *portPtr,
+		RateLimit: *rateLimitPtr}
 }
 
 func toJson(filePath string, data interface{}) {
@@ -224,15 +246,19 @@ func main() {
 
 	go func() {
 		for {
-			time.Sleep(30 * time.Minute)
+			time.Sleep(60 * time.Minute)
 			FlushStoreToBinary(STORE_FILE)
 			stats := Stats{TotalRequests: StoreGet(STORE_KEY_REQUESTS).(int), Timestamp: int(time.Now().Unix())}
 			toJson("stats.json", stats)
+
+			limiterMap = make(map[string]int)
 		}
 	}()
 
 	config := getConfig()
 	token = config.Token
+	limiterMap = make(map[string]int)
+	maxReqsPerHous = config.RateLimit
 
 	http.HandleFunc("/api/messages", messageHandler)
 
