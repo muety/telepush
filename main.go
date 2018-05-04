@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -13,13 +12,14 @@ import (
 	"strings"
 	"time"
 	"errors"
-
+	"net/url"
+	"encoding/json"
 	"github.com/satori/go.uuid"
 )
 
 const BASE_URL = "https://api.telegram.org/bot"
 const STORE_FILE = "store.gob"
-const POLL_TIMEOUT_SEC = 180
+const POLL_TIMEOUT_SEC = 60
 const STORE_KEY_UPDATE_ID = "latestUpdateId"
 const STORE_KEY_REQUESTS = "totalRequests"
 const STORE_KEY_MESSAGES = "messages"
@@ -27,6 +27,10 @@ const STORE_KEY_MESSAGES = "messages"
 var token string
 var limiterMap map[string]int
 var maxReqsPerHous int
+var (
+	client = &http.Client{
+		Timeout: (POLL_TIMEOUT_SEC + 10) * time.Second}
+)
 
 func getApiUrl() string {
 	return BASE_URL + token
@@ -38,11 +42,18 @@ func sendMessage(recipientId, text string) error {
 		return err
 	}
 	reader := strings.NewReader(string(m))
-	resp, err := http.Post(getApiUrl()+"/sendMessage", "application/json", reader)
-	defer resp.Body.Close()
+	request, _ := http.NewRequest(http.MethodPost, getApiUrl()+"/sendMessage", reader)
+	request.Header.Set("Content-Type", "application/json")
+	resp, err := client.Do(request)
 	if err != nil {
 		return err
 	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	log.Printf("resp: %s", data)
+	defer resp.Body.Close()
 	return nil
 }
 
@@ -77,13 +88,19 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(m.RecipientToken) == 0 || len(m.Text) == 0 || len(m.Origin) == 0 {
+	token := r.Header.Get("token")
+	if token == "" {
+		token = m.RecipientToken
+	}
+
+	if len(token) == 0 || len(m.Text) == 0 || len(m.Origin) == 0 {
 		w.WriteHeader(400)
 		w.Write([]byte("You need to pass recipient_token, origin and text parameters."))
 		return
 	}
 
-	recipientId := resolveToken(m.RecipientToken)
+	recipientId := resolveToken(token)
+
 	if len(recipientId) == 0 {
 		w.WriteHeader(404)
 		w.Write([]byte("The token you passed doesn't seem to relate to a valid user."))
@@ -137,18 +154,18 @@ func getUpdate() (*[]TelegramUpdate, error) {
 	if StoreGet(STORE_KEY_UPDATE_ID) != nil {
 		offset = int(StoreGet(STORE_KEY_UPDATE_ID).(float64)) + 1
 	}
-	url := getApiUrl() + string("/getUpdates?timeout="+strconv.Itoa(POLL_TIMEOUT_SEC)+"&offset="+strconv.Itoa(offset))
+	apiurl := getApiUrl() + string("/getUpdates?timeout="+strconv.Itoa(POLL_TIMEOUT_SEC)+"&offset="+strconv.Itoa(offset))
 	log.Println("Polling for updates.")
-	request, _ := http.NewRequest("GET", url, nil)
+	request, _ := http.NewRequest("GET", apiurl, nil)
 	request.Close = true
-	client := &http.Client{Timeout: (POLL_TIMEOUT_SEC + 10) * time.Second}
 
 	response, err := client.Do(request)
-	defer response.Body.Close()
 
 	if err != nil {
 		return nil, err
 	}
+
+	defer response.Body.Close()
 
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -167,6 +184,7 @@ func getUpdate() (*[]TelegramUpdate, error) {
 	if len(update.Result) > 0 {
 		var latestUpdateId interface{} = float64(update.Result[len(update.Result)-1].UpdateId)
 		StorePut(STORE_KEY_UPDATE_ID, latestUpdateId)
+		log.Printf("update: %v", update.Result[0].Message.Text)
 	}
 
 	return &update.Result, nil
@@ -176,11 +194,12 @@ func processUpdate(update TelegramUpdate) {
 	var text string
 	chatId := update.Message.Chat.Id
 	if strings.HasPrefix(update.Message.Text, "/start") {
-		id := uuid.NewV4().String()
+		id, _ := uuid.NewV4()
+
 		invalidateUserToken(chatId)
-		StorePut(id, StoreObject{User: update.Message.From, ChatId: chatId})
-		text = "Here is your token you can use to send messages to your Telegram account:\n\n_" + id + "_"
-		log.Println("Sending new token to", strconv.Itoa(chatId))
+		StorePut(id.String(), StoreObject{User: update.Message.From, ChatId: chatId})
+		text = "Here is your token you can use to send messages to your Telegram account:\n\n_" + id.String() + "_"
+		log.Printf("Sending new token %s to %s", id.String(), strconv.Itoa(chatId))
 	} else {
 		text = "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/n1try/telegram-middleman-bot."
 	}
@@ -211,6 +230,7 @@ func getConfig() BotConfig {
 	certPathPtr := flag.String("certPath", "", "Path of your SSL certificate when using webhook mode")
 	keyPathPtr := flag.String("keyPath", "", "Path of your private SSL key when using webhook mode")
 	portPtr := flag.Int("port", 8080, "Port for the webserver to listen on")
+	proxyPtr := flag.String("proxy", "", "proxy for poll mode socks5://127.0.0.01:1080, http://127.0.0.1:8080")
 	rateLimitPtr := flag.Int("rateLimit", 10, "Max number of requests per recipient per hour")
 
 	flag.Parse()
@@ -222,6 +242,7 @@ func getConfig() BotConfig {
 		CertPath:  *certPathPtr,
 		KeyPath:   *keyPathPtr,
 		Port:      *portPtr,
+		ProxyURI:  *proxyPtr,
 		RateLimit: *rateLimitPtr}
 }
 
@@ -256,6 +277,11 @@ func main() {
 	}()
 
 	config := getConfig()
+
+	if urlProxy, err := url.Parse(config.ProxyURI); err == nil {
+		client.Transport = &http.Transport{Proxy: http.ProxyURL(urlProxy),}
+	}
+
 	token = config.Token
 	limiterMap = make(map[string]int)
 	maxReqsPerHous = config.RateLimit
