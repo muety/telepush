@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -12,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"errors"
 
 	"github.com/satori/go.uuid"
 )
@@ -177,7 +177,7 @@ func processUpdate(update TelegramUpdate) {
 	chatId := update.Message.Chat.Id
 	if strings.HasPrefix(update.Message.Text, "/start") {
 		u, _ := uuid.NewV4()
-                id := u.String()
+		id := u.String()
 		invalidateUserToken(chatId)
 		StorePut(id, StoreObject{User: update.Message.From, ChatId: chatId})
 		text = "Here is your token you can use to send messages to your Telegram account:\n\n_" + id + "_"
