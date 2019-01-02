@@ -52,4 +52,4 @@ Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](ht
 }
 ```
 ## License
-MIT @ [Ferdinand Mütsch](https://ferdinand-muetsch.de)
+MIT @ [Ferdinand Mütsch](https://muetsch.io)
