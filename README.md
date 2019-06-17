@@ -20,7 +20,7 @@ This is especially useful for __developers or sysadmins__. Imagine you want some
 If you develop those thoughts further, this could potentially __replace any kind of e-mail notifications__ - be it the message that someone has answered to your __forum post__, your favorite game is __now on sale at Steam__, and so on. It's __lightweight and easy__, unlike e-mails that have way too much overhead.
 
 ## How to run it?
-You can either set up your own instance or use mine, which is running at [http://middleman.ferdinand-muetsch.de](https://middleman.ferdinand-muetsch.de). The hosted instance only allows for a maxmimum of 240 requests per recipient per day. If you want to set this up on your own, do the following. You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and s (self-signed) SSL certificate. 
+You can either set up your own instance or use mine, which is running at [https://apps.muetsch.io/middleman](https://apps.muetsch.io/middleman). The hosted instance only allows for a maxmimum of 240 requests per recipient per day. If you want to set this up on your own, do the following. You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and s (self-signed) SSL certificate. 
 1. Make sure u have the latest version of Go installed.
 2. `go get github.com/n1try/telegram-middleman-bot`
 3. `cd <YOUR_GO_WORKSPACE_PATH>/src/github.com/n1try/telegram-middleman-bot`
