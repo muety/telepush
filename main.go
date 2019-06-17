@@ -79,6 +79,7 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 	if invalid != nil {
 		w.WriteHeader(400)
 		w.Write([]byte(invalid.Error()))
+		return
 	}
 
 	recipientId := resolveToken(m.RecipientToken)
@@ -105,7 +106,7 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	valueForStore  := typesResolvers[messageType].ValueForStore(m)
+	valueForStore  := typesResolvers[messageType].Value(m)
 	storedMessages := StoreGet(STORE_KEY_MESSAGES).(StoreMessageObject)
 	storedMessages = append(storedMessages, valueForStore)
 	StorePut(STORE_KEY_MESSAGES, storedMessages)

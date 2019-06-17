@@ -18,31 +18,31 @@ var typesResolvers map[string] TypeResolver
 func InitResolvers() {
 	typesResolvers = map[string] TypeResolver {
 		TEXT_TYPE: TypeResolver{
-			Resolve:       sendMessageClosure,
-			IsValid:       sendMessageValidation,
-			ValueForStore: sendMessageValueForStore,
+			Resolve: resolveText,
+			IsValid: validateText,
+			Value:   logText,
 		},
 		FILE_TYPE: TypeResolver{
-			Resolve:       sendFileClosure,
-			IsValid:       sendDocumentValidation,
-			ValueForStore: sendDocumentValueForStore,
+			Resolve: resolveFile,
+			IsValid: validateFile,
+			Value:   logFile,
 		},
 	}
 }
 
 // Send Message validaiton and resolving
-func sendMessageValidation(m InMessage) error {
+func validateText(m InMessage) error {
 	if len(m.Text) == 0 {
 		return errors.New("You need to pass a text parameter")
 	}
 	return nil
 }
 
-func sendMessageValueForStore(m InMessage) string {
+func logText(m InMessage) string {
 	return m.Text
 }
 
-func sendMessageClosure(recipientId string, m InMessage) error {
+func resolveText(recipientId string, m InMessage) error {
 	return sendMessage(recipientId, "*"+m.Origin+"* wrote:\n\n"+m.Text)
 }
 
@@ -61,18 +61,18 @@ func sendMessage(recipientId, text string) error {
 }
 
 // Send Document validation and resolving
-func sendDocumentValidation(m InMessage) error {
+func validateFile(m InMessage) error {
 	if len(m.File) == 0 || len(m.Filename) == 0 {
 		return errors.New("You need to pass a file and filename parameter")
 	}
 	return nil
 }
 
-func sendDocumentValueForStore(m InMessage) string {
+func logFile(m InMessage) string {
 	return "A document named " + m.Filename + " was sent"
 }
 
-func sendFileClosure(recipientId string, m InMessage) error {
+func resolveFile(recipientId string, m InMessage) error {
 	decodedFile := decodeB64StringToByteArray(m.File)
 	return sendFile(recipientId, decodedFile, m.Filename, m.Origin)
 }

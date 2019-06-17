@@ -17,9 +17,9 @@ type InMessage struct {
 }
 
 type TypeResolver struct {
-	IsValid       func(InMessage) error
-	Resolve       func(string, InMessage) error
-	ValueForStore func(InMessage) string
+	IsValid func(InMessage) error
+	Resolve func(string, InMessage) error
+	Value   func(InMessage) string
 }
 
 // Only required fields are implemented
