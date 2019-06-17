@@ -47,7 +47,7 @@ Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](ht
 ```
 {
 	"recipient_token": "3edf633a-eab0-45ea-9721-16c07bb8f245",
-	"text": "__Hello World!__ (yes, this is Markdown)",
+	"text": "*Hello World!* (yes, this is Markdown)",
 	"origin": "My lonely server script"
 }
 ```
