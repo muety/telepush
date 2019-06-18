@@ -1,22 +1,24 @@
 package main
 
 import (
-	"encoding/json"
-	"net/http"
-	"mime/multipart"
-	"strings"
-	b64 "encoding/base64"
 	"bytes"
-	"io"
+	b64 "encoding/base64"
+	"encoding/json"
 	errors "errors"
+	"io"
+	"io/ioutil"
+	"mime/multipart"
+	"net/http"
+	"strings"
 )
 
 const TEXT_TYPE = "TEXT"
 const FILE_TYPE = "FILE"
-var typesResolvers map[string] TypeResolver
+
+var typesResolvers map[string]TypeResolver
 
 func InitResolvers() {
-	typesResolvers = map[string] TypeResolver {
+	typesResolvers = map[string]TypeResolver{
 		TEXT_TYPE: TypeResolver{
 			Resolve: resolveText,
 			IsValid: validateText,
@@ -52,8 +54,16 @@ func sendMessage(recipientId, text string) error {
 		return err
 	}
 	reader := strings.NewReader(string(m))
-	resp, err := http.Post(getApiUrl()+"/sendMessage", "application/json", reader)
+	request, _ := http.NewRequest(http.MethodPost, getApiUrl()+"/sendMessage", reader)
+	request.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(request)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
+
+	_, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
@@ -85,12 +95,12 @@ func decodeB64StringToByteArray(encodedString string) []byte {
 func sendFile(recipientId string, file []byte, filename string, origin string) error {
 	body := &bytes.Buffer{}
 	multipartWriter := multipart.NewWriter(body)
-	params := map[string]string {
-		"caption": "*" + origin + "* sent a document",
+	params := map[string]string{
+		"caption":    "*" + origin + "* sent a document",
 		"parse_mode": "Markdown",
 	}
 	addFileAndParamsToMultipartWriter(multipartWriter, file, filename, params)
-	req, err := http.NewRequest("POST", getApiUrl()+"/sendDocument?chat_id=" + recipientId, body)
+	req, err := http.NewRequest("POST", getApiUrl()+"/sendDocument?chat_id="+recipientId, body)
 	req.Header.Add("Content-Type", multipartWriter.FormDataContentType())
 	client := &http.Client{}
 	resp, err := client.Do(req)

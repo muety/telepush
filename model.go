@@ -69,6 +69,7 @@ type BotConfig struct {
 	UseHTTPS  bool
 	CertPath  string
 	KeyPath   string
+	ProxyURI  string
 	Port      int
 	RateLimit int
 }
