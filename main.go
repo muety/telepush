@@ -32,20 +32,6 @@ func getApiUrl() string {
 	return BASE_URL + token
 }
 
-func sendMessage(recipientId, text string) error {
-	m, err := json.Marshal(&TelegramOutMessage{ChatId: recipientId, Text: text, ParseMode: "Markdown"})
-	if err != nil {
-		return err
-	}
-	reader := strings.NewReader(string(m))
-	resp, err := http.Post(getApiUrl()+"/sendMessage", "application/json", reader)
-	defer resp.Body.Close()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func invalidateUserToken(userChatId int) {
 	for k, v := range StoreGetMap() {
 		entry, ok := v.(StoreObject)
@@ -68,6 +54,7 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(415)
 		return
 	}
+
 	dec := json.NewDecoder(r.Body)
 	var m InMessage
 	err := dec.Decode(&m)
@@ -77,9 +64,21 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(m.RecipientToken) == 0 || len(m.Text) == 0 || len(m.Origin) == 0 {
+	if len(m.RecipientToken) == 0 || len(m.Origin) == 0 {
 		w.WriteHeader(400)
-		w.Write([]byte("You need to pass recipient_token, origin and text parameters."))
+		w.Write([]byte("You need to pass recipient_token and origin."))
+		return
+	}
+
+	messageType := TEXT_TYPE
+	if len(m.Type) > 0 {
+		messageType = m.Type
+	}
+
+	invalid := typesResolvers[messageType].IsValid(m)
+	if invalid != nil {
+		w.WriteHeader(400)
+		w.Write([]byte(invalid.Error()))
 		return
 	}
 
@@ -101,14 +100,15 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	limiterMap[recipientId] += 1
 
-	err = sendMessage(recipientId, "*"+m.Origin+"* wrote:\n\n"+m.Text)
+	err = typesResolvers[messageType].Resolve(recipientId, m)
 	if err != nil {
 		w.WriteHeader(500)
 		return
 	}
 
+	valueForStore  := typesResolvers[messageType].Value(m)
 	storedMessages := StoreGet(STORE_KEY_MESSAGES).(StoreMessageObject)
-	storedMessages = append(storedMessages, m.Text)
+	storedMessages = append(storedMessages, valueForStore)
 	StorePut(STORE_KEY_MESSAGES, storedMessages)
 	StorePut(STORE_KEY_REQUESTS, StoreGet(STORE_KEY_REQUESTS).(int)+1)
 
@@ -243,6 +243,7 @@ func toJson(filePath string, data interface{}) {
 
 func main() {
 	InitStore()
+	InitResolvers()
 	ReadStoreFromBinary(STORE_FILE)
 
 	go func() {
