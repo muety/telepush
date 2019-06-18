@@ -38,7 +38,8 @@ You can either set up your own instance or use mine, which is running at [https:
 Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](https://caddyserver.com) to handle encryption. In that case you would set the `mode` to _webhook_, but `useHttps` to _false_ and your bot wouldn't need any certificate.
 
 ### Additional parameters
-* `--rateLimit` (`int`) - Maximum number of messages to be delivered to each recipient per hour. Defaults to `10`.
+* `--rateLimit` (`int`) – Maximum number of messages to be delivered to each recipient per hour. Defaults to `10`.
+* `--proxy` (`string`) – Proxy connection string to be used for long-polling mode. Defaults to none.
 
 ## How to use it?
 1. You need to get a token from the bot. Send a message with `/start` to the [@MiddleManBot](https://telegram.me/MiddleManBot) therefore.
@@ -55,7 +56,7 @@ Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](ht
 
 **NOTE:** If the field *type* is omitted then the `TEXT` type will be used as default, though this is not recommended as this may change in future versions.
 
-3. If you want to attach a file in the HTTP POST request you must encode it into a Base64 string and send it in a body like the following.
+3. If you want to **attach a file** in the HTTP POST request you need to encode it to a Base64 string and send it in the body as follows.
 
 ```
 {
