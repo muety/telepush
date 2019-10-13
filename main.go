@@ -5,7 +5,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,24 +14,28 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	uuid "github.com/satori/go.uuid"
 )
 
-const BASE_URL = "https://api.telegram.org/bot"
-const STORE_FILE = "store.gob"
-const POLL_TIMEOUT_SEC = 60
-const STORE_KEY_UPDATE_ID = "latestUpdateId"
-const STORE_KEY_REQUESTS = "totalRequests"
-const STORE_KEY_MESSAGES = "messages"
+const (
+	BaseURL          = "https://api.telegram.org/bot"
+	StoreFile        = "store.gob"
+	PollTimeoutSec   = 60
+	StoreKeyUpdateID = "latestUpdateId"
+	StoreKeyRequests = "totalRequests"
+	StoreKeyMessages = "messages"
+)
 
-var token string
-var limiterMap map[string]int
-var maxReqsPerHous int
 var (
-	client = &http.Client{Timeout: (POLL_TIMEOUT_SEC + 10) * time.Second}
+	token          string
+	limiterMap     map[string]int
+	maxReqsPerHous int
+	client         = &http.Client{Timeout: (PollTimeoutSec + 10) * time.Second}
 )
 
 func getApiUrl() string {
-	return BASE_URL + token
+	return BaseURL + token
 }
 
 func invalidateUserToken(userChatId int) {
@@ -78,7 +81,7 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	messageType := TEXT_TYPE
+	messageType := TextType
 	if len(m.Type) > 0 {
 		messageType = m.Type
 	}
@@ -116,10 +119,10 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	valueForStore := typesResolvers[messageType].Value(m)
-	storedMessages := StoreGet(STORE_KEY_MESSAGES).(StoreMessageObject)
+	storedMessages := StoreGet(StoreKeyMessages).(StoreMessageObject)
 	storedMessages = append(storedMessages, valueForStore)
-	StorePut(STORE_KEY_MESSAGES, storedMessages)
-	StorePut(STORE_KEY_REQUESTS, StoreGet(STORE_KEY_REQUESTS).(int)+1)
+	StorePut(StoreKeyMessages, storedMessages)
+	StorePut(StoreKeyRequests, StoreGet(StoreKeyRequests).(int)+1)
 
 	w.WriteHeader(200)
 }
@@ -143,10 +146,10 @@ func webhookUpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 func getUpdate() (*[]TelegramUpdate, error) {
 	offset := 0
-	if StoreGet(STORE_KEY_UPDATE_ID) != nil {
-		offset = int(StoreGet(STORE_KEY_UPDATE_ID).(float64)) + 1
+	if StoreGet(StoreKeyUpdateID) != nil {
+		offset = int(StoreGet(StoreKeyUpdateID).(float64)) + 1
 	}
-	apiUrl := getApiUrl() + string("/getUpdates?timeout="+strconv.Itoa(POLL_TIMEOUT_SEC)+"&offset="+strconv.Itoa(offset))
+	apiUrl := getApiUrl() + string("/getUpdates?timeout="+strconv.Itoa(PollTimeoutSec)+"&offset="+strconv.Itoa(offset))
 	log.Println("Polling for updates.")
 	request, _ := http.NewRequest("GET", apiUrl, nil)
 	request.Close = true
@@ -174,7 +177,7 @@ func getUpdate() (*[]TelegramUpdate, error) {
 
 	if len(update.Result) > 0 {
 		var latestUpdateId interface{} = float64(update.Result[len(update.Result)-1].UpdateId)
-		StorePut(STORE_KEY_UPDATE_ID, latestUpdateId)
+		StorePut(StoreKeyUpdateID, latestUpdateId)
 	}
 
 	return &update.Result, nil
@@ -208,7 +211,7 @@ func startPolling() {
 			}
 		} else {
 			log.Printf("ERROR getting updates: %s\n", err)
-			time.Sleep(POLL_TIMEOUT_SEC * time.Second)
+			time.Sleep(PollTimeoutSec * time.Second)
 		}
 	}
 }
@@ -254,13 +257,13 @@ func toJson(filePath string, data interface{}) {
 func main() {
 	InitStore()
 	InitResolvers()
-	ReadStoreFromBinary(STORE_FILE)
+	ReadStoreFromBinary(StoreFile)
 
 	go func() {
 		for {
 			time.Sleep(60 * time.Minute)
-			FlushStoreToBinary(STORE_FILE)
-			stats := Stats{TotalRequests: StoreGet(STORE_KEY_REQUESTS).(int), Timestamp: int(time.Now().Unix())}
+			FlushStoreToBinary(StoreFile)
+			stats := Stats{TotalRequests: StoreGet(StoreKeyRequests).(int), Timestamp: int(time.Now().Unix())}
 			toJson("stats.json", stats)
 
 			limiterMap = make(map[string]int)
@@ -287,12 +290,12 @@ func main() {
 		go startPolling()
 	}
 
-	if StoreGet(STORE_KEY_REQUESTS) == nil {
-		StorePut(STORE_KEY_REQUESTS, 0)
+	if StoreGet(StoreKeyRequests) == nil {
+		StorePut(StoreKeyRequests, 0)
 	}
 
-	if StoreGet(STORE_KEY_MESSAGES) == nil {
-		StorePut(STORE_KEY_MESSAGES, StoreMessageObject{})
+	if StoreGet(StoreKeyMessages) == nil {
+		StorePut(StoreKeyMessages, StoreMessageObject{})
 	}
 
 	// Exit handler
@@ -301,7 +304,7 @@ func main() {
 	signal.Notify(c, os.Kill)
 	go func() {
 		for _ = range c {
-			FlushStoreToBinary(STORE_FILE)
+			FlushStoreToBinary(StoreFile)
 			os.Exit(0)
 		}
 	}()

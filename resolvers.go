@@ -12,19 +12,21 @@ import (
 	"strings"
 )
 
-const TEXT_TYPE = "TEXT"
-const FILE_TYPE = "FILE"
+const (
+	TextType = "TEXT"
+	FileType = "FILE"
+)
 
 var typesResolvers map[string]TypeResolver
 
 func InitResolvers() {
 	typesResolvers = map[string]TypeResolver{
-		TEXT_TYPE: TypeResolver{
+		TextType: TypeResolver{
 			Resolve: resolveText,
 			IsValid: validateText,
 			Value:   logText,
 		},
-		FILE_TYPE: TypeResolver{
+		FileType: TypeResolver{
 			Resolve: resolveFile,
 			IsValid: validateFile,
 			Value:   logFile,
