@@ -1,7 +1,12 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="../style.xsl" type="text/xsl"?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-    <Project xmlns="http://usefulinc.com/ns/doap#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:xmpp="https://linkmauve.fr/ns/xmpp-doap#">
+<?xml-stylesheet type="text/xsl"?>
+<rdf:RDF xml:lang="en"
+         xmlns="http://usefulinc.com/ns/doap#" 
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+         xmlns:asfext="http://projects.apache.org/ns/asfext#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/">
+
+    <Project xmlns="http://usefulinc.com/ns/doap#">
         <name>telegram-middleman-bot</name>
         <created>2017-07-04</created>
         <shortdesc xml:lang="en">Publish / Subscribe Telegram Bot</shortdesc>
@@ -32,4 +37,5 @@
             </GitRepository>
         </repository> 
     </Project>
+    
 </rdf:RDF>
