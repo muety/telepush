@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../style.xsl" type="text/xsl"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <Project xmlns="http://usefulinc.com/ns/doap#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:xmpp="https://linkmauve.fr/ns/xmpp-doap#">
+        <name>telegram-middleman-bot</name>
+        <created>2017-07-04</created>
+        <shortdesc xml:lang="en">Publish / Subscribe Telegram Bot</shortdesc>
+        <description xml:lang="en">A Telegram bot which translates push messages sent as simple HTTP calls into Telegram messages you can subscribe to</description>
+        <homepage rdf:resource="https://github.com/n1try/telegram-middleman-bot"/>
+        <bug-database rdf:resource="https://github.com/n1try/telegram-middleman-bot/issues"/>
+        <license rdf:resource="https://github.com/n1try/telegram-middleman-bot/blob/master/LICENSE"/>
+        <language>en</language>
+        <programming-language>Go</programming-language>
+        <os>Linux</os>
+        <os>Windows</os>
+        <os>MacOS</os>
+
+        <category rdf:resource="http://projects.apache.org/category/http"/>
+        <category rdf:resource="http://projects.apache.org/category/chat"/>
+
+        <maintainer>
+            <foaf:Person>
+                <foaf:name>Ferdinand Mütsch</foaf:name>
+                <foaf:homepage rdf:resource="https://muetsch.io/"/>
+            </foaf:Person>
+        </maintainer>
+
+        <repository>
+            <GitRepository>
+                <browse rdf:resource="https://github.com/n1try/telegram-middleman-bot"/>
+                <location rdf:resource="https://github.com/n1try/telegram-middleman-bot.git"/>
+            </GitRepository>
+        </repository> 
+    </Project>
+</rdf:RDF>
