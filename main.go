@@ -14,6 +14,7 @@ import (
 	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
@@ -308,6 +309,7 @@ func main() {
 	// Exit handler
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
+	signal.Notify(c, syscall.SIGTERM)
 	signal.Notify(c, os.Kill)
 	go func() {
 		for _ = range c {
