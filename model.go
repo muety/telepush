@@ -72,9 +72,9 @@ type BotConfig struct {
 	ProxyURI  string
 	Port      int
 	RateLimit int
-    Address   string
-    Address6  string
-    Disable6  bool
+	Address   string
+	Address6  string
+	Disable6  bool
 }
 
 type Stats struct {

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -14,9 +15,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-    "net"
 
-    uuid "github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -227,8 +227,8 @@ func getConfig() BotConfig {
 	proxyPtr := flag.String("proxy", "", "Proxy for poll mode, e.g. 'socks5://127.0.0.01:1080'")
 	rateLimitPtr := flag.Int("rateLimit", 10, "Max number of requests per recipient per hour")
 	addrPtr := flag.String("address", "127.0.0.1", "IPv4 address to bind the webserver to")
-    addr6Ptr := flag.String("address6", "::1", "IPv6 address to bind the webserver to")
-    disable6Ptr := flag.Bool("disableIPv6", false, "Set if your device doesn't support IPv6. address6 will be ignored if this is set.")
+	addr6Ptr := flag.String("address6", "::1", "IPv6 address to bind the webserver to")
+	disable6Ptr := flag.Bool("disableIPv6", false, "Set if your device doesn't support IPv6. address6 will be ignored if this is set.")
 
 	flag.Parse()
 
@@ -241,9 +241,9 @@ func getConfig() BotConfig {
 		Port:      *portPtr,
 		ProxyURI:  *proxyPtr,
 		RateLimit: *rateLimitPtr,
-        Address:   *addrPtr,
-        Address6:  *addr6Ptr,
-        Disable6:  *disable6Ptr}
+		Address:   *addrPtr,
+		Address6:  *addr6Ptr,
+		Disable6:  *disable6Ptr}
 }
 
 func toJson(filePath string, data interface{}) {
@@ -291,7 +291,7 @@ func main() {
 
 	if config.Mode == "webhook" {
 		fmt.Println("Using webhook mode.")
-        http.HandleFunc("/api/updates", webhookUpdateHandler)
+		http.HandleFunc("/api/updates", webhookUpdateHandler)
 	} else {
 		fmt.Println("Using long-polling mode.")
 		go startPolling()
@@ -316,14 +316,14 @@ func main() {
 		}
 	}()
 
-    // Check if address is valid
-    ip := net.ParseIP(config.Address)
-    if ip == nil {
-        log.Println("Address '" + config.Address + "' is not valid. Exiting...")
-        os.Exit(1)
-    }
+	// Check if address is valid
+	ip := net.ParseIP(config.Address)
+	if ip == nil {
+		log.Println("Address '" + config.Address + "' is not valid. Exiting...")
+		os.Exit(1)
+	}
 
-    // IPv4
+	// IPv4
 	bindString := config.Address + ":" + strconv.Itoa(config.Port)
 	s := &http.Server{
 		Addr:         bindString,
@@ -331,34 +331,34 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-    // IPv6
-    var s6 *http.Server
-    if !config.Disable6 {
-        ip := net.ParseIP(config.Address6)
-        if ip == nil {
-            log.Println("Address '" + config.Address6 + "' is not valid. Exiting...")
-            os.Exit(1)
-        }
+	// IPv6
+	var s6 *http.Server
+	if !config.Disable6 {
+		ip := net.ParseIP(config.Address6)
+		if ip == nil {
+			log.Println("Address '" + config.Address6 + "' is not valid. Exiting...")
+			os.Exit(1)
+		}
 
-        bindString := "[" + config.Address6 + "]:" + strconv.Itoa(config.Port)
-        s6 = &http.Server{
-            Addr:         bindString,
-            ReadTimeout:  10 * time.Second,
-            WriteTimeout: 10 * time.Second,
-        }
-    }
+		bindString := "[" + config.Address6 + "]:" + strconv.Itoa(config.Port)
+		s6 = &http.Server{
+			Addr:         bindString,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 10 * time.Second,
+		}
+	}
 
 	if config.UseHTTPS {
 		fmt.Printf("Listening for HTTPS on port %d.\n", config.Port)
 		if !config.Disable6 {
-            go s6.ListenAndServeTLS(config.CertPath, config.KeyPath)
-        }
-        s.ListenAndServeTLS(config.CertPath, config.KeyPath)
+			go s6.ListenAndServeTLS(config.CertPath, config.KeyPath)
+		}
+		s.ListenAndServeTLS(config.CertPath, config.KeyPath)
 	} else {
 		fmt.Printf("Listening for HTTP on port %d.\n", config.Port)
-	    if !config.Disable6 {
-            go s6.ListenAndServe()
-        }
-        s.ListenAndServe()
+		if !config.Disable6 {
+			go s6.ListenAndServe()
+		}
+		s.ListenAndServe()
 	}
 }
