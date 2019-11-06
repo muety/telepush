@@ -11,7 +11,7 @@ I translate simple JSON HTTP requests into Telegram push messages that you will 
 [![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoff.ee/n1try)
 
 ## What's new (2019-11-06) ?
-Thanks to contributions [peet1993](https://github.com/peet1993).
+Thanks to contributions by [peet1993](https://github.com/peet1993).
 
 * Introduced explicit IPv6 support 
 * Introduced ability to specify network address to bind to
