@@ -10,9 +10,11 @@ I translate simple JSON HTTP requests into Telegram push messages that you will 
 
 [![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoff.ee/n1try)
 
-## What's new (2018-02-05) ?
-* Reacting to non-`200` status codes from Telegram API
-* Message rate limitation per recipient (`--rateLimit` parameter). On my hosted instance, this is **set to 10 req / hour / recipient** from now on. 
+## What's new (2019-11-06) ?
+Thanks to contributions [peet1993](https://github.com/peet1993).
+
+* Introduced explicit IPv6 support 
+* Introduced ability to specify network address to bind to
 
 ## Why might this be useful?
 This is especially useful for __developers or sysadmins__. Imagine you want some kind of reporting from your application or server, like a daily report including some statistics. You don't want to actively look it up on a website but you want to receive it in a __passive fashion__. Just like getting an e-mail. But come on, let's be honest. __E-Mails are so 2010__. And they require your little server-side script to include some SMTP library and connect to a mail server. That's __too heavyweight__ just to __get some short information__. Personally, I have a Python script running on my server which gathers some statistics from log files and databases and regularly sends me a Telegram message.
@@ -38,8 +40,11 @@ You can either set up your own instance or use mine, which is running at [https:
 Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](https://caddyserver.com) to handle encryption. In that case you would set the `mode` to _webhook_, but `useHttps` to _false_ and your bot wouldn't need any certificate.
 
 ### Additional parameters
-* `--rateLimit` (`int`) – Maximum number of messages to be delivered to each recipient per hour. Defaults to `10`.
+* `--address` (`string`) – Network address (IPv4) to bind to. Default to `127.0.0.1`.
+* `--address6` (`string`) – Network address (IPv6) to bind to. Default to `::1`.
+* `--disableIPv6` (`bool`) – Whether or not to disable listening on both IPv4 and IPv6 interfaces. Default to `false`.
 * `--proxy` (`string`) – Proxy connection string to be used for long-polling mode. Defaults to none.
+* `--rateLimit` (`int`) – Maximum number of messages to be delivered to each recipient per hour. Defaults to `10`.
 
 ## How to use it?
 1. You need to get a token from the bot. Send a message with `/start` to the [@MiddleManBot](https://telegram.me/MiddleManBot) therefore.
