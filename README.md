@@ -77,7 +77,7 @@ Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](ht
 }
 ```
 
-## Inlets
+### Inlets
 Inlets provide a mechanism to pre-process incoming data that comes in a format different from what is normally expected by the bot. 
 
 This is especially useful if data is sent by external, third-party applications which you cannot modify.
@@ -92,9 +92,6 @@ Following inlets are currently available:
 |--------------|-------------------------------------------------------------------------------------------------------------|--------|---|---|
 | `default`      | Simply passes the request through without any changes                                                       | ✅      |   |   |
 | `alertmanager` | Consumes [Alertmanager webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) | ⏳      |   |   |
-|              |                                                                                                             |        |   |   |
-|              |                                                                                                             |        |   |   |
-|              |                                                                                                             |        |   |   |
-|              |                                                                                                             |        |   |   |
+
 ## License
 MIT @ [Ferdinand Mütsch](https://muetsch.io)
