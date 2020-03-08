@@ -10,9 +10,13 @@ I translate simple JSON HTTP requests into Telegram push messages that you will 
 
 [![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoff.ee/n1try)
 
-## What's new (2019-11-06) ?
-Thanks to contributions by [peet1993](https://github.com/peet1993).
+## Changelog (2019-11-06)
+### 2020-03-09
+* Major code refactorings
+* Support for Inlets (see below)
 
+### 2019-11-06
+Thanks to contributions by [peet1993](https://github.com/peet1993).
 * Introduced explicit IPv6 support 
 * Introduced ability to specify network address to bind to
 
@@ -73,5 +77,24 @@ Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](ht
 }
 ```
 
+## Inlets
+Inlets provide a mechanism to pre-process incoming data that comes in a format different from what is normally expected by the bot. 
+
+This is especially useful if data is sent by external, third-party applications which you cannot modify.
+
+For instance, you might want to deliver alerts from [Prometheus' Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) as Telegram notifications. However, Alertmanager's [webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) look much different from  Middleman's default input format. To still make them fit, you can write an [Inlet](/inlets) to massage the data accordingly.
+
+To directly address an inlet, request `http://localhost:8080/api/inlets/<inlet_name>`. Note that `/api/inlets/default` is equivalent to `/api/messages`.
+
+Following inlets are currently available:
+
+| Name         | Description                                                                                                 | Status |   |   |
+|--------------|-------------------------------------------------------------------------------------------------------------|--------|---|---|
+| `default`      | Simply passes the request through without any changes                                                       | ✅      |   |   |
+| `alertmanager` | Consumes [Alertmanager webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) | ⏳      |   |   |
+|              |                                                                                                             |        |   |   |
+|              |                                                                                                             |        |   |   |
+|              |                                                                                                             |        |   |   |
+|              |                                                                                                             |        |   |   |
 ## License
 MIT @ [Ferdinand Mütsch](https://muetsch.io)

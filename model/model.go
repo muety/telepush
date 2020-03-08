@@ -1,11 +1,9 @@
-package main
+package model
 
 type StoreObject struct {
 	User   TelegramUser `json:"user"`
 	ChatId int          `json:"chat_id"`
 }
-
-type StoreMessageObject []string
 
 type InMessage struct {
 	RecipientToken string `json:"recipient_token"`
@@ -14,12 +12,6 @@ type InMessage struct {
 	File           string `json:"file"`
 	Filename       string `json:"filename"`
 	Type           string `json:"type"`
-}
-
-type TypeResolver struct {
-	IsValid func(InMessage) error
-	Resolve func(string, InMessage) error
-	Value   func(InMessage) string
 }
 
 // Only required fields are implemented
@@ -61,20 +53,6 @@ type TelegramUpdate struct {
 type TelegramUpdateResponse struct {
 	Ok     bool             `json:"ok"`
 	Result []TelegramUpdate `json:"result"`
-}
-
-type BotConfig struct {
-	Token     string
-	Mode      string
-	UseHTTPS  bool
-	CertPath  string
-	KeyPath   string
-	ProxyURI  string
-	Port      int
-	RateLimit int
-	Address   string
-	Address6  string
-	Disable6  bool
 }
 
 type Stats struct {
