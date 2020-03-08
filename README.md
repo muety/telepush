@@ -88,10 +88,10 @@ To directly address an inlet, request `http://localhost:8080/api/inlets/<inlet_n
 
 Following inlets are currently available:
 
-| Name         | Description                                                                                                 | Status |   |   |
-|--------------|-------------------------------------------------------------------------------------------------------------|--------|---|---|
-| `default`      | Simply passes the request through without any changes                                                       | ✅      |   |   |
-| `alertmanager` | Consumes [Alertmanager webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) | ⏳      |   |   |
+| Name         | Description                                                                                                 | Status |
+|--------------|-------------------------------------------------------------------------------------------------------------|--------|
+| `default`      | Simply passes the request through without any changes                                                       | ✅      |
+| `alertmanager` | Consumes [Alertmanager webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) | ⏳      |
 
 ## License
 MIT @ [Ferdinand Mütsch](https://muetsch.io)
