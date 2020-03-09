@@ -126,8 +126,7 @@ func processUpdate(update model.TelegramUpdate) {
 	var text string
 	chatId := update.Message.Chat.Id
 	if strings.HasPrefix(update.Message.Text, "/start") {
-		id, _ := uuid.NewV4()
-
+		id := uuid.NewV4()
 		store.InvalidateToken(chatId)
 		store.Put(id.String(), model.StoreObject{User: update.Message.From, ChatId: chatId})
 		text = "Here is your token you can use to send messages to your Telegram account:\n\n_" + id.String() + "_"
