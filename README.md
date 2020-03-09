@@ -11,9 +11,10 @@ I translate simple JSON HTTP requests into Telegram push messages that you will 
 [![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoff.ee/n1try)
 
 ## Changelog (2019-11-06)
-### 2020-03-09
+### 2020-03-10
 * Major code refactorings
 * Support for Inlets (see below)
+* Integration with Prometheus Alertmanager
 
 ### 2019-11-06
 Thanks to contributions by [peet1993](https://github.com/peet1993).
@@ -27,11 +28,11 @@ If you develop those thoughts further, this could potentially __replace any kind
 
 ## How to run it?
 You can either set up your own instance or use mine, which is running at [https://apps.muetsch.io/middleman](https://apps.muetsch.io/middleman). The hosted instance only allows for a maxmimum of 240 requests per recipient per day. If you want to set this up on your own, do the following. You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and s (self-signed) SSL certificate. 
-1. Make sure u have the latest version of Go installed.
-2. `go get github.com/n1try/telegram-middleman-bot`
-3. `cd <YOUR_GO_WORKSPACE_PATH>/src/github.com/n1try/telegram-middleman-bot`
-4. `go get ./...`
-5. `go build .`
+1. Make sure you have the Go >= 1.13 installed.
+2. `export GO111MODULE=on`
+3. `go get github.com/n1try/telegram-middleman-bot`
+4. `cd $GOPATH/src/github.com/n1try/telegram-middleman-bot`
+5. `go build`
 
 ### Using long-polling mode
 1. `./telegram-middleman-bot --token <TOKEN_YOU_GOT_FROM_BOTFATHER> --port 8080` (of course you can use a different port)
