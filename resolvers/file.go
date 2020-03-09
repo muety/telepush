@@ -1,4 +1,4 @@
-package internal
+package resolvers
 
 import (
 	"bytes"
@@ -10,18 +10,18 @@ import (
 	"net/http"
 )
 
-func validateFile(m *model.InMessage) error {
+func validateFile(m *model.DefaultMessage) error {
 	if len(m.File) == 0 || len(m.Filename) == 0 {
 		return errors.New("file or file name parameter missing")
 	}
 	return nil
 }
 
-func logFile(m *model.InMessage) string {
+func logFile(m *model.DefaultMessage) string {
 	return "A document named " + m.Filename + " was sent"
 }
 
-func resolveFile(recipientId string, m *model.InMessage) error {
+func resolveFile(recipientId string, m *model.DefaultMessage, params *model.MessageParams) error {
 	decodedFile, _ := b64.StdEncoding.DecodeString(m.File)
 	return sendFile(recipientId, decodedFile, m.Filename, m.Origin)
 }

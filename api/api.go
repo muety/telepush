@@ -100,8 +100,8 @@ func Webhook(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-func SendMessage(recipientId, text string) error {
-	m, err := json.Marshal(&model.TelegramOutMessage{ChatId: recipientId, Text: text, ParseMode: "Markdown"})
+func SendMessage(message *model.TelegramOutMessage) error {
+	m, err := json.Marshal(message)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,12 @@ func processUpdate(update model.TelegramUpdate) {
 	} else {
 		text = "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/n1try/telegram-middleman-bot."
 	}
-	err := SendMessage(strconv.Itoa(chatId), text)
+	err := SendMessage(&model.TelegramOutMessage{
+		ChatId:             strconv.Itoa(chatId),
+		Text:               text,
+		ParseMode:          "Markdown",
+		DisableLinkPreview: true,
+	})
 	if err != nil {
 		log.Println(err)
 	}

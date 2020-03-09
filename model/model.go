@@ -5,13 +5,28 @@ type StoreObject struct {
 	ChatId int          `json:"chat_id"`
 }
 
-type InMessage struct {
+type DefaultMessage struct {
 	RecipientToken string `json:"recipient_token"`
 	Text           string `json:"text"`
 	Origin         string `json:"origin"`
 	File           string `json:"file"`
 	Filename       string `json:"filename"`
 	Type           string `json:"type"`
+}
+
+type MessageParams struct {
+	DisableLinkPreviews bool
+}
+
+type AlertmanagerMessage struct {
+	Alerts []*AlertmanagerAlert
+}
+
+type AlertmanagerAlert struct {
+	Status      string            `json:"status"`
+	Url         string            `json:"generatorURL"`
+	Labels      map[string]string `json:"labels"`
+	Annotations map[string]string `json:"annotations"`
 }
 
 // Only required fields are implemented
@@ -30,9 +45,10 @@ type TelegramChat struct {
 
 // Only required fields are implemented
 type TelegramOutMessage struct {
-	ChatId    string `json:"chat_id"`
-	Text      string `json:"text"`
-	ParseMode string `json:"parse_mode"`
+	ChatId             string `json:"chat_id"`
+	Text               string `json:"text"`
+	ParseMode          string `json:"parse_mode"`
+	DisableLinkPreview bool   `json:"disable_web_page_preview"`
 }
 
 // Only required fields are implemented

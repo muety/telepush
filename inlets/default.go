@@ -16,10 +16,10 @@ func NewDefaultInlet() *DefaultInlet {
 
 func (d DefaultInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var m model.DefaultMessage
+
 		dec := json.NewDecoder(r.Body)
-		var m model.InMessage
-		err := dec.Decode(&m)
-		if err != nil {
+		if err := dec.Decode(&m); err != nil {
 			w.WriteHeader(400)
 			w.Write([]byte(err.Error()))
 			return

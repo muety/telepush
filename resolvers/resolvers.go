@@ -1,6 +1,6 @@
 // Introduced by jejoivanic in 5f48bd2bc154f63f7cf1afacdbde5f1d0a493fbb
 
-package internal
+package resolvers
 
 import (
 	"github.com/n1try/telegram-middleman-bot/config"
@@ -27,9 +27,9 @@ var (
 )
 
 type MessageResolver struct {
-	IsValid func(*model.InMessage) error
-	Resolve func(string, *model.InMessage) error
-	Value   func(*model.InMessage) string
+	IsValid func(*model.DefaultMessage) error
+	Resolve func(string, *model.DefaultMessage, *model.MessageParams) error
+	Value   func(*model.DefaultMessage) string
 }
 
 func init() {

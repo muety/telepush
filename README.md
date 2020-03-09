@@ -65,17 +65,7 @@ Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](ht
 
 **NOTE:** If the field *type* is omitted then the `TEXT` type will be used as default, though this is not recommended as this may change in future versions.
 
-3. If you want to **attach a file** in the HTTP POST request you need to encode it to a Base64 string and send it in the body as follows.
-
-```
-{
-	"recipient_token": "3edf633a-eab0-45ea-9721-16c07bb8f245",
-	"file": "SGVsbG8gV29ybGQhCg==",
-	"filename": "file.txt",
-	"type": "FILE",
-	"origin": "My lonely server script"
-}
-```
+More details are available [here](/inlets).
 
 ### Inlets
 Inlets provide a mechanism to pre-process incoming data that comes in a format different from what is normally expected by the bot. 
@@ -91,7 +81,9 @@ Following inlets are currently available:
 | Name         | Description                                                                                                 | Status |
 |--------------|-------------------------------------------------------------------------------------------------------------|--------|
 | `default`      | Simply passes the request through without any changes                                                       | ✅      |
-| `alertmanager` | Consumes [Alertmanager webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) | ⏳      |
+| `alertmanager` | Consumes [Alertmanager webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) | ✅      |
+
+Further documentation about the individual inlets is available [here](/inlets).
 
 ## License
 MIT @ [Ferdinand Mütsch](https://muetsch.io)

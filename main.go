@@ -26,13 +26,19 @@ var (
 )
 
 func handleMessage(w http.ResponseWriter, r *http.Request) {
-	var m *model.InMessage
+	var m *model.DefaultMessage
+	var p *model.MessageParams
+
 	if message := r.Context().Value(config.KeyMessage); message != nil {
-		m = message.(*model.InMessage)
+		m = message.(*model.DefaultMessage)
 	} else {
 		w.WriteHeader(400)
 		w.Write([]byte("failed to parse message"))
 		return
+	}
+
+	if params := r.Context().Value(config.KeyParams); params != nil {
+		p = params.(*model.MessageParams)
 	}
 
 	token := r.Header.Get("token")
@@ -46,7 +52,7 @@ func handleMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resolver := internal.GetResolver(m.Type)
+	resolver := resolvers.GetResolver(m.Type)
 
 	if err := resolver.IsValid(m); err != nil {
 		w.WriteHeader(400)
@@ -73,7 +79,7 @@ func handleMessage(w http.ResponseWriter, r *http.Request) {
 	}
 	limiterMap[recipientId] += 1
 
-	if err := resolver.Resolve(recipientId, m); err != nil {
+	if err := resolver.Resolve(recipientId, m, p); err != nil {
 		w.WriteHeader(500)
 		return
 	}
@@ -107,8 +113,9 @@ func updateLimits() {
 func registerRoutes() {
 	baseChain := middleware.Chain(handleMessage, middleware.CheckMethod)
 
-	http.HandleFunc("/api/inlets/default", middleware.Chain(baseChain, inlets.NewDefaultInlet().Middleware))
 	http.HandleFunc("/api/messages", middleware.Chain(baseChain, inlets.NewDefaultInlet().Middleware))
+	http.HandleFunc("/api/inlets/default", middleware.Chain(baseChain, inlets.NewDefaultInlet().Middleware))
+	http.HandleFunc("/api/inlets/alertmanager", middleware.Chain(baseChain, inlets.NewAlertmanagerInlet().Middleware))
 }
 
 func connectApi() {

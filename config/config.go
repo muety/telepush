@@ -19,6 +19,7 @@ const (
 	KeyUpdateID = "latestUpdateId"
 	KeyRequests = "totalRequests"
 	KeyMessage  = "message"
+	KeyParams   = "message_params"
 	KeyMessages = "messages"
 )
 
