@@ -118,7 +118,7 @@ func registerRoutes() {
 
 	http.HandleFunc("/api/messages", middleware.Chain(baseChain, _default.New().Middleware))
 	http.HandleFunc("/api/inlets/default", middleware.Chain(baseChain, _default.New().Middleware))
-	http.HandleFunc("/api/inlets/alertmanager", middleware.Chain(baseChain, alertmanager_webhook.New().Middleware))
+	http.HandleFunc("/api/inlets/alertmanager_webhook", middleware.Chain(baseChain, alertmanager_webhook.New().Middleware))
 	http.HandleFunc("/api/inlets/bitbucket_webhook", middleware.Chain(baseChain, bitbucket_webhook.New().Middleware))
 }
 
