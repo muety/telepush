@@ -8,6 +8,7 @@ import (
 	"github.com/n1try/telegram-middleman-bot/config"
 	"github.com/n1try/telegram-middleman-bot/inlets"
 	"github.com/n1try/telegram-middleman-bot/model"
+	"github.com/n1try/telegram-middleman-bot/util"
 )
 
 type DefaultInlet struct {
@@ -35,7 +36,7 @@ func (i *DefaultInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		m.Text = "*" + m.Origin + "* wrote:\n\n" + m.Text
+		m.Text = "*" + util.EscapeMarkdown(m.Origin) + "* wrote:\n\n" + m.Text
 
 		next(
 			w,

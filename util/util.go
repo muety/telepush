@@ -4,6 +4,15 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strings"
+)
+
+var markdownReplacer = strings.NewReplacer(
+	"\\", "\\\\",
+	"`", "\\`",
+	"*", "\\*",
+	"[", "\\[",
+	"_", "\\_",
 )
 
 func DumpJson(filePath string, data interface{}) {
@@ -19,4 +28,8 @@ func DumpJson(filePath string, data interface{}) {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func EscapeMarkdown(s string) string {
+	return markdownReplacer.Replace(s)
 }
