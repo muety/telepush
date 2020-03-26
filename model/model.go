@@ -18,17 +18,6 @@ type MessageParams struct {
 	DisableLinkPreviews bool
 }
 
-type AlertmanagerMessage struct {
-	Alerts []*AlertmanagerAlert
-}
-
-type AlertmanagerAlert struct {
-	Status      string            `json:"status"`
-	Url         string            `json:"generatorURL"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
-}
-
 // Only required fields are implemented
 type TelegramUser struct {
 	Id        int    `json:"id"`

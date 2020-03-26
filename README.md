@@ -11,6 +11,11 @@ I translate simple JSON HTTP requests into Telegram push messages that you will 
 [![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoff.ee/n1try)
 
 ## Changelog (2019-11-06)
+### 2020-03-26
+* ⚠️ `alertmanager` inlet was renamed  to `alertmanager_webhook` and its endpoint has changed accordingly
+* Docker support, thanks to [luza](https://github.com/luza)
+* Integration with Bitbucket, thanks to [luza](https://github.com/luza)
+
 ### 2020-03-10
 * Major code refactorings
 * Support for Inlets (see below)
@@ -27,7 +32,7 @@ This is especially useful for __developers or sysadmins__. Imagine you want some
 If you develop those thoughts further, this could potentially __replace any kind of e-mail notifications__ - be it the message that someone has answered to your __forum post__, your favorite game is __now on sale at Steam__, and so on. It's __lightweight and easy__, unlike e-mails that have way too much overhead.
 
 ## How to run it?
-You can either set up your own instance or use mine, which is running at [https://apps.muetsch.io/middleman](https://apps.muetsch.io/middleman). The hosted instance only allows for a maxmimum of 240 requests per recipient per day. If you want to set this up on your own, do the following. You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and s (self-signed) SSL certificate. 
+You can either set up your own instance or use mine, which is running at [https://apps.muetsch.io/middleman](https://apps.muetsch.io/middleman). The hosted instance only allows for a maximum of 240 requests per recipient per day. If you want to set this up on your own, do the following. You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and s (self-signed) SSL certificate. 
 1. Make sure you have the Go >= 1.13 installed.
 2. `export GO111MODULE=on`
 3. `go get github.com/n1try/telegram-middleman-bot`
@@ -82,7 +87,8 @@ Following inlets are currently available:
 | Name         | Description                                                                                                 | Status |
 |--------------|-------------------------------------------------------------------------------------------------------------|--------|
 | `default`      | Simply passes the request through without any changes                                                       | ✅      |
-| `alertmanager` | Consumes [Alertmanager webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) | ✅      |
+| `alertmanager_webhook` | Consumes [Alertmanager webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) | ✅      |
+| `bitbucket_webhook` | Accepts [Bitbucket webhook requests](https://confluence.atlassian.com/bitbucket/tutorial-create-and-trigger-a-webhook-747606432.html) to notify about a pipeline status change | ⏳      |
 
 Further documentation about the individual inlets is available [here](/inlets).
 

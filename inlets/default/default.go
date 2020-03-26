@@ -1,4 +1,4 @@
-package inlets
+package _default
 
 import (
 	"context"
@@ -6,16 +6,19 @@ import (
 	"net/http"
 
 	"github.com/n1try/telegram-middleman-bot/config"
+	"github.com/n1try/telegram-middleman-bot/inlets"
 	"github.com/n1try/telegram-middleman-bot/model"
 )
 
-type DefaultInlet struct{}
+type DefaultInlet struct {
+	inlets.Inlet
+}
 
-func NewDefaultInlet() *DefaultInlet {
+func New() inlets.Inlet {
 	return &DefaultInlet{}
 }
 
-func (d DefaultInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
+func (i *DefaultInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var m model.DefaultMessage
 

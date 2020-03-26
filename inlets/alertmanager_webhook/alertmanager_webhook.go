@@ -1,4 +1,4 @@
-package inlets
+package alertmanager_webhook
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/n1try/telegram-middleman-bot/config"
+	"github.com/n1try/telegram-middleman-bot/inlets"
 	"github.com/n1try/telegram-middleman-bot/model"
 	"github.com/n1try/telegram-middleman-bot/resolvers"
 )
@@ -17,15 +18,17 @@ var (
 	tokenRegex = regexp.MustCompile("^Bearer (.+)$")
 )
 
-type AlertmanagerInlet struct{}
+type AlertmanagerInlet struct {
+	inlets.Inlet
+}
 
-func NewAlertmanagerInlet() *AlertmanagerInlet {
+func New() inlets.Inlet {
 	return &AlertmanagerInlet{}
 }
 
-func (a AlertmanagerInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
+func (i *AlertmanagerInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var m model.AlertmanagerMessage
+		var m Message
 
 		authHeader := r.Header.Get("authorization")
 		matches := tokenRegex.FindStringSubmatch(authHeader)
@@ -52,9 +55,10 @@ func (a AlertmanagerInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func transformMessage(in *model.AlertmanagerMessage, token string) *model.DefaultMessage {
+func transformMessage(in *Message, token string) *model.DefaultMessage {
 	var sb strings.Builder
 	sb.WriteString("*Alertmanager* wrote:\n\n")
+
 	for i, a := range in.Alerts {
 		// Status
 		var statusEmoji string
@@ -93,7 +97,7 @@ func transformMessage(in *model.AlertmanagerMessage, token string) *model.Defaul
 
 	return &model.DefaultMessage{
 		RecipientToken: token,
-		Type:           resolvers.TextType,
 		Text:           sb.String(),
+		Type:           resolvers.TextType,
 	}
 }

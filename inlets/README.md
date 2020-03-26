@@ -4,9 +4,6 @@
 
 Forwards a basic text message or a file to a Telegram chat.  
 
-#### Headers
-None
-
 #### Body (Text Message)
 ```json
 {
@@ -28,8 +25,8 @@ None
 }
 ```
 
-## `alertmanager`
-`/api/inlets/alertmanager`
+## `alertmanager_webhook`
+`/api/inlets/alertmanager_webhook`
 
 Accepts, transforms and forwards alerts sent by [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) to a Telegram chat.
 
@@ -59,7 +56,18 @@ route:
 receivers:
 - name: 'middleman'
   webhook_configs:
-  - url: 'http://localhost:8080/api/inlets/alertmanager'
+  - url: 'http://localhost:8080/api/inlets/alertmanager_webhook'
     http_config:
       bearer_token: '3edf633a-eab0-45ea-9721-16c07bb8f245'
 ```
+
+## `bitbucket_webhook`
+`/api/inlets/bitbucket_webhook`
+
+Accepts, transforms and forwards events sent by [Bitbucket](https://bitbucket.org/) to a Telegram chat.
+
+#### Parameters
+Requires the recipient token to be included as a `token` URL query parameter and the `X-Event-Key` header to be set. 
+
+### Body
+See [Event Payloads](https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html).

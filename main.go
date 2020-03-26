@@ -13,8 +13,9 @@ import (
 
 	"github.com/n1try/telegram-middleman-bot/api"
 	"github.com/n1try/telegram-middleman-bot/config"
-	"github.com/n1try/telegram-middleman-bot/inlets"
+	"github.com/n1try/telegram-middleman-bot/inlets/alertmanager_webhook"
 	"github.com/n1try/telegram-middleman-bot/inlets/bitbucket_webhook"
+	"github.com/n1try/telegram-middleman-bot/inlets/default"
 	"github.com/n1try/telegram-middleman-bot/middleware"
 	"github.com/n1try/telegram-middleman-bot/model"
 	"github.com/n1try/telegram-middleman-bot/resolvers"
@@ -66,7 +67,7 @@ func handleMessage(w http.ResponseWriter, r *http.Request) {
 
 	if len(recipientId) == 0 {
 		w.WriteHeader(404)
-		w.Write([]byte("passed token you passed does not relate to a valid user"))
+		w.Write([]byte("passed token does not relate to a valid user"))
 		return
 	}
 
@@ -115,9 +116,9 @@ func updateLimits() {
 func registerRoutes() {
 	baseChain := middleware.Chain(handleMessage, middleware.CheckMethod)
 
-	http.HandleFunc("/api/messages", middleware.Chain(baseChain, inlets.NewDefaultInlet().Middleware))
-	http.HandleFunc("/api/inlets/default", middleware.Chain(baseChain, inlets.NewDefaultInlet().Middleware))
-	http.HandleFunc("/api/inlets/alertmanager", middleware.Chain(baseChain, inlets.NewAlertmanagerInlet().Middleware))
+	http.HandleFunc("/api/messages", middleware.Chain(baseChain, _default.New().Middleware))
+	http.HandleFunc("/api/inlets/default", middleware.Chain(baseChain, _default.New().Middleware))
+	http.HandleFunc("/api/inlets/alertmanager", middleware.Chain(baseChain, alertmanager_webhook.New().Middleware))
 	http.HandleFunc("/api/inlets/bitbucket_webhook", middleware.Chain(baseChain, bitbucket_webhook.New().Middleware))
 }
 
