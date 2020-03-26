@@ -2,14 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/n1try/telegram-middleman-bot/api"
-	"github.com/n1try/telegram-middleman-bot/config"
-	"github.com/n1try/telegram-middleman-bot/inlets"
-	"github.com/n1try/telegram-middleman-bot/middleware"
-	"github.com/n1try/telegram-middleman-bot/model"
-	"github.com/n1try/telegram-middleman-bot/resolvers"
-	"github.com/n1try/telegram-middleman-bot/store"
-	"github.com/n1try/telegram-middleman-bot/util"
 	"log"
 	"net"
 	"net/http"
@@ -18,6 +10,16 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/n1try/telegram-middleman-bot/api"
+	"github.com/n1try/telegram-middleman-bot/config"
+	"github.com/n1try/telegram-middleman-bot/inlets"
+	"github.com/n1try/telegram-middleman-bot/inlets/bitbucket_webhook"
+	"github.com/n1try/telegram-middleman-bot/middleware"
+	"github.com/n1try/telegram-middleman-bot/model"
+	"github.com/n1try/telegram-middleman-bot/resolvers"
+	"github.com/n1try/telegram-middleman-bot/store"
+	"github.com/n1try/telegram-middleman-bot/util"
 )
 
 var (
@@ -46,9 +48,9 @@ func handleMessage(w http.ResponseWriter, r *http.Request) {
 		token = m.RecipientToken
 	}
 
-	if len(token) == 0 || len(m.Origin) == 0 {
+	if len(token) == 0 {
 		w.WriteHeader(400)
-		w.Write([]byte("missing recipient_token and origin parameters"))
+		w.Write([]byte("missing recipient_token parameter"))
 		return
 	}
 
@@ -116,6 +118,7 @@ func registerRoutes() {
 	http.HandleFunc("/api/messages", middleware.Chain(baseChain, inlets.NewDefaultInlet().Middleware))
 	http.HandleFunc("/api/inlets/default", middleware.Chain(baseChain, inlets.NewDefaultInlet().Middleware))
 	http.HandleFunc("/api/inlets/alertmanager", middleware.Chain(baseChain, inlets.NewAlertmanagerInlet().Middleware))
+	http.HandleFunc("/api/inlets/bitbucket_webhook", middleware.Chain(baseChain, bitbucket_webhook.New().Middleware))
 }
 
 func connectApi() {

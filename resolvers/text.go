@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"errors"
+
 	"github.com/n1try/telegram-middleman-bot/api"
 	"github.com/n1try/telegram-middleman-bot/model"
 )
@@ -25,7 +26,7 @@ func resolveText(recipientId string, m *model.DefaultMessage, params *model.Mess
 
 	return api.SendMessage(&model.TelegramOutMessage{
 		ChatId:             recipientId,
-		Text:               "*" + m.Origin + "* wrote:\n\n" + m.Text,
+		Text:               m.Text,
 		ParseMode:          "Markdown",
 		DisableLinkPreview: disableLinkPreview,
 	})

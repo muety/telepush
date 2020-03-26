@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/n1try/telegram-middleman-bot/config"
-	"github.com/n1try/telegram-middleman-bot/model"
-	"github.com/n1try/telegram-middleman-bot/resolvers"
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/n1try/telegram-middleman-bot/config"
+	"github.com/n1try/telegram-middleman-bot/model"
+	"github.com/n1try/telegram-middleman-bot/resolvers"
 )
 
 var (
@@ -53,6 +54,7 @@ func (a AlertmanagerInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
 
 func transformMessage(in *model.AlertmanagerMessage, token string) *model.DefaultMessage {
 	var sb strings.Builder
+	sb.WriteString("*Alertmanager* wrote:\n\n")
 	for i, a := range in.Alerts {
 		// Status
 		var statusEmoji string
@@ -91,7 +93,6 @@ func transformMessage(in *model.AlertmanagerMessage, token string) *model.Defaul
 
 	return &model.DefaultMessage{
 		RecipientToken: token,
-		Origin:         "Alertmanager",
 		Type:           resolvers.TextType,
 		Text:           sb.String(),
 	}
