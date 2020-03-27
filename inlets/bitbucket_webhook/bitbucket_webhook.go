@@ -10,6 +10,7 @@ import (
 	"github.com/n1try/telegram-middleman-bot/inlets"
 	"github.com/n1try/telegram-middleman-bot/model"
 	"github.com/n1try/telegram-middleman-bot/resolvers"
+	"github.com/n1try/telegram-middleman-bot/util"
 )
 
 type BitbucketWebhookInlet struct {
@@ -49,7 +50,31 @@ func (i *BitbucketWebhookInlet) Middleware(next http.HandlerFunc) http.HandlerFu
 
 func buildMessage(eventKey string, payload *Payload) string {
 	switch eventKey {
-	// A user pushes 1 or more commits to a repository
+	// A build system, CI tool, or another vendor recognizes that
+	// a commit has a new status and updates the commit with its status
+	case "repo:commit_status_created", "repo:commit_status_updated":
+		if payload.CommitStatus != nil {
+			var emoji string
+			switch payload.CommitStatus.State {
+			case "INPROGRESS":
+				emoji = "⌛️"
+			case "SUCCESSFUL":
+				emoji = "✅"
+			case "FAILED":
+				emoji = "❌"
+			}
+			return fmt.Sprintf(
+				"%s *%s*: [%s](%s)\n%s",
+				emoji,
+				util.EscapeMarkdown(payload.Repository.Name),
+				payload.CommitStatus.State,
+				payload.CommitStatus.URL,
+				util.EscapeMarkdown(payload.CommitStatus.Name),
+			)
+		}
+		fallthrough
+
+		// A user pushes 1 or more commits to a repository
 	case "repo:push":
 		fallthrough
 
@@ -68,35 +93,6 @@ func buildMessage(eventKey string, payload *Payload) string {
 
 	// A user comments on a commit in a repository
 	case "repo:commit_comment_created":
-		fallthrough
-
-	// A build system, CI tool, or another vendor recognizes that
-	// a user recently pushed a commit and updates the commit with its status
-	case "repo:commit_status_created":
-		fallthrough
-
-	// A build system, CI tool, or another vendor recognizes that
-	// a commit has a new status and updates the commit with its status
-	case "repo:commit_status_updated":
-		if payload.CommitStatus != nil {
-			var emoji string
-			switch payload.CommitStatus.State {
-			case "INPROGRESS":
-				emoji = "⌛️"
-			case "SUCCESSFUL":
-				emoji = "✅"
-			case "FAILED":
-				emoji = "❌"
-			}
-			return fmt.Sprintf(
-				"%s *%s*: [%s](%s)\n%s",
-				emoji,
-				payload.Repository.Name,
-				payload.CommitStatus.State,
-				payload.CommitStatus.URL,
-				payload.CommitStatus.Name,
-			)
-		}
 		fallthrough
 
 	// A user creates an issue for a repository
@@ -148,6 +144,6 @@ func buildMessage(eventKey string, payload *Payload) string {
 		fallthrough
 
 	default:
-		return fmt.Sprintf("Event %s triggered", eventKey)
+		return fmt.Sprintf("Event %s triggered", util.EscapeMarkdown(eventKey))
 	}
 }

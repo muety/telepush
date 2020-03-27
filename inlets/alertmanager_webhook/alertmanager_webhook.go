@@ -12,6 +12,7 @@ import (
 	"github.com/n1try/telegram-middleman-bot/inlets"
 	"github.com/n1try/telegram-middleman-bot/model"
 	"github.com/n1try/telegram-middleman-bot/resolvers"
+	"github.com/n1try/telegram-middleman-bot/util"
 )
 
 var (
@@ -78,6 +79,8 @@ func transformMessage(in *Message, token string) *model.DefaultMessage {
 		if len(a.Labels) > 0 {
 			sb.WriteString(fmt.Sprintf("*🏷 Labels:*\n"))
 			for k, v := range a.Labels {
+				k = util.EscapeMarkdown(k)
+				v = util.EscapeMarkdown(v)
 				sb.WriteString(fmt.Sprintf("– `%s` = `%s`\n", k, v))
 			}
 		}
@@ -86,6 +89,8 @@ func transformMessage(in *Message, token string) *model.DefaultMessage {
 		if len(a.Annotations) > 0 {
 			sb.WriteString(fmt.Sprintf("*📝 Annotations:*\n"))
 			for k, v := range a.Annotations {
+				k = util.EscapeMarkdown(k)
+				v = util.EscapeMarkdown(v)
 				sb.WriteString(fmt.Sprintf("– `%s` = `%s`\n", k, v))
 			}
 		}
