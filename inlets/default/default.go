@@ -25,13 +25,13 @@ func (i *DefaultInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
 
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&m); err != nil {
-			w.WriteHeader(400)
+			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 			return
 		}
 
 		if len(m.Origin) == 0 {
-			w.WriteHeader(400)
+			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("missing origin parameter"))
 			return
 		}

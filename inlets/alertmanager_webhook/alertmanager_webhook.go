@@ -34,14 +34,14 @@ func (i *AlertmanagerInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
 		authHeader := r.Header.Get("authorization")
 		matches := tokenRegex.FindStringSubmatch(authHeader)
 		if len(matches) < 2 {
-			w.WriteHeader(401)
+			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte("missing recipient token"))
 			return
 		}
 
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&m); err != nil {
-			w.WriteHeader(400)
+			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 			return
 		}

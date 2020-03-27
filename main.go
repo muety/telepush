@@ -35,7 +35,7 @@ func handleMessage(w http.ResponseWriter, r *http.Request) {
 	if message := r.Context().Value(config.KeyMessage); message != nil {
 		m = message.(*model.DefaultMessage)
 	} else {
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("failed to parse message"))
 		return
 	}
@@ -50,15 +50,16 @@ func handleMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(token) == 0 {
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("missing recipient_token parameter"))
 		return
 	}
 
+	// TODO: Refactoring: get rid of this resolver concept
 	resolver := resolvers.GetResolver(m.Type)
 
 	if err := resolver.IsValid(m); err != nil {
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
@@ -66,7 +67,7 @@ func handleMessage(w http.ResponseWriter, r *http.Request) {
 	recipientId := store.ResolveToken(token)
 
 	if len(recipientId) == 0 {
-		w.WriteHeader(404)
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("passed token does not relate to a valid user"))
 		return
 	}
@@ -76,20 +77,21 @@ func handleMessage(w http.ResponseWriter, r *http.Request) {
 		limiterMap[recipientId] = 0
 	}
 	if limiterMap[recipientId] >= botConfig.RateLimit {
-		w.WriteHeader(429)
+		w.WriteHeader(http.StatusTooManyRequests)
 		w.Write([]byte(fmt.Sprintf("request rate of %d per hour exceeded", botConfig.RateLimit)))
 		return
 	}
 	limiterMap[recipientId] += 1
 
 	if err := resolver.Resolve(recipientId, m, p); err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(err.StatusCode)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
 	store.Put(config.KeyRequests, store.Get(config.KeyRequests).(int)+1)
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }
 
 func init() {

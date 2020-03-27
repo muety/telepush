@@ -18,7 +18,7 @@ func logText(m *model.DefaultMessage) string {
 	return m.Text
 }
 
-func resolveText(recipientId string, m *model.DefaultMessage, params *model.MessageParams) error {
+func resolveText(recipientId string, m *model.DefaultMessage, params *model.MessageParams) *model.ApiError {
 	var disableLinkPreview bool
 	if params != nil {
 		disableLinkPreview = params.DisableLinkPreviews

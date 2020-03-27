@@ -29,7 +29,7 @@ func (i *BitbucketWebhookInlet) Middleware(next http.HandlerFunc) http.HandlerFu
 		var payload Payload
 		j := json.NewDecoder(r.Body)
 		if err := j.Decode(&payload); err != nil {
-			w.WriteHeader(400)
+			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 			return
 		}

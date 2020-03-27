@@ -28,7 +28,7 @@ var (
 
 type MessageResolver struct {
 	IsValid func(*model.DefaultMessage) error
-	Resolve func(string, *model.DefaultMessage, *model.MessageParams) error
+	Resolve func(string, *model.DefaultMessage, *model.MessageParams) *model.ApiError
 	Value   func(*model.DefaultMessage) string
 }
 

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/n1try/telegram-middleman-bot/config"
@@ -49,7 +50,7 @@ func GetUpdate() (*[]model.TelegramUpdate, error) {
 		return nil, err
 	}
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		return nil, errors.New(string(data))
 	}
 
@@ -70,13 +71,14 @@ func GetUpdate() (*[]model.TelegramUpdate, error) {
 func Poll() {
 	go func() {
 		for {
-			updates, err := GetUpdate()
-			if err == nil {
+			if updates, err := GetUpdate(); err == nil {
 				for _, update := range *updates {
-					processUpdate(update)
+					if err := processUpdate(update); err != nil {
+						log.Printf("error processing updates: %s\n", err.Error())
+					}
 				}
 			} else {
-				log.Printf("ERROR getting updates: %s\n", err)
+				log.Printf("error getting updates: %s\n", err)
 				time.Sleep(config.PollTimeoutSec * time.Second)
 			}
 		}
@@ -84,63 +86,117 @@ func Poll() {
 }
 
 func Webhook(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.WriteHeader(415)
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	dec := json.NewDecoder(r.Body)
+
 	var u model.TelegramUpdate
-	err := dec.Decode(&u)
-	if err != nil {
-		w.WriteHeader(400)
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	processUpdate(u)
-	w.WriteHeader(200)
+
+	if err := processUpdate(u); err != nil {
+		w.WriteHeader(err.StatusCode)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
-func SendMessage(message *model.TelegramOutMessage) error {
-	m, err := json.Marshal(message)
-	if err != nil {
-		return err
+func SendMessage(message *model.TelegramOutMessage) *model.ApiError {
+	buf := bytes.Buffer{}
+	if err := json.NewEncoder(&buf).Encode(message); err != nil {
+		return &model.ApiError{
+			StatusCode: http.StatusBadRequest,
+			Text:       err.Error(),
+		}
 	}
-	reader := strings.NewReader(string(m))
-	request, _ := http.NewRequest(http.MethodPost, botConfig.GetApiUrl()+"/sendMessage", reader)
+	request, _ := http.NewRequest(http.MethodPost, botConfig.GetApiUrl()+"/sendMessage", &buf)
 	request.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(request)
 	if err != nil {
-		return err
+		return &model.ApiError{
+			StatusCode: http.StatusInternalServerError,
+			Text:       err.Error(),
+		}
 	}
 	defer resp.Body.Close()
 
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	return nil
+	return handleApiResponse(resp)
 }
 
-func processUpdate(update model.TelegramUpdate) {
-	var text string
+func SendDocument(document *model.TelegramOutDocument) *model.ApiError {
+	buf, contentType, err := document.EncodeMultipart()
+	if err != nil {
+		return &model.ApiError{
+			StatusCode: http.StatusBadRequest,
+			Text:       err.Error(),
+		}
+	}
+
+	request, _ := http.NewRequest(http.MethodPost, botConfig.GetApiUrl()+"/sendDocument", buf)
+	request.Header.Set("Content-Type", contentType)
+
+	resp, err := client.Do(request)
+	if err != nil {
+		return &model.ApiError{
+			StatusCode: http.StatusInternalServerError,
+			Text:       err.Error(),
+		}
+	}
+	defer resp.Body.Close()
+
+	return handleApiResponse(resp)
+}
+
+func processUpdate(update model.TelegramUpdate) *model.ApiError {
+	text := "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/n1try/telegram-middleman-bot."
 	chatId := update.Message.Chat.Id
+
 	if strings.HasPrefix(update.Message.Text, "/start") {
 		id := uuid.NewV4()
 		store.InvalidateToken(chatId)
 		store.Put(id.String(), model.StoreObject{User: update.Message.From, ChatId: chatId})
 		text = "Here is your token you can use to send messages to your Telegram account:\n\n_" + id.String() + "_"
 		log.Printf("Sending new token %s to %s", id.String(), strconv.Itoa(chatId))
-	} else {
-		text = "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/n1try/telegram-middleman-bot."
 	}
-	err := SendMessage(&model.TelegramOutMessage{
+
+	return SendMessage(&model.TelegramOutMessage{
 		ChatId:             strconv.Itoa(chatId),
 		Text:               text,
 		ParseMode:          "Markdown",
 		DisableLinkPreview: true,
 	})
+}
+
+func handleApiResponse(response *http.Response) *model.ApiError {
+	resData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Println(err)
+		return &model.ApiError{
+			StatusCode: http.StatusInternalServerError,
+			Text:       err.Error(),
+		}
 	}
+
+	var jsonResponse map[string]interface{}
+	if err := json.Unmarshal(resData, &jsonResponse); err != nil {
+		return &model.ApiError{
+			StatusCode: http.StatusInternalServerError,
+			Text:       err.Error(),
+		}
+	} else if ok := jsonResponse["ok"]; !(ok.(bool)) {
+		desc := jsonResponse["description"].(string)
+		status := jsonResponse["error_code"].(float64)
+		return &model.ApiError{
+			StatusCode: int(status),
+			Text:       desc,
+		}
+	}
+
+	return nil
 }

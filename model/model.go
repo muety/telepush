@@ -1,5 +1,11 @@
 package model
 
+import (
+	"bytes"
+	"io"
+	"mime/multipart"
+)
+
 type StoreObject struct {
 	User   TelegramUser `json:"user"`
 	ChatId int          `json:"chat_id"`
@@ -40,6 +46,18 @@ type TelegramOutMessage struct {
 	DisableLinkPreview bool   `json:"disable_web_page_preview"`
 }
 
+type TelegramOutDocument struct {
+	ChatId    string
+	Caption   string
+	ParseMode string
+	Document  *TelegramInputFile
+}
+
+type TelegramInputFile struct {
+	Name string
+	Data []byte
+}
+
 // Only required fields are implemented
 type TelegramInMessage struct {
 	MessageId int          `json:"message_id"`
@@ -63,4 +81,25 @@ type TelegramUpdateResponse struct {
 type Stats struct {
 	TotalRequests int `json:"total_requests"`
 	Timestamp     int `json:"timestamp"`
+}
+
+func (d *TelegramOutDocument) EncodeMultipart() (*bytes.Buffer, string, error) {
+	buf := bytes.Buffer{}
+	w := multipart.NewWriter(&buf)
+	defer w.Close()
+
+	filePart, err := w.CreateFormFile("document", d.Document.Name)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if _, err := io.Copy(filePart, bytes.NewReader(d.Document.Data)); err != nil {
+		return nil, "", err
+	}
+
+	w.WriteField("chat_id", d.ChatId)
+	w.WriteField("caption", d.Caption)
+	w.WriteField("parse_mode", d.ParseMode)
+
+	return &buf, w.FormDataContentType(), nil
 }
