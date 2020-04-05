@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/n1try/telegram-middleman-bot/inlets/webmentionio_webhook"
 	"log"
 	"net"
 	"net/http"
@@ -122,6 +123,7 @@ func registerRoutes() {
 	http.HandleFunc("/api/inlets/default", middleware.Chain(baseChain, _default.New().Middleware))
 	http.HandleFunc("/api/inlets/alertmanager_webhook", middleware.Chain(baseChain, alertmanager_webhook.New().Middleware))
 	http.HandleFunc("/api/inlets/bitbucket_webhook", middleware.Chain(baseChain, bitbucket_webhook.New().Middleware))
+	http.HandleFunc("/api/inlets/webmentionio_webhook", middleware.Chain(baseChain, webmentionio_webhook.New().Middleware))
 }
 
 func connectApi() {
