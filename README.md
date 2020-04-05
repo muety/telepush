@@ -10,7 +10,10 @@ I translate simple JSON HTTP requests into Telegram push messages that you will 
 
 [![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoff.ee/n1try)
 
-## Changelog (2019-11-06)
+## Changelog
+### 2020-04-05
+* Integration with [Webmention.io](https://webmention.io)
+
 ### 2020-03-26
 * ⚠️ `alertmanager` inlet was renamed  to `alertmanager_webhook` and its endpoint has changed accordingly
 * Docker support, thanks to [luza](https://github.com/luza)
