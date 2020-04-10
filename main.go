@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/n1try/telegram-middleman-bot/inlets/alertmanager_webhook"
+	"github.com/n1try/telegram-middleman-bot/inlets/bitbucket_webhook"
 	"github.com/n1try/telegram-middleman-bot/inlets/webmentionio_webhook"
 	"log"
 	"net"
@@ -12,10 +14,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/justinas/alice"
 	"github.com/n1try/telegram-middleman-bot/api"
 	"github.com/n1try/telegram-middleman-bot/config"
-	"github.com/n1try/telegram-middleman-bot/inlets/alertmanager_webhook"
-	"github.com/n1try/telegram-middleman-bot/inlets/bitbucket_webhook"
 	"github.com/n1try/telegram-middleman-bot/inlets/default"
 	"github.com/n1try/telegram-middleman-bot/middleware"
 	"github.com/n1try/telegram-middleman-bot/model"
@@ -29,7 +30,9 @@ var (
 	limiterMap map[string]int
 )
 
-func handleMessage(w http.ResponseWriter, r *http.Request) {
+type MessageHandler struct{}
+
+func (h MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var m *model.DefaultMessage
 	var p *model.MessageParams
 
@@ -117,13 +120,17 @@ func updateLimits() {
 }
 
 func registerRoutes() {
-	baseChain := middleware.Chain(handleMessage, middleware.CheckMethod)
+	messageHandler := &MessageHandler{}
+	baseChain := alice.New(
+		middleware.NewCheckMethod(botConfig),
+		middleware.NewRateLimit(botConfig),
+	)
 
-	http.HandleFunc("/api/messages", middleware.Chain(baseChain, _default.New().Middleware))
-	http.HandleFunc("/api/inlets/default", middleware.Chain(baseChain, _default.New().Middleware))
-	http.HandleFunc("/api/inlets/alertmanager_webhook", middleware.Chain(baseChain, alertmanager_webhook.New().Middleware))
-	http.HandleFunc("/api/inlets/bitbucket_webhook", middleware.Chain(baseChain, bitbucket_webhook.New().Middleware))
-	http.HandleFunc("/api/inlets/webmentionio_webhook", middleware.Chain(baseChain, webmentionio_webhook.New().Middleware))
+	http.Handle("/api/messages", baseChain.Append(_default.New().Handler).Then(messageHandler))
+	http.Handle("/api/inlets/default", baseChain.Append(_default.New().Handler).Then(messageHandler))
+	http.Handle("/api/inlets/alertmanager_webhook", baseChain.Append(alertmanager_webhook.New().Handler).Then(messageHandler))
+	http.Handle("/api/inlets/bitbucket_webhook", baseChain.Append(bitbucket_webhook.New().Handler).Then(messageHandler))
+	http.Handle("/api/inlets/webmentionio_webhook", baseChain.Append(webmentionio_webhook.New().Handler).Then(messageHandler))
 }
 
 func connectApi() {

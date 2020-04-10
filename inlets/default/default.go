@@ -3,24 +3,18 @@ package _default
 import (
 	"context"
 	"encoding/json"
-	"net/http"
-
 	"github.com/n1try/telegram-middleman-bot/config"
-	"github.com/n1try/telegram-middleman-bot/inlets"
 	"github.com/n1try/telegram-middleman-bot/model"
 	"github.com/n1try/telegram-middleman-bot/util"
+	"net/http"
+
+	"github.com/n1try/telegram-middleman-bot/inlets"
 )
 
-type DefaultInlet struct {
-	inlets.Inlet
-}
+type DefaultInlet struct{}
 
-func New() inlets.Inlet {
-	return &DefaultInlet{}
-}
-
-func (i *DefaultInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var m model.DefaultMessage
 
 		dec := json.NewDecoder(r.Body)
@@ -38,9 +32,13 @@ func (i *DefaultInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
 
 		m.Text = "*" + util.EscapeMarkdown(m.Origin) + "* wrote:\n\n" + m.Text
 
-		next(
+		h.ServeHTTP(
 			w,
 			r.WithContext(context.WithValue(r.Context(), config.KeyMessage, &m)),
 		)
-	}
+	})
+}
+
+func New() inlets.Inlet {
+	return &DefaultInlet{}
 }

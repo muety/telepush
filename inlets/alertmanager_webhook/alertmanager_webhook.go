@@ -19,16 +19,14 @@ var (
 	tokenRegex = regexp.MustCompile("^Bearer (.+)$")
 )
 
-type AlertmanagerInlet struct {
-	inlets.Inlet
-}
+type AlertmanagerInlet struct{}
 
 func New() inlets.Inlet {
 	return &AlertmanagerInlet{}
 }
 
-func (i *AlertmanagerInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (i *AlertmanagerInlet) Handler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var m Message
 
 		authHeader := r.Header.Get("authorization")
@@ -52,8 +50,8 @@ func (i *AlertmanagerInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
 		ctx = context.WithValue(ctx, config.KeyMessage, message)
 		ctx = context.WithValue(ctx, config.KeyParams, &model.MessageParams{DisableLinkPreviews: true})
 
-		next(w, r.WithContext(ctx))
-	}
+		h.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func transformMessage(in *Message, token string) *model.DefaultMessage {

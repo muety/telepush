@@ -13,16 +13,14 @@ import (
 	"net/url"
 )
 
-type WebmentionioInlet struct {
-	inlets.Inlet
-}
+type WebmentionioInlet struct{}
 
 func New() inlets.Inlet {
 	return &WebmentionioInlet{}
 }
 
-func (i *WebmentionioInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (i *WebmentionioInlet) Handler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var m WebmentionMessage
 
 		dec := json.NewDecoder(r.Body)
@@ -44,8 +42,8 @@ func (i *WebmentionioInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
 		ctx = context.WithValue(ctx, config.KeyMessage, message)
 		ctx = context.WithValue(ctx, config.KeyParams, &model.MessageParams{DisableLinkPreviews: true})
 
-		next(w, r.WithContext(ctx))
-	}
+		h.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func validateMessage(message *WebmentionMessage) bool {

@@ -13,16 +13,14 @@ import (
 	"github.com/n1try/telegram-middleman-bot/util"
 )
 
-type BitbucketWebhookInlet struct {
-	inlets.Inlet
-}
+type BitbucketWebhookInlet struct{}
 
 func New() inlets.Inlet {
 	return &BitbucketWebhookInlet{}
 }
 
-func (i *BitbucketWebhookInlet) Middleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (i *BitbucketWebhookInlet) Handler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.URL.Query().Get("token")
 		eventKey := r.Header.Get("X-Event-Key")
 
@@ -44,8 +42,8 @@ func (i *BitbucketWebhookInlet) Middleware(next http.HandlerFunc) http.HandlerFu
 		ctx = context.WithValue(ctx, config.KeyMessage, message)
 		ctx = context.WithValue(ctx, config.KeyParams, &model.MessageParams{DisableLinkPreviews: true})
 
-		next(w, r.WithContext(ctx))
-	}
+		h.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func buildMessage(eventKey string, payload *Payload) string {
