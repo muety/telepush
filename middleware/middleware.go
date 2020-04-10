@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	limiter "github.com/n1try/limiter/v3"
+	"github.com/n1try/limiter/v3"
 	mhttp "github.com/n1try/limiter/v3/drivers/middleware/stdlib"
 	memst "github.com/n1try/limiter/v3/drivers/store/memory"
 	"github.com/n1try/telegram-middleman-bot/config"
@@ -12,8 +12,8 @@ import (
 func NewCheckMethod(cfg *config.BotConfig) func(h http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.Method != "POST" {
-				w.WriteHeader(415)
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
 				return
 			}
 			h.ServeHTTP(w, r)

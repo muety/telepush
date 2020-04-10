@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/n1try/telegram-middleman-bot/handlers"
 	"github.com/n1try/telegram-middleman-bot/inlets/alertmanager_webhook"
 	"github.com/n1try/telegram-middleman-bot/inlets/bitbucket_webhook"
 	"github.com/n1try/telegram-middleman-bot/inlets/webmentionio_webhook"
@@ -20,83 +21,13 @@ import (
 	"github.com/n1try/telegram-middleman-bot/inlets/default"
 	"github.com/n1try/telegram-middleman-bot/middleware"
 	"github.com/n1try/telegram-middleman-bot/model"
-	"github.com/n1try/telegram-middleman-bot/resolvers"
 	"github.com/n1try/telegram-middleman-bot/store"
 	"github.com/n1try/telegram-middleman-bot/util"
 )
 
 var (
-	botConfig  *config.BotConfig
-	limiterMap map[string]int
+	botConfig *config.BotConfig
 )
-
-type MessageHandler struct{}
-
-func (h MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var m *model.DefaultMessage
-	var p *model.MessageParams
-
-	if message := r.Context().Value(config.KeyMessage); message != nil {
-		m = message.(*model.DefaultMessage)
-	} else {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("failed to parse message"))
-		return
-	}
-
-	if params := r.Context().Value(config.KeyParams); params != nil {
-		p = params.(*model.MessageParams)
-	}
-
-	token := r.Header.Get("token")
-	if token == "" {
-		token = m.RecipientToken
-	}
-
-	if len(token) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("missing recipient_token parameter"))
-		return
-	}
-
-	// TODO: Refactoring: get rid of this resolver concept
-	resolver := resolvers.GetResolver(m.Type)
-
-	if err := resolver.IsValid(m); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	recipientId := store.ResolveToken(token)
-
-	if len(recipientId) == 0 {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("passed token does not relate to a valid user"))
-		return
-	}
-
-	_, hasKey := limiterMap[recipientId]
-	if !hasKey {
-		limiterMap[recipientId] = 0
-	}
-	if limiterMap[recipientId] >= botConfig.RateLimit {
-		w.WriteHeader(http.StatusTooManyRequests)
-		w.Write([]byte(fmt.Sprintf("request rate of %d per hour exceeded", botConfig.RateLimit)))
-		return
-	}
-	limiterMap[recipientId] += 1
-
-	if err := resolver.Resolve(recipientId, m, p); err != nil {
-		w.WriteHeader(err.StatusCode)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	store.Put(config.KeyRequests, store.Get(config.KeyRequests).(int)+1)
-
-	w.WriteHeader(http.StatusOK)
-}
 
 func init() {
 	botConfig = config.Get()
@@ -114,13 +45,12 @@ func flush() {
 
 func updateLimits() {
 	for {
-		limiterMap = make(map[string]int)
 		time.Sleep(config.LimitsTimeoutMin * time.Minute)
 	}
 }
 
 func registerRoutes() {
-	messageHandler := &MessageHandler{}
+	messageHandler := &handlers.MessageHandler{}
 	baseChain := alice.New(
 		middleware.NewCheckMethod(botConfig),
 		middleware.NewRateLimit(botConfig),
