@@ -1,14 +1,19 @@
 # telegram-middleman-bot
 
-[![Say thanks](https://img.shields.io/badge/SayThanks.io-%E2%98%BC-1EAEDB.svg)](https://saythanks.io/to/n1try)
+[![](http://img.shields.io/liberapay/receives/muety.svg?logo=liberapay&style=flat-square)](https://liberapay.com/muety/)
+[![Say thanks](https://img.shields.io/badge/SayThanks.io-%E2%98%BC-1EAEDB.svg?style=flat-square)](https://saythanks.io/to/n1try)
+![](https://img.shields.io/github/license/muety/telegram-middleman-bot?style=flat-square)
+[![Go Report Card](https://goreportcard.com/badge/github.com/muety/telegram-middleman-bot?style=flat-square)](https://goreportcard.com/report/github.com/muety/telegram-middleman-bot)
+
+[![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoff.ee/n1try)
+
+---
 
 ![](http://i.imgur.com/lvshgaj.png)
 
 __I'm the [@MiddleMan](https://telegram.me/MiddleManBot) bot! I sit in the middle between whatever you want to send yourself as a message and your Telegram.__
 
 I translate simple JSON HTTP requests into Telegram push messages that you will get on your Smartphone, PC or whatever Telegram client you have. Just like [Gotify](https://gotify.net/), but without an extra app.
-
-[![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoff.ee/n1try)
 
 ## Changelog
 ### 2020-04-05
