@@ -55,8 +55,7 @@ func GetUpdate() (*[]model.TelegramUpdate, error) {
 	}
 
 	var update model.TelegramUpdateResponse
-	err = json.Unmarshal(data, &update)
-	if err != nil {
+	if err := json.Unmarshal(data, &update); err != nil {
 		return nil, err
 	}
 

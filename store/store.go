@@ -34,9 +34,7 @@ func Read(filePath string) {
 		initEmpty()
 		return
 	}
-	decoder := gob.NewDecoder(file)
-	err = decoder.Decode(&store)
-	if err != nil {
+	if err := gob.NewDecoder(file).Decode(&store); err != nil {
 		log.Println(err)
 	}
 }
@@ -48,10 +46,7 @@ func Flush(filePath string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	encoder := gob.NewEncoder(file)
-	err = encoder.Encode(&store)
-	if err != nil {
+	if err := gob.NewEncoder(file).Encode(&store); err != nil {
 		log.Fatalln(err)
 	}
 }
