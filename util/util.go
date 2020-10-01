@@ -22,10 +22,7 @@ func DumpJson(filePath string, data interface{}) {
 	if err != nil {
 		log.Println(err)
 	}
-
-	encoder := json.NewEncoder(file)
-	err = encoder.Encode(&data)
-	if err != nil {
+	if err := json.NewEncoder(file).Encode(&data); err != nil {
 		log.Println(err)
 	}
 }
