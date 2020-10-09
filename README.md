@@ -4,6 +4,10 @@
 [![Say thanks](https://img.shields.io/badge/SayThanks.io-%E2%98%BC-1EAEDB.svg?style=flat-square)](https://saythanks.io/to/n1try)
 ![](https://img.shields.io/github/license/muety/telegram-middleman-bot?style=flat-square)
 [![Go Report Card](https://goreportcard.com/badge/github.com/muety/telegram-middleman-bot?style=flat-square)](https://goreportcard.com/report/github.com/muety/telegram-middleman-bot)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=security_rating)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=sqale_index)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=ncloc)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
 
 [![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoff.ee/n1try)
 
