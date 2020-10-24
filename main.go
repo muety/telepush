@@ -77,7 +77,7 @@ func listen() {
 	// Check if address is valid
 	ip := net.ParseIP(botConfig.Address)
 	if ip == nil {
-		log.Println("Address '" + botConfig.Address + "' is not valid. Exiting...")
+		log.Println("address '" + botConfig.Address + "' is not valid. Exiting...")
 		os.Exit(1)
 	}
 
@@ -94,7 +94,7 @@ func listen() {
 	if !botConfig.Disable6 {
 		ip := net.ParseIP(botConfig.Address6)
 		if ip == nil {
-			log.Println("Address '" + botConfig.Address6 + "' is not valid. Exiting...")
+			log.Println("address '" + botConfig.Address6 + "' is not valid. Exiting...")
 			os.Exit(1)
 		}
 

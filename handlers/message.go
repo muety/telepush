@@ -54,13 +54,9 @@ func (h MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := resolver.Resolve(recipientId, m, p); err != nil {
-		w.WriteHeader(err.StatusCode)
-		w.Write([]byte(err.Error()))
-		return
-	}
+	go resolver.Resolve(recipientId, m, p)
 
 	store.Put(config.KeyRequests, store.Get(config.KeyRequests).(int)+1)
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusAccepted)
 }
