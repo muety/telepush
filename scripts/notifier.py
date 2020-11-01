@@ -32,7 +32,7 @@ def main():
 
     for current in args.recipients:
         status_code, body = send_notification(args.name, args.message, current)
-        if status_code != 200:
+        if status_code != 202:
             print("Error sending data to telegram bot: " + str(status_code) + " - " + body)
 
 if __name__ == "__main__":
