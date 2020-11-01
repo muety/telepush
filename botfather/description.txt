@@ -1,0 +1,3 @@
+I deliver simple messages sent via HTTP request as Telegram messages with push notifications.
+
+More at https://github.com/muety/webhook2telegram.

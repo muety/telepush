@@ -1,0 +1,2 @@
+start - Get a token to be used as identifier in HTTP requests
+help - Get instructions on how to use this bot

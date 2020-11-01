@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/n1try/telegram-middleman-bot/config"
-	"github.com/n1try/telegram-middleman-bot/model"
-	"github.com/n1try/telegram-middleman-bot/store"
+	"github.com/muety/webhook2telegram/config"
+	"github.com/muety/webhook2telegram/model"
+	"github.com/muety/webhook2telegram/store"
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
 	"log"
@@ -154,7 +154,7 @@ func SendDocument(document *model.TelegramOutDocument) *model.ApiError {
 }
 
 func processUpdate(update model.TelegramUpdate) *model.ApiError {
-	text := "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/n1try/telegram-middleman-bot."
+	text := "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/muety/webhook2telegram."
 	chatId := update.Message.Chat.Id
 
 	if strings.HasPrefix(update.Message.Text, "/start") {

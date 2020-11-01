@@ -7,13 +7,13 @@
          xmlns:foaf="http://xmlns.com/foaf/0.1/">
 
     <Project xmlns="http://usefulinc.com/ns/doap#">
-        <name>telegram-middleman-bot</name>
+        <name>webhook2telegram</name>
         <created>2017-07-04</created>
         <shortdesc xml:lang="en">Publish / Subscribe Telegram Bot</shortdesc>
         <description xml:lang="en">A Telegram bot which translates push messages sent as simple HTTP calls into Telegram messages you can subscribe to</description>
-        <homepage rdf:resource="https://github.com/n1try/telegram-middleman-bot"/>
-        <bug-database rdf:resource="https://github.com/n1try/telegram-middleman-bot/issues"/>
-        <license rdf:resource="https://github.com/n1try/telegram-middleman-bot/blob/master/LICENSE"/>
+        <homepage rdf:resource="https://github.com/muety/webhook2telegram"/>
+        <bug-database rdf:resource="https://github.com/muety/webhook2telegram/issues"/>
+        <license rdf:resource="https://github.com/muety/webhook2telegram/blob/master/LICENSE"/>
         <language>en</language>
         <programming-language>Go</programming-language>
         <os>Linux</os>
@@ -32,8 +32,8 @@
 
         <repository>
             <GitRepository>
-                <browse rdf:resource="https://github.com/n1try/telegram-middleman-bot"/>
-                <location rdf:resource="https://github.com/n1try/telegram-middleman-bot.git"/>
+                <browse rdf:resource="https://github.com/muety/webhook2telegram"/>
+                <location rdf:resource="https://github.com/muety/webhook2telegram.git"/>
             </GitRepository>
         </repository> 
     </Project>

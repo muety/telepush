@@ -3,12 +3,12 @@ package _default
 import (
 	"context"
 	"encoding/json"
-	"github.com/n1try/telegram-middleman-bot/config"
-	"github.com/n1try/telegram-middleman-bot/model"
-	"github.com/n1try/telegram-middleman-bot/util"
+	"github.com/muety/webhook2telegram/config"
+	"github.com/muety/webhook2telegram/model"
+	"github.com/muety/webhook2telegram/util"
 	"net/http"
 
-	"github.com/n1try/telegram-middleman-bot/inlets"
+	"github.com/muety/webhook2telegram/inlets"
 )
 
 type DefaultInlet struct{}

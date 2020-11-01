@@ -1,4 +1,4 @@
-module github.com/n1try/telegram-middleman-bot
+module github.com/muety/webhook2telegram
 
 go 1.13
 

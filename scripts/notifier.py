@@ -20,7 +20,7 @@ def send_notification(name, text, recipient):
     return resp.status_code, resp.text
 
 def main():
-    parser = argparse.ArgumentParser(description="Send a notification via Telegram Middleman Bot.")
+    parser = argparse.ArgumentParser(description="Send a notification via Webhook2Telegram.")
     parser.add_argument("name", help="Name of the Bot shown in the chat.")
     parser.add_argument("message", help="Notification message to send.")
     parser.add_argument("recipients", metavar="recipients", nargs="*", default="main", choices=list(hook_recipient_ids.keys()), help="Name(s) of the recipient(s) of the notification. Possible recipients are " + ", ".join(list(hook_recipient_ids.keys())) + ". Default recipient is 'main'.")

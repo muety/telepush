@@ -51,10 +51,10 @@ route:
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 1h
-  receiver: 'middleman'
+  receiver: 'webhook2telegram'
 
 receivers:
-- name: 'middleman'
+- name: 'webhook2telegram'
   webhook_configs:
   - url: 'http://localhost:8080/api/inlets/alertmanager_webhook'
     http_config:

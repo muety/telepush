@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log"
 
-	"github.com/n1try/telegram-middleman-bot/api"
-	"github.com/n1try/telegram-middleman-bot/model"
+	"github.com/muety/webhook2telegram/api"
+	"github.com/muety/webhook2telegram/model"
 )
 
 type TextResolver struct{}

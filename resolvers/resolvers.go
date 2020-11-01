@@ -1,7 +1,7 @@
 package resolvers
 
 import (
-	"github.com/n1try/telegram-middleman-bot/model"
+	"github.com/muety/webhook2telegram/model"
 )
 
 const (

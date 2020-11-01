@@ -2,8 +2,8 @@ package store
 
 import (
 	"encoding/gob"
-	"github.com/n1try/telegram-middleman-bot/config"
-	"github.com/n1try/telegram-middleman-bot/model"
+	"github.com/muety/webhook2telegram/config"
+	"github.com/muety/webhook2telegram/model"
 	"log"
 	"os"
 )

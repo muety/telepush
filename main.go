@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/n1try/telegram-middleman-bot/handlers"
-	"github.com/n1try/telegram-middleman-bot/inlets/alertmanager_webhook"
-	"github.com/n1try/telegram-middleman-bot/inlets/bitbucket_webhook"
-	"github.com/n1try/telegram-middleman-bot/inlets/webmentionio_webhook"
+	"github.com/muety/webhook2telegram/handlers"
+	"github.com/muety/webhook2telegram/inlets/alertmanager_webhook"
+	"github.com/muety/webhook2telegram/inlets/bitbucket_webhook"
+	"github.com/muety/webhook2telegram/inlets/webmentionio_webhook"
 	"log"
 	"net"
 	"net/http"
@@ -16,13 +16,13 @@ import (
 	"time"
 
 	"github.com/justinas/alice"
-	"github.com/n1try/telegram-middleman-bot/api"
-	"github.com/n1try/telegram-middleman-bot/config"
-	"github.com/n1try/telegram-middleman-bot/inlets/default"
-	"github.com/n1try/telegram-middleman-bot/middleware"
-	"github.com/n1try/telegram-middleman-bot/model"
-	"github.com/n1try/telegram-middleman-bot/store"
-	"github.com/n1try/telegram-middleman-bot/util"
+	"github.com/muety/webhook2telegram/api"
+	"github.com/muety/webhook2telegram/config"
+	"github.com/muety/webhook2telegram/inlets/default"
+	"github.com/muety/webhook2telegram/middleware"
+	"github.com/muety/webhook2telegram/model"
+	"github.com/muety/webhook2telegram/store"
+	"github.com/muety/webhook2telegram/util"
 )
 
 var (

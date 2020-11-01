@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"github.com/n1try/telegram-middleman-bot/config"
-	"github.com/n1try/telegram-middleman-bot/model"
-	"github.com/n1try/telegram-middleman-bot/resolvers"
-	"github.com/n1try/telegram-middleman-bot/store"
+	"github.com/muety/webhook2telegram/config"
+	"github.com/muety/webhook2telegram/model"
+	"github.com/muety/webhook2telegram/resolvers"
+	"github.com/muety/webhook2telegram/store"
 	"net/http"
 )
 

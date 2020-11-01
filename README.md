@@ -1,9 +1,10 @@
-# telegram-middleman-bot
+# webhook2telegram
+(formerly _telegram-middleman-bot_)
 
 [![](http://img.shields.io/liberapay/receives/muety.svg?logo=liberapay)](https://liberapay.com/muety/)
-[![Say thanks](https://img.shields.io/badge/SayThanks.io-%E2%98%BC-1EAEDB.svg)](https://saythanks.io/to/n1try)
-![](https://img.shields.io/github/license/muety/telegram-middleman-bot)
-[![Go Report Card](https://goreportcard.com/badge/github.com/muety/telegram-middleman-bot)](https://goreportcard.com/report/github.com/muety/telegram-middleman-bot)
+[![Say thanks](https://badges.fw-web.space/badge/SayThanks.io-%E2%98%BC-1EAEDB.svg)](https://saythanks.io/to/n1try)
+![](https://badges.fw-web.space/github/license/muety/webhook2telegram)
+[![Go Report Card](https://goreportcard.com/badge/github.com/muety/webhook2telegram)](https://goreportcard.com/report/github.com/muety/telegram-middleman-bot)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=security_rating)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=sqale_index)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
@@ -15,11 +16,12 @@
 
 ![](http://i.imgur.com/lvshgaj.png)
 
-__I'm the [@MiddleMan](https://telegram.me/MiddleManBot) bot! I sit in the middle between whatever you want to send yourself as a message and your Telegram.__
-
-I translate simple JSON HTTP requests into Telegram push messages that you will get on your Smartphone, PC or whatever Telegram client you have. Just like [Gotify](https://gotify.net/), but without an extra app.
+A [Telegram Bot](https://telegram.me/MiddleManBot) to translate simple JSON HTTP requests into Telegram push messages that you will get on your Smartphone, PC or whatever Telegram client you have. Just like [Gotify](https://gotify.net/), but without an extra app.
 
 ## Changelog
+### 2020-11-01
+* Project was renamed from _telegram-middleman-bot_ to _webhook2telegram_
+
 ### 2020-04-05
 * Integration with [Webmention.io](https://webmention.io)
 
@@ -44,20 +46,20 @@ This is especially useful for __developers or sysadmins__. Imagine you want some
 If you develop those thoughts further, this could potentially __replace any kind of e-mail notifications__ - be it the message that someone has answered to your __forum post__, your favorite game is __now on sale at Steam__, and so on. It's __lightweight and easy__, unlike e-mails that have way too much overhead.
 
 ## How to run it?
-You can either set up your own instance or use mine, which is running at [https://apps.muetsch.io/middleman](https://apps.muetsch.io/middleman). The hosted instance only allows for a maximum of 240 requests per recipient per day. If you want to set this up on your own, do the following. You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and s (self-signed) SSL certificate. 
+You can either set up your own instance or use mine, which is running at [https://apps.muetsch.io/webhook2telegram](https://apps.muetsch.io/webhook2telegram). The hosted instance only allows for a maximum of 240 requests per recipient per day. If you want to set this up on your own, do the following. You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and s (self-signed) SSL certificate. 
 1. Make sure you have the Go >= 1.13 installed.
 2. `export GO111MODULE=on`
-3. `go get github.com/n1try/telegram-middleman-bot`
-4. `cd $GOPATH/src/github.com/n1try/telegram-middleman-bot`
+3. `go get github.com/muety/webhook2telegram`
+4. `cd $GOPATH/src/github.com/muety/webhook2telegram`
 5. `go build`
 
 ### Using long-polling mode
-1. `./telegram-middleman-bot --token <TOKEN_YOU_GOT_FROM_BOTFATHER> --port 8080` (of course you can use a different port)
+1. `./webhook2telegram --token <TOKEN_YOU_GOT_FROM_BOTFATHER> --port 8080` (of course you can use a different port)
 
 ### Using webhook mode 
-1. If you don't have an official, verified certificate, create one doing `openssl req -newkey rsa:2048 -sha256 -nodes -keyout middleman.key -x509 -days 365 -out middleman.pem` (the CN must match your server's IP address)
+1. If you don't have an official, verified certificate, create one doing `openssl req -newkey rsa:2048 -sha256 -nodes -keyout bot.key -x509 -days 365 -out bot.pem` (the CN must match your server's IP address)
 2. Tell Telegram to use webhooks to send updates to your bot. `curl -F "url=https://<YOUR_DOMAIN_OR_IP>/api/updates" -F "certificate=@<YOUR_CERTS_PATH>.pem" https://api.telegram.org/bot<TOKEN_YOU_GOT_FROM_BOTFATHER>/setWebhook`
-3. `./telegram-middleman-bot --token <TOKEN_YOU_GOT_FROM_BOTFATHER> --mode webhook --certPath middleman.pem --keyPath middleman.key --port 8443 --useHttps` (of course you can use a different port)
+3. `./webhook2telegram --token <TOKEN_YOU_GOT_FROM_BOTFATHER> --mode webhook --certPath bot.pem --keyPath bot.key --port 8443 --useHttps` (of course you can use a different port)
 
 Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](https://caddyserver.com) to handle encryption. In that case you would set the `mode` to _webhook_, but `useHttps` to _false_ and your bot wouldn't need any certificate.
 
@@ -69,7 +71,7 @@ Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](ht
 * `--rateLimit` (`int`) – Maximum number of messages to be delivered to each recipient per hour. Defaults to `10`.
 
 ## How to use it?
-1. You need to get a token from the bot. Send a message with `/start` to the [@MiddleManBot](https://telegram.me/MiddleManBot) therefore.
+1. You need to get a token from the bot. Send a message with `/start` to the [Webhook2Telegram Bot](https://telegram.me/MiddleManBot) therefore.
 2. Now you can use that token to make HTTP POST requests to `http://localhost:8080/api/messages` (replace localhost by the hostname of your server running the bot or mine as shown above) with a body that looks like this.
 
 ```
@@ -90,7 +92,7 @@ Inlets provide a mechanism to pre-process incoming data that comes in a format d
 
 This is especially useful if data is sent by external, third-party applications which you cannot modify.
 
-For instance, you might want to deliver alerts from [Prometheus' Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) as Telegram notifications. However, Alertmanager's [webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) look much different from  Middleman's default input format. To still make them fit, you can write an [Inlet](/inlets) to massage the data accordingly.
+For instance, you might want to deliver alerts from [Prometheus' Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) as Telegram notifications. However, Alertmanager's [webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) look much different from WH2TG's default input format. To still make them fit, you can write an [Inlet](/inlets) to massage the data accordingly.
 
 To directly address an inlet, request `http://localhost:8080/api/inlets/<inlet_name>`. Note that `/api/inlets/default` is equivalent to `/api/messages`.
 
