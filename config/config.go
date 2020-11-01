@@ -41,6 +41,7 @@ var cfg *BotConfig
 type BotConfig struct {
 	Token     string
 	Mode      string
+	BaseUrl   string
 	UseHTTPS  bool
 	CertPath  string
 	KeyPath   string
@@ -72,6 +73,7 @@ func Get() *BotConfig {
 	if cfg == nil {
 		tokenPtr := flag.String("token", "", "Your Telegram Bot Token from Botfather")
 		modePtr := flag.String("mode", "poll", "Update mode ('poll' for development, 'webhook' for production)")
+		baseUrlPtr := flag.String("baseUrl", "", "A relative URL different from '/', required to run the bot on a subpath. E.g. to run bot under 'https://exmaple.org/wh2tg' set baseUrl to '/wh2tg'")
 		useHttpsPtr := flag.Bool("useHttps", false, "Whether or not to use TLS for webserver. Required for webhook mode if not using a reverse proxy")
 		certPathPtr := flag.String("certPath", "", "Path of your SSL certificate when using webhook mode")
 		keyPathPtr := flag.String("keyPath", "", "Path of your private SSL key when using webhook mode")
@@ -92,6 +94,7 @@ func Get() *BotConfig {
 		cfg = &BotConfig{
 			Token:     *tokenPtr,
 			Mode:      *modePtr,
+			BaseUrl:   *baseUrlPtr + "/",
 			UseHTTPS:  *useHttpsPtr,
 			CertPath:  *certPathPtr,
 			KeyPath:   *keyPathPtr,
