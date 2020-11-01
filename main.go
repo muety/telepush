@@ -50,7 +50,8 @@ func updateLimits() {
 }
 
 func registerRoutes() {
-	messageHandler := &handlers.MessageHandler{}
+	indexHandler := handlers.NewIndexHandler()
+	messageHandler := handlers.NewMessageHandler()
 	baseChain := alice.New(
 		middleware.NewCheckMethod(botConfig),
 		middleware.NewRateLimit(botConfig),
@@ -61,6 +62,8 @@ func registerRoutes() {
 	http.Handle("/api/inlets/alertmanager_webhook", baseChain.Append(alertmanager_webhook.New().Handler).Then(messageHandler))
 	http.Handle("/api/inlets/bitbucket_webhook", baseChain.Append(bitbucket_webhook.New().Handler).Then(messageHandler))
 	http.Handle("/api/inlets/webmentionio_webhook", baseChain.Append(webmentionio_webhook.New().Handler).Then(messageHandler))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("views/static/"))))
+	http.Handle("/", indexHandler)
 }
 
 func connectApi() {

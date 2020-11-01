@@ -14,7 +14,7 @@
 
 ---
 
-![](http://i.imgur.com/lvshgaj.png)
+![](views/static/logo.png)
 
 A [Telegram Bot](https://telegram.me/MiddleManBot) to translate simple JSON HTTP requests into Telegram push messages that you will get on your Smartphone, PC or whatever Telegram client you have. Just like [Gotify](https://gotify.net/), but without an extra app.
 

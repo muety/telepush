@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Webhook2Telegram</title>
+    <style>
+        html {
+            height: calc(100% - 40px);
+        }
+
+        body {
+            font-family: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: calc(100% - 40px);
+            height: 100%;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 0;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .my-1 {
+            margin: 10px 0;
+        }
+
+        .my-2 {
+            margin: 20px 0;
+        }
+
+        .code {
+            background-color: #2D3748;
+            color: #F7FAFC;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="my-2">webhook2telegram</h1>
+    <img src="static/logo.png" class="my-2"/>
+    <div class="my-1">
+        <span>Bot:</span>
+        <a href="https://telegram.me/MiddleManBot" class="code">@MiddleManBot</a>
+    </div>
+    <div class="my-1">
+        <span>API Entrypoint:</span>
+        <a href="api" class="code">/api</a>
+    </div>
+    <div class="my-1">
+        <span>GitHub:</span>
+        <a href="https://github.com/muety/webhook2telegram" class="code">muety/webhook2telegram</a>
+    </div>
+
+    <footer>
+        Version: {{ .Config.Version }}
+    </footer>
+</body>
+</html>

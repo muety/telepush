@@ -10,6 +10,10 @@ import (
 
 type MessageHandler struct{}
 
+func NewMessageHandler() *MessageHandler {
+	return &MessageHandler{}
+}
+
 func (h MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var m *model.DefaultMessage
 	var p *model.MessageParams
