@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/muety/webhook2telegram/config"
 	"github.com/muety/webhook2telegram/model"
 	"github.com/muety/webhook2telegram/store"
@@ -36,7 +37,7 @@ func GetUpdate() (*[]model.TelegramUpdate, error) {
 	}
 	apiUrl := botConfig.GetApiUrl() + string("/getUpdates?timeout="+strconv.Itoa(config.PollTimeoutSec)+"&offset="+strconv.Itoa(offset))
 	log.Println("Polling for updates.")
-	request, _ := http.NewRequest("GET", apiUrl, nil)
+	request, _ := http.NewRequest(http.MethodGet, apiUrl, nil)
 	request.Close = true
 
 	response, err := client.Do(request)
@@ -154,15 +155,17 @@ func SendDocument(document *model.TelegramOutDocument) *model.ApiError {
 }
 
 func processUpdate(update model.TelegramUpdate) *model.ApiError {
-	text := "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/muety/webhook2telegram."
+	text := config.MessageDefaultResponse
 	chatId := update.Message.Chat.Id
 
-	if strings.HasPrefix(update.Message.Text, "/start") {
+	if strings.HasPrefix(update.Message.Text, config.CmdStart) {
 		id := uuid.NewV4()
 		store.InvalidateToken(chatId)
 		store.Put(id.String(), model.StoreObject{User: update.Message.From, ChatId: chatId})
-		text = "Here is your token you can use to send messages to your Telegram account:\n\n_" + id.String() + "_"
+		text = fmt.Sprintf(config.MessageTokenResponse, id.String())
 		log.Printf("Sending new token %s to %s", id.String(), strconv.Itoa(chatId))
+	} else if strings.HasPrefix(update.Message.Text, config.CmdHelp) {
+		text = fmt.Sprintf(config.MessageHelpResponse, botConfig.Version)
 	}
 
 	return SendMessage(&model.TelegramOutMessage{

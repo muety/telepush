@@ -2,8 +2,10 @@ package config
 
 import (
 	"flag"
+	"io/ioutil"
 	"log"
 	"net/url"
+	"os"
 )
 
 const (
@@ -37,6 +39,22 @@ type BotConfig struct {
 	Address   string
 	Address6  string
 	Disable6  bool
+	Version   string
+}
+
+func readVersion() string {
+	file, err := os.Open("version.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return string(bytes)
 }
 
 func Get() *BotConfig {
@@ -71,7 +89,9 @@ func Get() *BotConfig {
 			RateLimit: *rateLimitPtr,
 			Address:   *addrPtr,
 			Address6:  *addr6Ptr,
-			Disable6:  *disable6Ptr}
+			Disable6:  *disable6Ptr,
+			Version:   readVersion(),
+		}
 	}
 
 	return cfg
