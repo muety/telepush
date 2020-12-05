@@ -19,6 +19,7 @@ func (r FileResolver) IsValid(m *model.DefaultMessage) error {
 }
 
 func (r FileResolver) Resolve(recipientId string, m *model.DefaultMessage, params *model.MessageParams) *model.ApiError {
+	defer logMessage(m)
 	decodedFile, err := b64.StdEncoding.DecodeString(m.File)
 	if err != nil {
 		return &model.ApiError{

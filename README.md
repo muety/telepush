@@ -20,6 +20,9 @@
 A [Telegram Bot](https://telegram.me/MiddleManBot) to translate simple JSON HTTP requests into Telegram push messages that you will get on your Smartphone, PC or whatever Telegram client you have. Just like [Gotify](https://gotify.net/), but without an extra app.
 
 ## Changelog
+### 2020-12-05
+* Support for Prometheus metrics ([#18](https://github.com/muety/webhook2telegram/issues/18))
+
 ### 2020-11-01
 * Project was renamed from _telegram-middleman-bot_ to _webhook2telegram_
 
@@ -67,9 +70,10 @@ Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](ht
 ### Additional parameters
 * `--address` (`string`) – Network address (IPv4) to bind to. Default to `127.0.0.1`.
 * `--address6` (`string`) – Network address (IPv6) to bind to. Default to `::1`.
-* `--disableIPv6` (`bool`) – Whether or not to disable listening on both IPv4 and IPv6 interfaces. Default to `false`.
+* `--disableIPv6` (`bool`) – Whether to disable listening on both IPv4 and IPv6 interfaces. Default to `false`.
 * `--proxy` (`string`) – Proxy connection string to be used for long-polling mode. Defaults to none.
 * `--rateLimit` (`int`) – Maximum number of messages to be delivered to each recipient per hour. Defaults to `10`.
+* `--metrics` (`bool`) – Whether to expose [Prometheus](https://prometheus.io) metrics under `/metrics`. Defaults to `false`.
 
 ## How to use it?
 1. You need to get a token from the bot. Send a message with `/start` to the [Webhook2Telegram Bot](https://telegram.me/MiddleManBot) therefore.
@@ -107,6 +111,11 @@ Following inlets are currently available:
 | `webmentionio_webhook` | Accepts [Webmention.io](https://webmention.io/) webhook requests to notify about a new Webmention of one of your articles | ✅      |
 
 Further documentation about the individual inlets is available [here](/inlets).
+
+### Metrics
+Fundamental [Prometheus](https://prometheus) metrics are exposed under `/metrics`, if the `--metrics` flag gets passed. They include:
+* `webhook2telegram_messages_total{origin="string", type="string"}` 
+* `webhook2telegram_requests_total{success="string"}` 
 
 ## License
 MIT @ [Ferdinand Mütsch](https://muetsch.io)

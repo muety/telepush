@@ -6,6 +6,7 @@ import (
 	"github.com/muety/webhook2telegram/inlets/alertmanager_webhook"
 	"github.com/muety/webhook2telegram/inlets/bitbucket_webhook"
 	"github.com/muety/webhook2telegram/inlets/webmentionio_webhook"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net"
 	"net/http"
@@ -20,9 +21,7 @@ import (
 	"github.com/muety/webhook2telegram/config"
 	"github.com/muety/webhook2telegram/inlets/default"
 	"github.com/muety/webhook2telegram/middleware"
-	"github.com/muety/webhook2telegram/model"
 	"github.com/muety/webhook2telegram/store"
-	"github.com/muety/webhook2telegram/util"
 )
 
 var (
@@ -37,15 +36,6 @@ func flush() {
 	for {
 		time.Sleep(config.FlushTimeoutMin * time.Minute)
 		store.Flush(config.StoreFile)
-
-		stats := model.Stats{TotalRequests: store.Get(config.KeyRequests).(int), Timestamp: int(time.Now().Unix())}
-		util.DumpJson(config.StatsFile, stats)
-	}
-}
-
-func updateLimits() {
-	for {
-		time.Sleep(config.LimitsTimeoutMin * time.Minute)
 	}
 }
 
@@ -53,10 +43,14 @@ func registerRoutes() {
 	indexHandler := handlers.NewIndexHandler()
 	messageHandler := handlers.NewMessageHandler()
 	baseChain := alice.New(
-		middleware.NewCheckMethod(botConfig),
-		middleware.NewRateLimit(botConfig),
+		middleware.WithEventLogging(),
+		middleware.WithMethodCheck(),
+		middleware.WithRateLimit(),
 	)
 
+	if botConfig.Metrics {
+		http.Handle("/metrics", promhttp.Handler())
+	}
 	http.Handle("/api/messages", baseChain.Append(_default.New().Handler).Then(messageHandler))
 	http.Handle("/api/inlets/default", baseChain.Append(_default.New().Handler).Then(messageHandler))
 	http.Handle("/api/inlets/alertmanager_webhook", baseChain.Append(alertmanager_webhook.New().Handler).Then(messageHandler))
@@ -125,6 +119,7 @@ func listen() {
 }
 
 func exitGracefully() {
+	config.GetHub().Close()
 	store.Flush(config.StoreFile)
 }
 
@@ -132,13 +127,7 @@ func main() {
 	store.Read(config.StoreFile)
 	store.Automigrate()
 
-	// Stats
-	if store.Get(config.KeyRequests) == nil {
-		store.Put(config.KeyRequests, 0)
-	}
-
 	go flush()
-	go updateLimits()
 
 	registerRoutes()
 	connectApi()

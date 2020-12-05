@@ -60,7 +60,5 @@ func (h MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	go resolver.Resolve(recipientId, m, p)
 
-	store.Put(config.KeyRequests, store.Get(config.KeyRequests).(int)+1)
-
 	w.WriteHeader(http.StatusAccepted)
 }

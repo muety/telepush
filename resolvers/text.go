@@ -18,6 +18,7 @@ func (r TextResolver) IsValid(m *model.DefaultMessage) error {
 }
 
 func (r TextResolver) Resolve(recipientId string, m *model.DefaultMessage, params *model.MessageParams) *model.ApiError {
+	defer logMessage(m)
 	var disableLinkPreview bool
 	if params != nil {
 		disableLinkPreview = params.DisableLinkPreviews

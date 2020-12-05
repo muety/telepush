@@ -9,17 +9,14 @@ import (
 )
 
 const (
-	BaseURL          = "https://api.telegram.org/bot"
-	StoreFile        = "store.gob"
-	StatsFile        = "stats.json"
-	PollTimeoutSec   = 60
-	FlushTimeoutMin  = 60
-	LimitsTimeoutMin = 60
+	BaseURL         = "https://api.telegram.org/bot"
+	StoreFile       = "store.gob"
+	PollTimeoutSec  = 60
+	FlushTimeoutMin = 1
 )
 
 const (
 	KeyUpdateID = "latestUpdateId"
-	KeyRequests = "totalRequests"
 	KeyMessage  = "message"
 	KeyParams   = "message_params"
 	KeyMessages = "messages"
@@ -51,6 +48,7 @@ type BotConfig struct {
 	Address   string
 	Address6  string
 	Disable6  bool
+	Metrics   bool
 	Version   string
 }
 
@@ -83,6 +81,7 @@ func Get() *BotConfig {
 		addrPtr := flag.String("address", "127.0.0.1", "IPv4 address to bind the webserver to")
 		addr6Ptr := flag.String("address6", "::1", "IPv6 address to bind the webserver to")
 		disable6Ptr := flag.Bool("disableIPv6", false, "Set if your device doesn't support IPv6. address6 will be ignored if this is set.")
+		metricsPtr := flag.Bool("metrics", false, "Whether or not to expose Prometheus metrics under '/metrics'")
 
 		flag.Parse()
 
@@ -104,6 +103,7 @@ func Get() *BotConfig {
 			Address:   *addrPtr,
 			Address6:  *addr6Ptr,
 			Disable6:  *disable6Ptr,
+			Metrics:   *metricsPtr,
 			Version:   readVersion(),
 		}
 	}
