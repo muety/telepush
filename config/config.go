@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"path"
 )
 
 const (
@@ -49,6 +50,7 @@ type BotConfig struct {
 	Address6  string
 	Disable6  bool
 	Metrics   bool
+	DataDir   string
 	Version   string
 }
 
@@ -77,16 +79,21 @@ func Get() *BotConfig {
 		keyPathPtr := flag.String("keyPath", "", "Path of your private SSL key when using webhook mode")
 		portPtr := flag.Int("port", 8080, "Port for the webserver to listen on")
 		proxyPtr := flag.String("proxy", "", "Proxy for poll mode, e.g. 'socks5://127.0.0.01:1080'")
-		rateLimitPtr := flag.Int("rateLimit", 10, "Max number of requests per recipient per hour")
+		rateLimitPtr := flag.Int("rateLimit", 100, "Max number of requests per recipient per hour")
 		addrPtr := flag.String("address", "127.0.0.1", "IPv4 address to bind the webserver to")
 		addr6Ptr := flag.String("address6", "::1", "IPv6 address to bind the webserver to")
 		disable6Ptr := flag.Bool("disableIPv6", false, "Set if your device doesn't support IPv6. address6 will be ignored if this is set.")
 		metricsPtr := flag.Bool("metrics", false, "Whether or not to expose Prometheus metrics under '/metrics'")
+		dataDirPtr := flag.String("dataDir", ".", "File system location where to store persistent data")
 
 		flag.Parse()
 
+		if *tokenPtr == "" {
+			log.Fatalln("Token missing.")
+		}
+
 		proxyUri, err := url.Parse(*proxyPtr)
-		if err != nil || proxyUri.String() == "" {
+		if err != nil {
 			log.Println("Failed to parse proxy URI.")
 		}
 
@@ -104,6 +111,7 @@ func Get() *BotConfig {
 			Address6:  *addr6Ptr,
 			Disable6:  *disable6Ptr,
 			Metrics:   *metricsPtr,
+			DataDir:   *dataDirPtr,
 			Version:   readVersion(),
 		}
 	}
@@ -113,4 +121,8 @@ func Get() *BotConfig {
 
 func (c *BotConfig) GetApiUrl() string {
 	return BaseURL + c.Token
+}
+
+func (c *BotConfig) GetStorePath() string {
+	return path.Join(c.DataDir, StoreFile)
 }

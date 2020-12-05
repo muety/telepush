@@ -40,7 +40,6 @@ func Read(filePath string) {
 }
 
 func Flush(filePath string) {
-	log.Println("Flushing store.")
 	file, err := os.Create(filePath)
 	defer file.Close()
 	if err != nil {

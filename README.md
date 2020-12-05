@@ -22,6 +22,7 @@ A [Telegram Bot](https://telegram.me/MiddleManBot) to translate simple JSON HTTP
 ## Changelog
 ### 2020-12-05
 * Support for Prometheus metrics ([#18](https://github.com/muety/webhook2telegram/issues/18))
+* Official Docker image (`[n1try/webhook2telegram](https://hub.docker.com/repository/docker/n1try/webhook2telegram)`) ([#20](https://github.com/muety/webhook2telegram/issues/20))
 
 ### 2020-11-01
 * Project was renamed from _telegram-middleman-bot_ to _webhook2telegram_
@@ -49,33 +50,46 @@ This is especially useful for __developers or sysadmins__. Imagine you want some
 
 If you develop those thoughts further, this could potentially __replace any kind of e-mail notifications__ - be it the message that someone has answered to your __forum post__, your favorite game is __now on sale at Steam__, and so on. It's __lightweight and easy__, unlike e-mails that have way too much overhead.
 
-## How to run it?
-You can either set up your own instance or use mine, which is running at [https://apps.muetsch.io/webhook2telegram](https://apps.muetsch.io/webhook2telegram). The hosted instance only allows for a maximum of 240 requests per recipient per day. If you want to set this up on your own, do the following. You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and s (self-signed) SSL certificate. 
-1. Make sure you have the Go >= 1.13 installed.
-2. `export GO111MODULE=on`
-3. `go get github.com/muety/webhook2telegram`
-4. `cd $GOPATH/src/github.com/muety/webhook2telegram`
-5. `go build`
+## How to run
+### Hosted
+One option is to simply use the hosted instance running at [https://apps.muetsch.io/webhook2telegram](https://apps.muetsch.io/webhook2telegram).  It only allows for a maximum of 240 requests per recipient per day. 
 
-### Using long-polling mode
-1. `./webhook2telegram --token <TOKEN_YOU_GOT_FROM_BOTFATHER> --port 8080` (of course you can use a different port)
+### Self-hosted
+If you want to set this up on your own, do the following. You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and s (self-signed) SSL certificate.
 
-### Using webhook mode 
-1. If you don't have an official, verified certificate, create one doing `openssl req -newkey rsa:2048 -sha256 -nodes -keyout bot.key -x509 -days 365 -out bot.pem` (the CN must match your server's IP address)
-2. Tell Telegram to use webhooks to send updates to your bot. `curl -F "url=https://<YOUR_DOMAIN_OR_IP>/api/updates" -F "certificate=@<YOUR_CERTS_PATH>.pem" https://api.telegram.org/bot<TOKEN_YOU_GOT_FROM_BOTFATHER>/setWebhook`
-3. `./webhook2telegram --token <TOKEN_YOU_GOT_FROM_BOTFATHER> --mode webhook --certPath bot.pem --keyPath bot.key --port 8443 --useHttps` (of course you can use a different port)
+#### Compile from source
+1. `git clone github.com/muety/webhook2telegram`
+1. `GO111MODULE=on go build`
+1. Long-polling mode: `./webhook2telegram -token <YOUR_BOTFATHER_TOKEN>`
+1. Webhook mode: `./webhook2telegram -token <YOUR_BOTFATHER_TOKEN> -mode webhook`
 
-Alternatively, you can also use a __reverse proxy__ like _nginx_ or [_Caddy_](https://caddyserver.com) to handle encryption. In that case you would set the `mode` to _webhook_, but `useHttps` to _false_ and your bot wouldn't need any certificate.
+#### Using Docker
+```bash
+$ docker volume create webhook2telegram_data
+$ docker run -d -p 8080:8080 \
+    -v webhook2telegram_data:/srv/data \
+    -e "APP_TOKEN=<YOUR_BOTFATHER_TOKEN>" \
+    -e "APP_MODE=webhook" # you can use 'poll' as well \
+    --name webhook2telegram \
+    n1try/webhook2telegram
+```
+
+💡 It is recommended to either use `-useHttps` or set up a __reverse proxy__ like _nginx_ or [_Caddy_](https://caddyserver.com) to handle encryption.
 
 ### Additional parameters
-* `--address` (`string`) – Network address (IPv4) to bind to. Default to `127.0.0.1`.
-* `--address6` (`string`) – Network address (IPv6) to bind to. Default to `::1`.
-* `--disableIPv6` (`bool`) – Whether to disable listening on both IPv4 and IPv6 interfaces. Default to `false`.
-* `--proxy` (`string`) – Proxy connection string to be used for long-polling mode. Defaults to none.
-* `--rateLimit` (`int`) – Maximum number of messages to be delivered to each recipient per hour. Defaults to `10`.
-* `--metrics` (`bool`) – Whether to expose [Prometheus](https://prometheus.io) metrics under `/metrics`. Defaults to `false`.
+* `-address` (`string`) – Network address (IPv4) to bind to. Defaults to `127.0.0.1`.
+* `-address6` (`string`) – Network address (IPv6) to bind to. Defaults to `::1`.
+* `-disableIPv6` (`bool`) – Whether to disable listening on both IPv4 and IPv6 interfaces. Defaults to `false`.
+* `-port` (`int`) – TCP port to listen on. Defaults to `8080`.
+* `-proxy` (`string`) – Proxy connection string to be used for long-polling mode. Defaults to none.
+* `-useHttps` (`bool`) – Whether to use HTTPS. Defaults to `false`.
+* `-certPath` (`string`) – Path of your SSL certificate when using webhook mode with `useHttp`. Default to none.
+* `-keyPath` (`string`) – Path of your private SSL key when using webhook mode with `useHttp`. Default to none.
+* `-dataDir` (`string`) – File system location where to store persistent data. Defaults to `.`.
+* `-rateLimit` (`int`) – Maximum number of messages to be delivered to each recipient per hour. Defaults to `100`.
+* `-metrics` (`bool`) – Whether to expose [Prometheus](https://prometheus.io) metrics under `/metrics`. Defaults to `false`.
 
-## How to use it?
+## How to use
 1. You need to get a token from the bot. Send a message with `/start` to the [Webhook2Telegram Bot](https://telegram.me/MiddleManBot) therefore.
 2. Now you can use that token to make HTTP POST requests to `http://localhost:8080/api/messages` (replace localhost by the hostname of your server running the bot or mine as shown above) with a body that looks like this.
 
@@ -113,7 +127,7 @@ Following inlets are currently available:
 Further documentation about the individual inlets is available [here](/inlets).
 
 ### Metrics
-Fundamental [Prometheus](https://prometheus) metrics are exposed under `/metrics`, if the `--metrics` flag gets passed. They include:
+Fundamental [Prometheus](https://prometheus) metrics are exposed under `/metrics`, if the `-metrics` flag gets passed. They include:
 * `webhook2telegram_messages_total{origin="string", type="string"}` 
 * `webhook2telegram_requests_total{success="string"}` 
 

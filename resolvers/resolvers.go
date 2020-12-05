@@ -27,7 +27,7 @@ func GetResolver(ttype string) MessageResolver {
 func logMessage(m *model.DefaultMessage) {
 	ttype := m.Type
 	if ttype == "" {
-		ttype = "text"
+		ttype = TextType
 	}
 
 	config.GetHub().Publish(hub.Message{

@@ -35,7 +35,7 @@ func init() {
 func flush() {
 	for {
 		time.Sleep(config.FlushTimeoutMin * time.Minute)
-		store.Flush(config.StoreFile)
+		store.Flush(botConfig.GetStorePath())
 	}
 }
 
@@ -104,27 +104,31 @@ func listen() {
 	}
 
 	if botConfig.UseHTTPS {
-		fmt.Printf("Listening for HTTPS on port %d.\n", botConfig.Port)
-		if !botConfig.Disable6 {
+		fmt.Printf("Listening for HTTPS on %s.\n", s.Addr)
+		go s.ListenAndServeTLS(botConfig.CertPath, botConfig.KeyPath)
+
+		if s6 != nil {
+			fmt.Printf("Listening for HTTPS on %s.\n", s6.Addr)
 			go s6.ListenAndServeTLS(botConfig.CertPath, botConfig.KeyPath)
 		}
-		go s.ListenAndServeTLS(botConfig.CertPath, botConfig.KeyPath)
 	} else {
-		fmt.Printf("Listening for HTTP on port %d.\n", botConfig.Port)
-		if !botConfig.Disable6 {
+		fmt.Printf("Listening for HTTP on %s.\n", s.Addr)
+		go s.ListenAndServe()
+
+		if s6 != nil {
+			fmt.Printf("Listening for HTTP on %s.\n", s6.Addr)
 			go s6.ListenAndServe()
 		}
-		go s.ListenAndServe()
 	}
 }
 
 func exitGracefully() {
 	config.GetHub().Close()
-	store.Flush(config.StoreFile)
+	store.Flush(botConfig.GetStorePath())
 }
 
 func main() {
-	store.Read(config.StoreFile)
+	store.Read(botConfig.GetStorePath())
 	store.Automigrate()
 
 	go flush()
