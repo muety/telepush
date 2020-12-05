@@ -69,7 +69,7 @@ $ docker volume create webhook2telegram_data
 $ docker run -d -p 8080:8080 \
     -v webhook2telegram_data:/srv/data \
     -e "APP_TOKEN=<YOUR_BOTFATHER_TOKEN>" \
-    -e "APP_MODE=webhook" # you can use 'poll' as well \
+    -e "APP_MODE=webhook" \
     --name webhook2telegram \
     n1try/webhook2telegram
 ```
