@@ -3,7 +3,8 @@ name: Build Webhook2Telegram on Linux
 on:
   release:
     types:
-      - created
+      - released
+      - edited
 jobs:
   build-and-release:
     name: Build and add to Release
