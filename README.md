@@ -86,6 +86,7 @@ $ docker run -d -p 8080:8080 \
 * `-certPath` (`string`) – Path of your SSL certificate when using webhook mode with `useHttp`. Default to none.
 * `-keyPath` (`string`) – Path of your private SSL key when using webhook mode with `useHttp`. Default to none.
 * `-dataDir` (`string`) – File system location where to store persistent data. Defaults to `.`.
+* `-blacklist` (`string`) – Path to a user id blacklist file. Defaults to `blacklist.txt`.
 * `-rateLimit` (`int`) – Maximum number of messages to be delivered to each recipient per hour. Defaults to `100`.
 * `-metrics` (`bool`) – Whether to expose [Prometheus](https://prometheus.io) metrics under `/metrics`. Defaults to `false`.
 

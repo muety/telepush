@@ -6,7 +6,6 @@ import (
 	"github.com/muety/webhook2telegram/api"
 	"github.com/muety/webhook2telegram/model"
 	"log"
-	"net/http"
 )
 
 type FileResolver struct{}
@@ -18,17 +17,14 @@ func (r FileResolver) IsValid(m *model.DefaultMessage) error {
 	return nil
 }
 
-func (r FileResolver) Resolve(recipientId string, m *model.DefaultMessage, params *model.MessageParams) *model.ApiError {
+func (r FileResolver) Resolve(recipientId string, m *model.DefaultMessage, params *model.MessageParams) error {
 	defer logMessage(m)
 	decodedFile, err := b64.StdEncoding.DecodeString(m.File)
 	if err != nil {
-		return &model.ApiError{
-			StatusCode: http.StatusBadRequest,
-			Text:       err.Error(),
-		}
+		return err
 	}
 
-	apiErr := api.SendDocument(&model.TelegramOutDocument{
+	err = api.SendDocument(&model.TelegramOutDocument{
 		ChatId:    recipientId,
 		Caption:   "*" + m.Origin + "* sent a document",
 		ParseMode: "Markdown",
@@ -38,9 +34,8 @@ func (r FileResolver) Resolve(recipientId string, m *model.DefaultMessage, param
 		},
 	})
 
-	if apiErr != nil {
-		log.Printf("error: %v\n", apiErr)
+	if err != nil {
+		log.Printf("error: %v\n", err)
 	}
-
-	return apiErr
+	return nil
 }

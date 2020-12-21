@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"regexp"
+	"strings"
 )
 
 const (
@@ -14,6 +16,7 @@ const (
 	StoreFile       = "store.gob"
 	PollTimeoutSec  = 60
 	FlushTimeoutMin = 1
+	UserIdRegex     = "(?m)^\\d+$"
 )
 
 const (
@@ -51,6 +54,7 @@ type BotConfig struct {
 	Disable6  bool
 	Metrics   bool
 	DataDir   string
+	Blacklist []string
 	Version   string
 }
 
@@ -69,6 +73,32 @@ func readVersion() string {
 	return string(bytes)
 }
 
+func readBlacklist(path string) []string {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	re := regexp.MustCompile(UserIdRegex)
+	lines := strings.Split(string(bytes), "\n")
+	blacklist := make([]string, 0, len(lines))
+
+	for _, l := range lines {
+		if !re.MatchString(l) {
+			continue
+		}
+		blacklist = append(blacklist, l)
+	}
+
+	return blacklist
+}
+
 func Get() *BotConfig {
 	if cfg == nil {
 		tokenPtr := flag.String("token", "", "Your Telegram Bot Token from Botfather")
@@ -85,6 +115,7 @@ func Get() *BotConfig {
 		disable6Ptr := flag.Bool("disableIPv6", false, "Set if your device doesn't support IPv6. address6 will be ignored if this is set.")
 		metricsPtr := flag.Bool("metrics", false, "Whether or not to expose Prometheus metrics under '/metrics'")
 		dataDirPtr := flag.String("dataDir", ".", "File system location where to store persistent data")
+		blacklistPtr := flag.String("blacklist", "blacklist.txt", "Path to a user id blacklist file")
 
 		flag.Parse()
 
@@ -112,6 +143,7 @@ func Get() *BotConfig {
 			Disable6:  *disable6Ptr,
 			Metrics:   *metricsPtr,
 			DataDir:   *dataDirPtr,
+			Blacklist: readBlacklist(*blacklistPtr),
 			Version:   readVersion(),
 		}
 	}

@@ -1,0 +1,1 @@
+# Blacklist of Telegram user / chat IDs, line by line

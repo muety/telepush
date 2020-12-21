@@ -73,9 +73,7 @@ func Poll() {
 		for {
 			if updates, err := GetUpdate(); err == nil {
 				for _, update := range *updates {
-					if err := processUpdate(update); err != nil {
-						log.Printf("error processing updates: %s\n", err.Error())
-					}
+					go processUpdate(update)
 				}
 			} else {
 				log.Printf("error getting updates: %s\n", err)
@@ -98,45 +96,33 @@ func Webhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := processUpdate(u); err != nil {
-		w.WriteHeader(err.StatusCode)
-		w.Write([]byte(err.Error()))
-		return
-	}
+	go processUpdate(u)
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusAccepted)
 }
 
-func SendMessage(message *model.TelegramOutMessage) *model.ApiError {
+func SendMessage(message *model.TelegramOutMessage) error {
 	buf := bytes.Buffer{}
 	if err := json.NewEncoder(&buf).Encode(message); err != nil {
-		return &model.ApiError{
-			StatusCode: http.StatusBadRequest,
-			Text:       err.Error(),
-		}
+		return err
 	}
+
 	request, _ := http.NewRequest(http.MethodPost, botConfig.GetApiUrl()+"/sendMessage", &buf)
 	request.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(request)
 	if err != nil {
-		return &model.ApiError{
-			StatusCode: http.StatusInternalServerError,
-			Text:       err.Error(),
-		}
+		return err
 	}
 	defer resp.Body.Close()
 
 	return handleApiResponse(resp)
 }
 
-func SendDocument(document *model.TelegramOutDocument) *model.ApiError {
+func SendDocument(document *model.TelegramOutDocument) error {
 	buf, contentType, err := document.EncodeMultipart()
 	if err != nil {
-		return &model.ApiError{
-			StatusCode: http.StatusBadRequest,
-			Text:       err.Error(),
-		}
+		return err
 	}
 
 	request, _ := http.NewRequest(http.MethodPost, botConfig.GetApiUrl()+"/sendDocument", buf)
@@ -144,19 +130,21 @@ func SendDocument(document *model.TelegramOutDocument) *model.ApiError {
 
 	resp, err := client.Do(request)
 	if err != nil {
-		return &model.ApiError{
-			StatusCode: http.StatusInternalServerError,
-			Text:       err.Error(),
-		}
+		return err
 	}
 	defer resp.Body.Close()
 
 	return handleApiResponse(resp)
 }
 
-func processUpdate(update model.TelegramUpdate) *model.ApiError {
+func processUpdate(update model.TelegramUpdate) {
 	text := config.MessageDefaultResponse
 	chatId := update.Message.Chat.Id
+
+	if checkBlacklist(chatId) {
+		log.Printf("got update from blacklisted chat id '%d'\n", chatId)
+		return
+	}
 
 	if strings.HasPrefix(update.Message.Text, config.CmdStart) {
 		id := uuid.NewV4()
@@ -168,36 +156,39 @@ func processUpdate(update model.TelegramUpdate) *model.ApiError {
 		text = fmt.Sprintf(config.MessageHelpResponse, botConfig.Version)
 	}
 
-	return SendMessage(&model.TelegramOutMessage{
+	if err := SendMessage(&model.TelegramOutMessage{
 		ChatId:             strconv.Itoa(chatId),
 		Text:               text,
 		ParseMode:          "Markdown",
 		DisableLinkPreview: true,
-	})
+	}); err != nil {
+		log.Printf("error responding to update for chat '%d': %v\n", chatId, err)
+	}
 }
 
-func handleApiResponse(response *http.Response) *model.ApiError {
+func checkBlacklist(senderId int) bool {
+	for _, id := range botConfig.Blacklist {
+		// TODO: refactor ids to be strings, not numbers!
+		if sid, err := strconv.Atoi(id); err == nil && sid == senderId {
+			return true
+		}
+	}
+	return false
+}
+
+func handleApiResponse(response *http.Response) error {
 	resData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return &model.ApiError{
-			StatusCode: http.StatusInternalServerError,
-			Text:       err.Error(),
-		}
+		return err
 	}
 
 	var jsonResponse map[string]interface{}
 	if err := json.Unmarshal(resData, &jsonResponse); err != nil {
-		return &model.ApiError{
-			StatusCode: http.StatusInternalServerError,
-			Text:       err.Error(),
-		}
+		return err
 	} else if ok := jsonResponse["ok"]; !(ok.(bool)) {
 		desc := jsonResponse["description"].(string)
 		status := jsonResponse["error_code"].(float64)
-		return &model.ApiError{
-			StatusCode: int(status),
-			Text:       desc,
-		}
+		return errors.New(fmt.Sprintf("telegram api returned status %d: '%s'\n", int(status), desc))
 	}
 
 	return nil

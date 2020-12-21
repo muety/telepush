@@ -13,7 +13,7 @@ const (
 
 type MessageResolver interface {
 	IsValid(*model.DefaultMessage) error
-	Resolve(string, *model.DefaultMessage, *model.MessageParams) *model.ApiError
+	Resolve(string, *model.DefaultMessage, *model.MessageParams) error
 }
 
 func GetResolver(ttype string) MessageResolver {

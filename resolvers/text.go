@@ -17,23 +17,22 @@ func (r TextResolver) IsValid(m *model.DefaultMessage) error {
 	return nil
 }
 
-func (r TextResolver) Resolve(recipientId string, m *model.DefaultMessage, params *model.MessageParams) *model.ApiError {
+func (r TextResolver) Resolve(recipientId string, m *model.DefaultMessage, params *model.MessageParams) error {
 	defer logMessage(m)
 	var disableLinkPreview bool
 	if params != nil {
 		disableLinkPreview = params.DisableLinkPreviews
 	}
 
-	apiErr := api.SendMessage(&model.TelegramOutMessage{
+	err := api.SendMessage(&model.TelegramOutMessage{
 		ChatId:             recipientId,
 		Text:               m.Text,
 		ParseMode:          "Markdown",
 		DisableLinkPreview: disableLinkPreview,
 	})
 
-	if apiErr != nil {
-		log.Printf("error: %v\n", apiErr)
+	if err != nil {
+		log.Printf("error: %v\n", err)
 	}
-
-	return apiErr
+	return err
 }
