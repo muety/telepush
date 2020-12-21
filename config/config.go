@@ -40,22 +40,23 @@ const (
 var cfg *BotConfig
 
 type BotConfig struct {
-	Token     string
-	Mode      string
-	BaseUrl   string
-	UseHTTPS  bool
-	CertPath  string
-	KeyPath   string
-	ProxyURI  *url.URL
-	Port      int
-	RateLimit int
-	Address   string
-	Address6  string
-	Disable6  bool
-	Metrics   bool
-	DataDir   string
-	Blacklist []string
-	Version   string
+	Token        string
+	Mode         string
+	BaseUrl      string
+	UseHTTPS     bool
+	CertPath     string
+	KeyPath      string
+	ProxyURI     *url.URL
+	Port         int
+	ReqRateLimit int
+	CmdRateLimit int
+	Address      string
+	Address6     string
+	Disable6     bool
+	Metrics      bool
+	DataDir      string
+	Blacklist    []string
+	Version      string
 }
 
 func readVersion() string {
@@ -74,6 +75,10 @@ func readVersion() string {
 }
 
 func readBlacklist(path string) []string {
+	if path == "" {
+		return []string{}
+	}
+
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -109,13 +114,14 @@ func Get() *BotConfig {
 		keyPathPtr := flag.String("keyPath", "", "Path of your private SSL key when using webhook mode")
 		portPtr := flag.Int("port", 8080, "Port for the webserver to listen on")
 		proxyPtr := flag.String("proxy", "", "Proxy for poll mode, e.g. 'socks5://127.0.0.01:1080'")
-		rateLimitPtr := flag.Int("rateLimit", 100, "Max number of requests per recipient per hour")
+		reqRateLimitPtr := flag.Int("rateLimit", 100, "Max number of requests per recipient per hour")
+		cmdRateLimitPtr := flag.Int("cmdRateLimit", 10, "Max number of chat commands to execute per hour")
 		addrPtr := flag.String("address", "127.0.0.1", "IPv4 address to bind the webserver to")
 		addr6Ptr := flag.String("address6", "::1", "IPv6 address to bind the webserver to")
 		disable6Ptr := flag.Bool("disableIPv6", false, "Set if your device doesn't support IPv6. address6 will be ignored if this is set.")
 		metricsPtr := flag.Bool("metrics", false, "Whether or not to expose Prometheus metrics under '/metrics'")
 		dataDirPtr := flag.String("dataDir", ".", "File system location where to store persistent data")
-		blacklistPtr := flag.String("blacklist", "blacklist.txt", "Path to a user id blacklist file")
+		blacklistPtr := flag.String("blacklist", "", "Path to a user id blacklist file (e.g. 'blacklist.txt')")
 
 		flag.Parse()
 
@@ -129,22 +135,23 @@ func Get() *BotConfig {
 		}
 
 		cfg = &BotConfig{
-			Token:     *tokenPtr,
-			Mode:      *modePtr,
-			BaseUrl:   *baseUrlPtr + "/",
-			UseHTTPS:  *useHttpsPtr,
-			CertPath:  *certPathPtr,
-			KeyPath:   *keyPathPtr,
-			Port:      *portPtr,
-			ProxyURI:  proxyUri,
-			RateLimit: *rateLimitPtr,
-			Address:   *addrPtr,
-			Address6:  *addr6Ptr,
-			Disable6:  *disable6Ptr,
-			Metrics:   *metricsPtr,
-			DataDir:   *dataDirPtr,
-			Blacklist: readBlacklist(*blacklistPtr),
-			Version:   readVersion(),
+			Token:        *tokenPtr,
+			Mode:         *modePtr,
+			BaseUrl:      *baseUrlPtr + "/",
+			UseHTTPS:     *useHttpsPtr,
+			CertPath:     *certPathPtr,
+			KeyPath:      *keyPathPtr,
+			Port:         *portPtr,
+			ProxyURI:     proxyUri,
+			ReqRateLimit: *reqRateLimitPtr,
+			CmdRateLimit: *cmdRateLimitPtr,
+			Address:      *addrPtr,
+			Address6:     *addr6Ptr,
+			Disable6:     *disable6Ptr,
+			Metrics:      *metricsPtr,
+			DataDir:      *dataDirPtr,
+			Blacklist:    readBlacklist(*blacklistPtr),
+			Version:      readVersion(),
 		}
 	}
 

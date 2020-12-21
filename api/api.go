@@ -2,12 +2,15 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/muety/webhook2telegram/config"
 	"github.com/muety/webhook2telegram/model"
 	"github.com/muety/webhook2telegram/store"
+	limiter "github.com/n1try/limiter/v3"
+	memst "github.com/n1try/limiter/v3/drivers/store/memory"
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
 	"log"
@@ -18,16 +21,27 @@ import (
 )
 
 var (
-	botConfig *config.BotConfig
-	client    *http.Client
+	botConfig      *config.BotConfig
+	client         *http.Client
+	cmdRateLimiter *limiter.Limiter
 )
 
 func init() {
+	// get config
 	botConfig = config.Get()
+
+	// init http client
 	client = &http.Client{Timeout: (config.PollTimeoutSec + 10) * time.Second}
 	if botConfig.ProxyURI != nil && botConfig.ProxyURI.String() != "" {
 		client.Transport = &http.Transport{Proxy: http.ProxyURL(botConfig.ProxyURI)}
 	}
+
+	// init rate limiter
+	rate, err := limiter.NewRateFromFormatted(fmt.Sprintf("%d-H", botConfig.CmdRateLimit))
+	if err != nil {
+		log.Fatalln("failed to parse command rate limit string")
+	}
+	cmdRateLimiter = limiter.New(memst.NewStore(), rate)
 }
 
 func GetUpdate() (*[]model.TelegramUpdate, error) {
@@ -146,14 +160,25 @@ func processUpdate(update model.TelegramUpdate) {
 		return
 	}
 
-	if strings.HasPrefix(update.Message.Text, config.CmdStart) {
+	// check rate limit
+	if limitCtx, _ := cmdRateLimiter.Get(context.Background(), fmt.Sprintf("%d-%s", chatId, update.Message.Text)); limitCtx.Reached {
+		log.Printf("command rate limit reached for chat '%d'\n", chatId)
+		return
+	}
+
+	if strings.TrimSpace(update.Message.Text) == config.CmdStart {
+		// create new token
 		id := uuid.NewV4()
 		store.InvalidateToken(chatId)
 		store.Put(id.String(), model.StoreObject{User: update.Message.From, ChatId: chatId})
+
 		text = fmt.Sprintf(config.MessageTokenResponse, id.String())
-		log.Printf("Sending new token %s to %s", id.String(), strconv.Itoa(chatId))
-	} else if strings.HasPrefix(update.Message.Text, config.CmdHelp) {
+		log.Printf("Sending new token %s to %d", id.String(), chatId)
+	} else if strings.TrimSpace(update.Message.Text) == config.CmdHelp {
+		// print help message
 		text = fmt.Sprintf(config.MessageHelpResponse, botConfig.Version)
+	} else {
+		log.Printf("got unknown command: '%s' from chat '%d'\n", update.Message.Text, chatId)
 	}
 
 	if err := SendMessage(&model.TelegramOutMessage{
