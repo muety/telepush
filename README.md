@@ -22,7 +22,7 @@ A [Telegram Bot](https://telegram.me/MiddleManBot) to translate simple JSON HTTP
 ## Changelog
 ### 2020-12-05
 * Support for Prometheus metrics ([#18](https://github.com/muety/webhook2telegram/issues/18))
-* Official Docker image (`[n1try/webhook2telegram](https://hub.docker.com/repository/docker/n1try/webhook2telegram)`) ([#20](https://github.com/muety/webhook2telegram/issues/20))
+* Official Docker image ([`n1try/webhook2telegram`](https://hub.docker.com/repository/docker/n1try/webhook2telegram)) ([#20](https://github.com/muety/webhook2telegram/issues/20))
 
 ### 2020-11-01
 * Project was renamed from _telegram-middleman-bot_ to _webhook2telegram_
