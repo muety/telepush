@@ -6,6 +6,7 @@ import (
 	"github.com/muety/webhook2telegram/inlets/alertmanager_webhook"
 	"github.com/muety/webhook2telegram/inlets/bitbucket_webhook"
 	"github.com/muety/webhook2telegram/inlets/webmentionio_webhook"
+	"github.com/muety/webhook2telegram/services"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net"
@@ -21,27 +22,19 @@ import (
 	"github.com/muety/webhook2telegram/config"
 	"github.com/muety/webhook2telegram/inlets/default"
 	"github.com/muety/webhook2telegram/middleware"
-	"github.com/muety/webhook2telegram/store"
 )
 
-var (
-	botConfig *config.BotConfig
-)
+var botConfig *config.BotConfig
 
 func init() {
 	botConfig = config.Get()
 }
 
-func flush() {
-	for {
-		time.Sleep(config.FlushTimeoutMin * time.Minute)
-		store.Flush(botConfig.GetStorePath())
-	}
-}
-
 func registerRoutes() {
 	indexHandler := handlers.NewIndexHandler()
-	messageHandler := handlers.NewMessageHandler()
+	messageHandler := handlers.NewMessageHandler(
+		services.NewUserService(config.GetStore()),
+	)
 	baseChain := alice.New(
 		middleware.WithEventLogging(),
 		middleware.WithMethodCheck(),
@@ -124,15 +117,10 @@ func listen() {
 
 func exitGracefully() {
 	config.GetHub().Close()
-	store.Flush(botConfig.GetStorePath())
+	config.GetStore().Flush()
 }
 
 func main() {
-	store.Read(botConfig.GetStorePath())
-	store.Automigrate()
-
-	go flush()
-
 	registerRoutes()
 	connectApi()
 	listen()

@@ -12,18 +12,16 @@ import (
 )
 
 const (
-	BaseURL         = "https://api.telegram.org/bot"
-	StoreFile       = "store.gob"
-	PollTimeoutSec  = 60
-	FlushTimeoutMin = 1
-	UserIdRegex     = "(?m)^\\d+$"
+	BaseURL        = "https://api.telegram.org/bot"
+	StoreFile      = "store.gob"
+	PollTimeoutSec = 60
+	UserIdRegex    = "(?m)^\\d+$"
 )
 
 const (
 	KeyUpdateID = "latestUpdateId"
 	KeyMessage  = "message"
 	KeyParams   = "message_params"
-	KeyMessages = "messages"
 )
 
 const (
@@ -126,12 +124,12 @@ func Get() *BotConfig {
 		flag.Parse()
 
 		if *tokenPtr == "" {
-			log.Fatalln("Token missing.")
+			log.Fatalln("token missing")
 		}
 
 		proxyUri, err := url.Parse(*proxyPtr)
 		if err != nil {
-			log.Println("Failed to parse proxy URI.")
+			log.Println("failed to parse proxy uri")
 		}
 
 		cfg = &BotConfig{

@@ -4,17 +4,19 @@ import (
 	"github.com/muety/webhook2telegram/config"
 	"github.com/muety/webhook2telegram/model"
 	"github.com/muety/webhook2telegram/resolvers"
-	"github.com/muety/webhook2telegram/store"
+	"github.com/muety/webhook2telegram/services"
 	"net/http"
 )
 
-type MessageHandler struct{}
-
-func NewMessageHandler() *MessageHandler {
-	return &MessageHandler{}
+type MessageHandler struct {
+	userService *services.UserService
 }
 
-func (h MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func NewMessageHandler(userService *services.UserService) *MessageHandler {
+	return &MessageHandler{userService: userService}
+}
+
+func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var m *model.DefaultMessage
 	var p *model.MessageParams
 
@@ -50,7 +52,7 @@ func (h MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	recipientId := store.ResolveToken(token)
+	recipientId := h.userService.ResolveToken(token)
 
 	if len(recipientId) == 0 {
 		w.WriteHeader(http.StatusNotFound)

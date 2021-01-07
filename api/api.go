@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"github.com/muety/webhook2telegram/config"
 	"github.com/muety/webhook2telegram/model"
+	"github.com/muety/webhook2telegram/services"
 	"github.com/muety/webhook2telegram/store"
-	limiter "github.com/n1try/limiter/v3"
+	"github.com/n1try/limiter/v3"
 	memst "github.com/n1try/limiter/v3/drivers/store/memory"
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
@@ -21,14 +22,20 @@ import (
 )
 
 var (
+	botStore       store.Store
 	botConfig      *config.BotConfig
 	client         *http.Client
 	cmdRateLimiter *limiter.Limiter
+	userService    *services.UserService
 )
 
 func init() {
 	// get config
 	botConfig = config.Get()
+	botStore = config.GetStore()
+
+	// init services
+	userService = services.NewUserService(botStore)
 
 	// init http client
 	client = &http.Client{Timeout: (config.PollTimeoutSec + 10) * time.Second}
@@ -46,11 +53,11 @@ func init() {
 
 func GetUpdate() (*[]model.TelegramUpdate, error) {
 	offset := 0
-	if store.Get(config.KeyUpdateID) != nil {
-		offset = int(store.Get(config.KeyUpdateID).(float64)) + 1
+	if botStore.Get(config.KeyUpdateID) != nil {
+		offset = int(botStore.Get(config.KeyUpdateID).(float64)) + 1
 	}
-	apiUrl := botConfig.GetApiUrl() + string("/getUpdates?timeout="+strconv.Itoa(config.PollTimeoutSec)+"&offset="+strconv.Itoa(offset))
-	log.Println("Polling for updates.")
+	apiUrl := botConfig.GetApiUrl() + "/getUpdates?timeout=" + strconv.Itoa(config.PollTimeoutSec) + "&offset=" + strconv.Itoa(offset)
+	log.Println("polling for updates")
 	request, _ := http.NewRequest(http.MethodGet, apiUrl, nil)
 	request.Close = true
 
@@ -76,7 +83,7 @@ func GetUpdate() (*[]model.TelegramUpdate, error) {
 
 	if len(update.Result) > 0 {
 		var latestUpdateId interface{} = float64(update.Result[len(update.Result)-1].UpdateId)
-		store.Put(config.KeyUpdateID, latestUpdateId)
+		botStore.Put(config.KeyUpdateID, latestUpdateId)
 	}
 
 	return &update.Result, nil
@@ -169,11 +176,11 @@ func processUpdate(update model.TelegramUpdate) {
 	if strings.TrimSpace(update.Message.Text) == config.CmdStart {
 		// create new token
 		id := uuid.NewV4()
-		store.InvalidateToken(chatId)
-		store.Put(id.String(), model.StoreObject{User: update.Message.From, ChatId: chatId})
+		userService.InvalidateToken(chatId)
+		botStore.Put(id.String(), model.StoreObject{User: update.Message.From, ChatId: chatId})
 
 		text = fmt.Sprintf(config.MessageTokenResponse, id.String())
-		log.Printf("Sending new token %s to %d", id.String(), chatId)
+		log.Printf("sending new token %s to %d", id.String(), chatId)
 	} else if strings.TrimSpace(update.Message.Text) == config.CmdHelp {
 		// print help message
 		text = fmt.Sprintf(config.MessageHelpResponse, botConfig.Version)
@@ -193,7 +200,6 @@ func processUpdate(update model.TelegramUpdate) {
 
 func checkBlacklist(senderId int) bool {
 	for _, id := range botConfig.Blacklist {
-		// TODO: refactor ids to be strings, not numbers!
 		if sid, err := strconv.Atoi(id); err == nil && sid == senderId {
 			return true
 		}
