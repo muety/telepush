@@ -98,19 +98,35 @@ func listen() {
 
 	if botConfig.UseHTTPS {
 		fmt.Printf("Listening for HTTPS on %s.\n", s.Addr)
-		go s.ListenAndServeTLS(botConfig.CertPath, botConfig.KeyPath)
+		go func() {
+			if err := s.ListenAndServeTLS(botConfig.CertPath, botConfig.KeyPath); err != nil {
+				log.Fatalln(err)
+			}
+		}()
 
 		if s6 != nil {
 			fmt.Printf("Listening for HTTPS on %s.\n", s6.Addr)
-			go s6.ListenAndServeTLS(botConfig.CertPath, botConfig.KeyPath)
+			go func() {
+				if err := s6.ListenAndServeTLS(botConfig.CertPath, botConfig.KeyPath); err != nil {
+					log.Fatalln(err)
+				}
+			}()
 		}
 	} else {
 		fmt.Printf("Listening for HTTP on %s.\n", s.Addr)
-		go s.ListenAndServe()
+		go func() {
+			if err := s.ListenAndServe(); err != nil {
+				log.Fatalln(err)
+			}
+		}()
 
 		if s6 != nil {
 			fmt.Printf("Listening for HTTP on %s.\n", s6.Addr)
-			go s6.ListenAndServe()
+			go func() {
+				if err := s6.ListenAndServe(); err != nil {
+					log.Fatalln(err)
+				}
+			}()
 		}
 	}
 }
