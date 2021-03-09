@@ -25,6 +25,16 @@ Forwards a basic text message or a file to a Telegram chat.
 }
 ```
 
+Optionally, you can pass sending options with your message:
+```json
+{
+    ...
+    "options": {
+        "disable_link_previews": true
+    }
+}
+```
+
 ## `alertmanager_webhook`
 `/api/inlets/alertmanager_webhook`
 

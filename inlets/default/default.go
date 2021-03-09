@@ -15,7 +15,7 @@ type DefaultInlet struct{}
 
 func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var m model.DefaultMessage
+		var m model.ExtendedMessage
 
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&m); err != nil {
@@ -32,10 +32,16 @@ func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
 
 		m.Text = "*" + util.EscapeMarkdown(m.Origin) + "* wrote:\n\n" + m.Text
 
-		h.ServeHTTP(
-			w,
-			r.WithContext(context.WithValue(r.Context(), config.KeyMessage, &m)),
-		)
+		options := &model.MessageParams{}
+		if m.Options != nil {
+			options = m.Options
+		}
+
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, config.KeyMessage, &m.DefaultMessage)
+		ctx = context.WithValue(ctx, config.KeyParams, options)
+
+		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 

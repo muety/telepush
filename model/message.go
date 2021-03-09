@@ -9,6 +9,11 @@ type DefaultMessage struct {
 	Type           string `json:"type"`
 }
 
+type ExtendedMessage struct {
+	DefaultMessage
+	Options *MessageParams `json:"options"`
+}
+
 type MessageParams struct {
-	DisableLinkPreviews bool
+	DisableLinkPreviews bool `json:"disable_link_previews"`
 }
