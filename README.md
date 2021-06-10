@@ -2,7 +2,6 @@
 (formerly _telegram-middleman-bot_)
 
 [![](http://img.shields.io/liberapay/receives/muety.svg?logo=liberapay)](https://liberapay.com/muety/)
-[![Say thanks](https://badges.fw-web.space/badge/SayThanks.io-%E2%98%BC-1EAEDB.svg)](https://saythanks.io/to/n1try)
 ![](https://badges.fw-web.space/github/license/muety/webhook2telegram)
 ![Coding Activity](https://badges.fw-web.space/endpoint?url=https://wakapi.dev/api/compat/shields/v1/n1try/interval:any/project:webhook2telegram&color=blue)
 [![Go Report Card](https://goreportcard.com/badge/github.com/muety/webhook2telegram)](https://goreportcard.com/report/github.com/muety/telegram-middleman-bot)
