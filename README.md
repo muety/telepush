@@ -4,7 +4,7 @@
 [![](http://img.shields.io/liberapay/receives/muety.svg?logo=liberapay)](https://liberapay.com/muety/)
 ![](https://badges.fw-web.space/github/license/muety/webhook2telegram)
 ![Coding Activity](https://badges.fw-web.space/endpoint?url=https://wakapi.dev/api/compat/shields/v1/n1try/interval:any/project:webhook2telegram&color=blue)
-[![Go Report Card](https://goreportcard.com/badge/github.com/muety/webhook2telegram)](https://goreportcard.com/report/github.com/muety/telegram-middleman-bot)
+[![Go Report Card](https://goreportcard.com/badge/github.com/muety/webhook2telegram)](https://goreportcard.com/report/github.com/muety/webhook2telegram)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=security_rating)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=sqale_index)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
