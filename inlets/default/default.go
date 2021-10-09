@@ -13,6 +13,8 @@ import (
 
 type DefaultInlet struct{}
 
+const defaultOrigin = "Webhook2Telegram"
+
 func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var m model.ExtendedMessage
@@ -25,9 +27,7 @@ func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
 		}
 
 		if len(m.Origin) == 0 {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("missing origin parameter"))
-			return
+			m.Origin = defaultOrigin
 		}
 
 		m.Text = "*" + util.EscapeMarkdown(m.Origin) + "* wrote:\n\n" + m.Text
