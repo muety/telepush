@@ -18,7 +18,7 @@ func NewMessageHandler(userService *services.UserService) *MessageHandler {
 
 func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var m *model.DefaultMessage
-	var p *model.MessageParams
+	var p model.MessageParams
 
 	if message := r.Context().Value(config.KeyMessage); message != nil {
 		m = message.(*model.DefaultMessage)
@@ -29,7 +29,7 @@ func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if params := r.Context().Value(config.KeyParams); params != nil {
-		p = params.(*model.MessageParams)
+		p = params.(model.MessageParams)
 	}
 
 	token := r.Header.Get("token")
@@ -60,7 +60,7 @@ func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go resolver.Resolve(recipientId, m, p)
+	go resolver.Resolve(recipientId, m, &p)
 
 	w.WriteHeader(http.StatusAccepted)
 }
