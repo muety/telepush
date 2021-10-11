@@ -91,7 +91,7 @@ $ docker run -d -p 8080:8080 \
 
 ## How to use
 1. You need to get a token from the bot. Send a message with `/start` to the [Webhook2Telegram Bot](https://telegram.me/MiddleManBot) therefore.
-2. Now you can use that token to make HTTP POST requests to `http://localhost:8080/api/messages` (replace localhost by the hostname of your server running the bot or mine as shown above) with a body that looks like this.
+2. Now you can use that token to make HTTP `POST` requests to `http://localhost:8080/api/messages` (replace localhost by the hostname of your server running the bot or mine as shown above) with a body that looks like this.
 
 ```
 {
@@ -104,7 +104,7 @@ $ docker run -d -p 8080:8080 \
 
 **NOTE:** If the field *type* is omitted then the `TEXT` type will be used as default, though this is not recommended as this may change in future versions.
 
-More details are available [here](/inlets).
+More details can be found [here](/inlets).
 
 ### Inlets
 Inlets provide a mechanism to pre-process incoming data that comes in a format different from what is normally expected by the bot. 

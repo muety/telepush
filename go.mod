@@ -6,6 +6,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/justinas/alice v1.2.0
 	github.com/leandro-lugaresi/hub v1.1.1
+	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/n1try/limiter/v3 v3.5.0
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/orcaman/concurrent-map v0.0.0-20210106121528-16402b402231
