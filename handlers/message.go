@@ -29,7 +29,7 @@ func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if params := r.Context().Value(config.KeyParams); params != nil {
-		p = params.(model.MessageParams)
+		p = *(params.(*model.MessageParams))
 	}
 
 	token := r.Header.Get("token")

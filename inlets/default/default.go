@@ -39,7 +39,7 @@ func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
 
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, config.KeyMessage, &m.DefaultMessage)
-		ctx = context.WithValue(ctx, config.KeyParams, m.Options)
+		ctx = context.WithValue(ctx, config.KeyParams, &m.Options)
 
 		h.ServeHTTP(w, r.WithContext(ctx))
 	})
