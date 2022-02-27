@@ -10,39 +10,11 @@
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=sqale_index)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=ncloc)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
 
-[![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoff.ee/n1try)
-
 ---
 
 ![](views/static/logo.png)
 
 A [Telegram Bot](https://telegram.me/MiddleManBot) to translate simple JSON HTTP requests into Telegram push messages that you will get on your Smartphone, PC or whatever Telegram client you have. Just like [Gotify](https://gotify.net/), but without an extra app.
-
-## Changelog
-### 2020-12-05
-* Support for Prometheus metrics ([#18](https://github.com/muety/webhook2telegram/issues/18))
-* Official Docker image ([`n1try/webhook2telegram`](https://hub.docker.com/repository/docker/n1try/webhook2telegram)) ([#20](https://github.com/muety/webhook2telegram/issues/20))
-
-### 2020-11-01
-* Project was renamed from _telegram-middleman-bot_ to _webhook2telegram_
-
-### 2020-04-05
-* Integration with [Webmention.io](https://webmention.io)
-
-### 2020-03-26
-* ⚠️ `alertmanager` inlet was renamed  to `alertmanager_webhook` and its endpoint has changed accordingly
-* Docker support, thanks to [luza](https://github.com/luza)
-* Integration with Bitbucket, thanks to [luza](https://github.com/luza)
-
-### 2020-03-10
-* Major code refactorings
-* Support for Inlets (see below)
-* Integration with Prometheus Alertmanager
-
-### 2019-11-06
-Thanks to contributions by [peet1993](https://github.com/peet1993).
-* Introduced explicit IPv6 support 
-* Introduced ability to specify network address to bind to
 
 ## Why might this be useful?
 This is especially useful for __developers or sysadmins__. Imagine you want some kind of reporting from your application or server, like a daily report including some statistics. You don't want to actively look it up on a website but you want to receive it in a __passive fashion__. Just like getting an e-mail. But come on, let's be honest. __E-Mails are so 2010__. And they require your little server-side script to include some SMTP library and connect to a mail server. That's __too heavyweight__ just to __get some short information__. Personally, I have a Python script running on my server which gathers some statistics from log files and databases and regularly sends me a Telegram message.
@@ -70,7 +42,7 @@ $ docker run -d -p 8080:8080 \
     -e "APP_TOKEN=<YOUR_BOTFATHER_TOKEN>" \
     -e "APP_MODE=webhook" \
     --name webhook2telegram \
-    n1try/webhook2telegram
+    ghcr.io/muety/webhook2telegram:latest
 ```
 
 💡 It is recommended to either use `-useHttps` or set up a __reverse proxy__ like _nginx_ or [_Caddy_](https://caddyserver.com) to handle encryption.
