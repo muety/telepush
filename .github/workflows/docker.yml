@@ -37,7 +37,7 @@ jobs:
         with:
           push: true
           tags: |
-            ghcr.io/n1try/webhook2telegram:${{ env.GIT_TAG }}
-            ghcr.io/n1try/webhook2telegram:latest
+            ghcr.io/${{ github.repository }}:${{ env.GIT_TAG }}
+            ghcr.io/${{ github.repository }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
