@@ -1,53 +1,77 @@
-# webhook2telegram
-(formerly _telegram-middleman-bot_)
+<p align="center">
+  <img src="views/static/logo.svg" height="200">
+</p>
 
-[![](http://img.shields.io/liberapay/receives/muety.svg?logo=liberapay)](https://liberapay.com/muety/)
-![](https://badges.fw-web.space/github/license/muety/webhook2telegram)
-![Coding Activity](https://badges.fw-web.space/endpoint?url=https://wakapi.dev/api/compat/shields/v1/n1try/interval:any/project:webhook2telegram&color=blue)
-[![Go Report Card](https://goreportcard.com/badge/github.com/muety/webhook2telegram)](https://goreportcard.com/report/github.com/muety/webhook2telegram)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=security_rating)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=sqale_index)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=ncloc)](https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot)
+<h1 align="center">Telepush</h1>
+<h3 align="center">Send Telegram push notifications easily via HTTP</h3>
+
+<p align="center">
+<img src="https://badges.fw-web.space/github/license/muety/telepush">
+<a href="mailto:ferdinand@muetsch.io?subject=Thanks for creating MailWhale" target="_blank"><img src="https://badges.fw-web.space/badge/say%20thanks-%F0%9F%99%8F-%23159CE4"></a>
+<a href="https://wakapi.dev" target="_blank"><img src="https://badges.fw-web.space/endpoint?url=https://wakapi.dev/api/compat/shields/v1/n1try/interval:any/project:telepush&color=blue"></a>
+<a href="https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot"><img src="https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=security_rating"></a>
+</p>
 
 ---
+## 📄 Description
+A simple [Telegram Bot](https://t.me/MiddleManBot) to translate `POST` requests with JSON payload into Telegram push messages, that you will get on your smartphone, PC or whatever Telegram client you are using. Similar [Gotify](https://gotify.net/) and [ntfy.sh](https://ntfy.sh/), except without an extra app. Useful for server monitoring, alerting, and anything else.
 
-![](views/static/logo.png)
 
-A [Telegram Bot](https://telegram.me/MiddleManBot) to translate simple JSON HTTP requests into Telegram push messages that you will get on your Smartphone, PC or whatever Telegram client you have. Just like [Gotify](https://gotify.net/), but without an extra app.
+## ⌨️ How to use?
+### Step 1: Get a token
+Open Telegram, start a chat with the [bot](https://t.me/MiddleManBot) (or your own bot, respectively) and type `/start` to obtain a recipient token.
 
-## Why might this be useful?
-This is especially useful for __developers or sysadmins__. Imagine you want some kind of reporting from your application or server, like a daily report including some statistics. You don't want to actively look it up on a website but you want to receive it in a __passive fashion__. Just like getting an e-mail. But come on, let's be honest. __E-Mails are so 2010__. And they require your little server-side script to include some SMTP library and connect to a mail server. That's __too heavyweight__ just to __get some short information__. Personally, I have a Python script running on my server which gathers some statistics from log files and databases and regularly sends me a Telegram message.
-
-If you develop those thoughts further, this could potentially __replace any kind of e-mail notifications__ - be it the message that someone has answered to your __forum post__, your favorite game is __now on sale at Steam__, and so on. It's __lightweight and easy__, unlike e-mails that have way too much overhead.
-
-## How to run
-### Hosted
-One option is to simply use the hosted instance running at [https://apps.muetsch.io/webhook2telegram](https://apps.muetsch.io/webhook2telegram).  It only allows for a maximum of 240 requests per recipient per day. 
-
-### Self-hosted
-If you want to set this up on your own, do the following. You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and s (self-signed) SSL certificate.
-
-#### Compile from source
-1. `git clone github.com/muety/webhook2telegram`
-1. `GO111MODULE=on go build`
-1. Long-polling mode: `./webhook2telegram -token <YOUR_BOTFATHER_TOKEN>`
-1. Webhook mode: `./webhook2telegram -token <YOUR_BOTFATHER_TOKEN> -mode webhook`
-
-#### Using Docker
+### Step 2: Send messages
 ```bash
-$ docker volume create webhook2telegram_data
-$ docker run -d -p 8080:8080 \
-    -v webhook2telegram_data:/srv/data \
-    -e "APP_TOKEN=<YOUR_BOTFATHER_TOKEN>" \
-    -e "APP_MODE=webhook" \
-    --name webhook2telegram \
-    ghcr.io/muety/webhook2telegram:latest
+curl -XPOST \
+     -H 'Content-Type: application/json' \
+     --data-raw '{
+            "recipient_token": "3edf633a-eab0-45ea-9721-16c07bb8f245",
+            "text": "*Hello World!* (yes, this is Markdown)",
+            "origin": "My lonely server script"
+     }' \
+     'https://telepush.dev/api/messages'
 ```
 
-💡 It is recommended to either use `-useHttps` or set up a __reverse proxy__ like _nginx_ or [_Caddy_](https://caddyserver.com) to handle encryption.
+When hosting your own instance, replace the URL respectively.
 
-### Additional parameters
+More details can be found [here](/inlets).
+
+## 🏃‍♀️ How to run?
+### ☁️ Option 1: [telepush.dev](https://telepush.dev)
+Simply use the official hosted instance. Rate-limited to 240 requests per recipient per day. 
+
+### 🌐 Option 2: Self-hosted
+When hosting your own Telepush instance, you need to create a new bot with [@BotFather](https://t.me/BotFather) first. As a result, you will get a token than you then pass to Telepush when starting the server (see below).
+
+#### 🐳 Option 2.1: With Docker
+```bash
+$ docker volume create telepush_data
+$ docker run -d -p 8080:8080 \
+    -v telepush_data:/srv/data \
+    -e "APP_TOKEN=<YOUR_BOTFATHER_TOKEN>" \
+    -e "APP_MODE=webhook" \
+    --name telepush \
+    ghcr.io/muety/telepush:latest
+```
+
+#### 🛠 Option 2.2: Compile from source
+```bash
+# Clone repo
+$ git clone github.com/muety/telepush
+
+# Build
+$ go build
+
+# Run (webhook mode)
+$ ./telepush -token <YOUR_BOTFATHER_TOKEN> -mode webhook
+```
+
+#### ↔️ Webhook vs. long-polling
+You can either run the bot in long-polling- or webhook mode. For production use the latter option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with a static IP and a TLS certificate. 
+In webhook mode, either use `-useHttps` or set up a reverse proxy like nginx or [Caddy](https://caddyserver.com) to handle encryption.
+
+## 🔧 Configuration options
 * `-address` (`string`) – Network address (IPv4) to bind to. Defaults to `127.0.0.1`.
 * `-address6` (`string`) – Network address (IPv6) to bind to. Defaults to `::1`.
 * `-disableIPv6` (`bool`) – Whether to disable listening on both IPv4 and IPv6 interfaces. Defaults to `false`.
@@ -61,31 +85,14 @@ $ docker run -d -p 8080:8080 \
 * `-rateLimit` (`int`) – Maximum number of messages to be delivered to each recipient per hour. Defaults to `100`.
 * `-metrics` (`bool`) – Whether to expose [Prometheus](https://prometheus.io) metrics under `/metrics`. Defaults to `false`.
 
-## How to use
-1. You need to get a token from the bot. Send a message with `/start` to the [Webhook2Telegram Bot](https://telegram.me/MiddleManBot) therefore.
-2. Now you can use that token to make HTTP `POST` requests to `http://localhost:8080/api/messages` (replace localhost by the hostname of your server running the bot or mine as shown above) with a body that looks like this.
-
-```
-{
-	"recipient_token": "3edf633a-eab0-45ea-9721-16c07bb8f245",
-	"text": "*Hello World!* (yes, this is Markdown)",
-	"type": "TEXT",
-	"origin": "My lonely server script"
-}
-```
-
-**NOTE:** If the field *type* is omitted then the `TEXT` type will be used as default, though this is not recommended as this may change in future versions.
-
-More details can be found [here](/inlets).
-
-### Inlets
+## 📥 Inlets
 Inlets provide a mechanism to pre-process incoming data that comes in a format different from what is normally expected by the bot. 
 
 This is especially useful if data is sent by external, third-party applications which you cannot modify.
 
 For instance, you might want to deliver alerts from [Prometheus' Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) as Telegram notifications. However, Alertmanager's [webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) look much different from WH2TG's default input format. To still make them fit, you can write an [Inlet](/inlets) to massage the data accordingly.
 
-To directly address an inlet, request `http://localhost:8080/api/inlets/<inlet_name>`. Note that `/api/inlets/default` is equivalent to `/api/messages`.
+To directly address an inlet, request `https://telepush.dev/api/inlets/<inlet_name>`. Note that `/api/inlets/default` is equivalent to `/api/messages`.
 
 Following inlets are currently available:
 
@@ -98,10 +105,10 @@ Following inlets are currently available:
 
 Further documentation about the individual inlets is available [here](/inlets).
 
-### Metrics
+## 📊 Metrics
 Fundamental [Prometheus](https://prometheus) metrics are exposed under `/metrics`, if the `-metrics` flag gets passed. They include:
-* `webhook2telegram_messages_total{origin="string", type="string"}` 
-* `webhook2telegram_requests_total{success="string"}` 
+* `telepush_messages_total{origin="string", type="string"}` 
+* `telepush_requests_total{success="string"}` 
 
-## License
+## 📓 License
 MIT @ [Ferdinand Mütsch](https://muetsch.io)
