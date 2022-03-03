@@ -1,4 +1,4 @@
-name: Build Webhook2Telegram on Windows
+name: Build Telepush on Windows
 
 on:
   release:

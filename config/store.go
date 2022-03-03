@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/muety/webhook2telegram/store"
+	"github.com/muety/telepush/store"
 )
 
 var storeInstance store.Store

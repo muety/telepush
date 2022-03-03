@@ -35,7 +35,7 @@ Optionally, you can pass sending options with your message:
 }
 ```
 
-**Alternatively**, the default inlet's payload can be passed as _query parameters_ of a `GET` request (see [#29](https://github.com/muety/webhook2telegram/issues/29)), e.g.:
+**Alternatively**, the default inlet's payload can be passed as _query parameters_ of a `GET` request (see [#29](https://github.com/muety/telepush/issues/29)), e.g.:
 ```
 GET http://localhost:8080/api/messages \
     ?recipient_token=3edf633a-eab0-45ea-9721-16c07bb8f245 \
@@ -71,10 +71,10 @@ route:
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 1h
-  receiver: 'webhook2telegram'
+  receiver: 'telepush'
 
 receivers:
-- name: 'webhook2telegram'
+- name: 'telepush'
   webhook_configs:
   - url: 'http://localhost:8080/api/inlets/alertmanager_webhook'
     http_config:

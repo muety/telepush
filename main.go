@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/muety/webhook2telegram/handlers"
-	"github.com/muety/webhook2telegram/inlets/alertmanager_webhook"
-	"github.com/muety/webhook2telegram/inlets/bitbucket_webhook"
-	"github.com/muety/webhook2telegram/inlets/webmentionio_webhook"
-	"github.com/muety/webhook2telegram/services"
+	"github.com/muety/telepush/handlers"
+	"github.com/muety/telepush/inlets/alertmanager_webhook"
+	"github.com/muety/telepush/inlets/bitbucket_webhook"
+	"github.com/muety/telepush/inlets/webmentionio_webhook"
+	"github.com/muety/telepush/services"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net"
@@ -18,10 +18,10 @@ import (
 	"time"
 
 	"github.com/justinas/alice"
-	"github.com/muety/webhook2telegram/api"
-	"github.com/muety/webhook2telegram/config"
-	"github.com/muety/webhook2telegram/inlets/default"
-	"github.com/muety/webhook2telegram/middleware"
+	"github.com/muety/telepush/api"
+	"github.com/muety/telepush/config"
+	"github.com/muety/telepush/inlets/default"
+	"github.com/muety/telepush/middleware"
 )
 
 var botConfig *config.BotConfig

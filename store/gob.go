@@ -2,7 +2,7 @@ package store
 
 import (
 	"encoding/gob"
-	"github.com/muety/webhook2telegram/model"
+	"github.com/muety/telepush/model"
 	"github.com/orcaman/concurrent-map"
 	"log"
 	"os"

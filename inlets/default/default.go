@@ -4,17 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/mitchellh/mapstructure"
-	"github.com/muety/webhook2telegram/config"
-	"github.com/muety/webhook2telegram/model"
-	"github.com/muety/webhook2telegram/util"
+	"github.com/muety/telepush/config"
+	"github.com/muety/telepush/model"
+	"github.com/muety/telepush/util"
 	"net/http"
 
-	"github.com/muety/webhook2telegram/inlets"
+	"github.com/muety/telepush/inlets"
 )
 
 type DefaultInlet struct{}
 
-const defaultOrigin = "Webhook2Telegram"
+const defaultOrigin = "Telepush"
 
 func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

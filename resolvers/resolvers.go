@@ -2,8 +2,8 @@ package resolvers
 
 import (
 	"github.com/leandro-lugaresi/hub"
-	"github.com/muety/webhook2telegram/config"
-	"github.com/muety/webhook2telegram/model"
+	"github.com/muety/telepush/config"
+	"github.com/muety/telepush/model"
 )
 
 const (

@@ -1,4 +1,4 @@
-name: Build Webhook2Telegram on Linux
+name: Build Telepush on Linux
 
 on:
   release:

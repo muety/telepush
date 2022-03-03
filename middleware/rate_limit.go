@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/muety/webhook2telegram/config"
+	"github.com/muety/telepush/config"
 	"github.com/n1try/limiter/v3"
 	mhttp "github.com/n1try/limiter/v3/drivers/middleware/stdlib"
 	memst "github.com/n1try/limiter/v3/drivers/store/memory"

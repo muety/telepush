@@ -16,4 +16,4 @@ if [[ "$APP_METRICS" != "" && "$APP_METRICS" != "false" ]]; then
   CMD_ARGS="$CMD_ARGS -metrics"
 fi
 
-./webhook2telegram $CMD_ARGS
+./telepush $CMD_ARGS

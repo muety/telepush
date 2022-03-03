@@ -1,4 +1,4 @@
-module github.com/muety/webhook2telegram
+module github.com/muety/telepush
 
 go 1.13
 

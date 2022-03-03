@@ -3,8 +3,8 @@ package resolvers
 import (
 	b64 "encoding/base64"
 	"errors"
-	"github.com/muety/webhook2telegram/api"
-	"github.com/muety/webhook2telegram/model"
+	"github.com/muety/telepush/api"
+	"github.com/muety/telepush/model"
 	"log"
 )
 

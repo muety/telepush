@@ -2,12 +2,12 @@ FROM golang:alpine
 
 WORKDIR /data
 COPY . .
-RUN GO111MODULE=on go build -o webhook2telegram .
+RUN go build -o telepush .
 
 FROM alpine
 
 WORKDIR /app
-COPY --from=0 /data/webhook2telegram webhook2telegram
+COPY --from=0 /data/telepush telepush
 COPY --from=0 /data/views views
 COPY --from=0 /data/version.txt version.txt
 COPY --from=0 /data/docker/entrypoint.sh entrypoint.sh

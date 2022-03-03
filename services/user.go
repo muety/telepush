@@ -1,8 +1,8 @@
 package services
 
 import (
-	"github.com/muety/webhook2telegram/model"
-	"github.com/muety/webhook2telegram/store"
+	"github.com/muety/telepush/model"
+	"github.com/muety/telepush/store"
 	"strconv"
 )
 

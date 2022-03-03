@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/leandro-lugaresi/hub"
-	"github.com/muety/webhook2telegram/config"
+	"github.com/muety/telepush/config"
 	"net/http"
 )
 

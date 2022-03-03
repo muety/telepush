@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/muety/webhook2telegram/config"
+	"github.com/muety/telepush/config"
 	"html/template"
 	"net/http"
 )

@@ -5,7 +5,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-const metricsPrefix = "webhook2telegram_"
+const metricsPrefix = "telepush_"
 
 const (
 	labelTotalMessagesOrigin  = "origin"

@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"github.com/muety/webhook2telegram/config"
-	"github.com/muety/webhook2telegram/model"
-	"github.com/muety/webhook2telegram/resolvers"
-	"github.com/muety/webhook2telegram/services"
+	"github.com/muety/telepush/config"
+	"github.com/muety/telepush/model"
+	"github.com/muety/telepush/resolvers"
+	"github.com/muety/telepush/services"
 	"net/http"
 )
 
