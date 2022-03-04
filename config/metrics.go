@@ -16,14 +16,14 @@ const (
 var (
 	counterTotalRequests = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "requests_total",
+			Name: metricsPrefix + "requests_total",
 			Help: "Total number of requests to this bot",
 		},
 		[]string{labelTotalRequestsSuccess},
 	)
 	counterTotalMessages = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "messages_total",
+			Name: metricsPrefix + "messages_total",
 			Help: "Total number of messages delivered",
 		},
 		[]string{labelTotalMessagesOrigin, labelTotalMessagesType},
@@ -31,9 +31,8 @@ var (
 )
 
 func init() {
-	registerer := prometheus.WrapRegistererWithPrefix(metricsPrefix, prometheus.DefaultRegisterer)
-	registerer.MustRegister(counterTotalMessages)
-	registerer.MustRegister(counterTotalRequests)
+	prometheus.MustRegister(counterTotalMessages)
+	prometheus.MustRegister(counterTotalRequests)
 
 	h := GetHub()
 	sub := h.NonBlockingSubscribe(0, AllEvents()...)
