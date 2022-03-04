@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
+	"github.com/justinas/alice"
 	"github.com/muety/telepush/handlers"
-	"github.com/muety/telepush/inlets/alertmanager_webhook"
-	"github.com/muety/telepush/inlets/bitbucket_webhook"
-	"github.com/muety/telepush/inlets/webmentionio_webhook"
+	alertmanagerIn "github.com/muety/telepush/inlets/alertmanager"
+	bitbucketIn "github.com/muety/telepush/inlets/bitbucket"
+	webmentionioIn "github.com/muety/telepush/inlets/webmentionio"
 	"github.com/muety/telepush/services"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
@@ -17,10 +19,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/justinas/alice"
 	"github.com/muety/telepush/api"
 	"github.com/muety/telepush/config"
-	"github.com/muety/telepush/inlets/default"
+	defaultIn "github.com/muety/telepush/inlets/default"
 	"github.com/muety/telepush/middleware"
 )
 
@@ -28,39 +29,6 @@ var botConfig *config.BotConfig
 
 func init() {
 	botConfig = config.Get()
-}
-
-func registerRoutes() {
-	indexHandler := handlers.NewIndexHandler()
-	messageHandler := handlers.NewMessageHandler(
-		services.NewUserService(config.GetStore()),
-	)
-	baseChain := alice.New(
-		middleware.WithEventLogging(),
-		middleware.WithMethodCheck(),
-		middleware.WithRateLimit(),
-	)
-
-	if botConfig.Metrics {
-		http.Handle("/metrics", promhttp.Handler())
-	}
-	http.Handle("/api/messages", baseChain.Append(_default.New().Handler).Then(messageHandler))
-	http.Handle("/api/inlets/default", baseChain.Append(_default.New().Handler).Then(messageHandler))
-	http.Handle("/api/inlets/alertmanager_webhook", baseChain.Append(alertmanager_webhook.New().Handler).Then(messageHandler))
-	http.Handle("/api/inlets/bitbucket_webhook", baseChain.Append(bitbucket_webhook.New().Handler).Then(messageHandler))
-	http.Handle("/api/inlets/webmentionio_webhook", baseChain.Append(webmentionio_webhook.New().Handler).Then(messageHandler))
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("views/static/"))))
-	http.Handle("/", indexHandler)
-}
-
-func connectApi() {
-	if botConfig.Mode == "webhook" {
-		fmt.Println("Using webhook mode.")
-		http.HandleFunc("/api/updates", api.Webhook)
-	} else {
-		fmt.Println("Using long-polling mode.")
-		api.Poll()
-	}
 }
 
 func listen() {
@@ -137,8 +105,43 @@ func exitGracefully() {
 }
 
 func main() {
-	registerRoutes()
-	connectApi()
+	// Initialize Router
+	rootRouter := mux.NewRouter().StrictSlash(true)
+	apiRouter := rootRouter.PathPrefix("/api").Subrouter()
+	apiRouter.Use(
+		middleware.WithEventLogging(),
+		middleware.WithRateLimit(),
+	)
+
+	// Initialize Handlers
+	indexHandler := handlers.NewIndexHandler()
+	messageHandler := handlers.NewMessageHandler(services.NewUserService(config.GetStore()))
+
+	// Register Routes
+	messageChain := alice.New(middleware.WithToken("recipient", config.KeyRecipient))
+	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/messages/{recipient}").Handler(messageChain.Append(defaultIn.New().Handler).Then(messageHandler))
+	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/default/{recipient}").Handler(messageChain.Append(defaultIn.New().Handler).Then(messageHandler))
+	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/alertmanager/{recipient}").Handler(messageChain.Append(alertmanagerIn.New().Handler).Then(messageHandler))
+	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/bitbucket/{recipient}").Handler(messageChain.Append(bitbucketIn.New().Handler).Then(messageHandler))
+	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/webmentionio/{recipient}").Handler(messageChain.Append(webmentionioIn.New().Handler).Then(messageHandler))
+
+	if botConfig.Mode == "webhook" {
+		fmt.Println("Using webhook mode.")
+		apiRouter.Methods(http.MethodPost).Path("/updates").HandlerFunc(api.Webhook)
+	} else {
+		fmt.Println("Using long-polling mode.")
+		api.Poll()
+	}
+
+	if botConfig.Metrics {
+		rootRouter.Methods(http.MethodGet).Path("/metrics").Handler(promhttp.Handler())
+	}
+
+	rootRouter.Methods(http.MethodGet).PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("views/static/"))))
+	rootRouter.Methods(http.MethodGet).PathPrefix("/").Handler(indexHandler)
+
+	// Start server
+	http.Handle("/", middleware.WithTrailingSlash()(rootRouter))
 	listen()
 
 	// Exit handler

@@ -4,8 +4,8 @@ go 1.13
 
 require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/justinas/alice v1.2.0
 	github.com/leandro-lugaresi/hub v1.1.1
 	github.com/mitchellh/mapstructure v1.4.2

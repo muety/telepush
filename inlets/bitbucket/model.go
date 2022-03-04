@@ -1,4 +1,4 @@
-package bitbucket_webhook
+package bitbucket
 
 import "time"
 

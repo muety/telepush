@@ -10,9 +10,9 @@ import (
 	"github.com/muety/telepush/model"
 	"github.com/muety/telepush/services"
 	"github.com/muety/telepush/store"
+	"github.com/muety/telepush/util"
 	"github.com/n1try/limiter/v3"
 	memst "github.com/n1try/limiter/v3/drivers/store/memory"
-	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -175,12 +175,12 @@ func processUpdate(update model.TelegramUpdate) {
 
 	if strings.TrimSpace(update.Message.Text) == config.CmdStart {
 		// create new token
-		id := uuid.NewV4()
+		token := util.RandomString(6)
 		userService.InvalidateToken(chatId)
-		botStore.Put(id.String(), model.StoreObject{User: update.Message.From, ChatId: chatId})
+		botStore.Put(token, model.StoreObject{User: update.Message.From, ChatId: chatId})
 
-		text = fmt.Sprintf(config.MessageTokenResponse, id.String())
-		log.Printf("sending new token %s to %d", id.String(), chatId)
+		text = fmt.Sprintf(config.MessageTokenResponse, token)
+		log.Printf("sending new token %s to %d", token, chatId)
 	} else if strings.TrimSpace(update.Message.Text) == config.CmdHelp {
 		// print help message
 		text = fmt.Sprintf(config.MessageHelpResponse, botConfig.Version)

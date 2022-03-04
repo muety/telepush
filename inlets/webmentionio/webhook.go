@@ -1,4 +1,4 @@
-package webmentionio_webhook
+package webmentionio
 
 import (
 	"context"
@@ -53,8 +53,7 @@ func validateMessage(message *WebmentionMessage) bool {
 	if u, err := url.Parse(message.Target); err != nil || (u.Scheme != "http" && u.Scheme != "https") {
 		return false
 	}
-
-	return message.Secret != ""
+	return true
 }
 
 func transformMessage(in *WebmentionMessage) *model.DefaultMessage {
@@ -62,8 +61,7 @@ func transformMessage(in *WebmentionMessage) *model.DefaultMessage {
 	text += util.EscapeMarkdown(fmt.Sprintf("Your article at %s was mentioned at %s.", in.Target, in.Source))
 
 	return &model.DefaultMessage{
-		RecipientToken: in.Secret,
-		Text:           text,
-		Type:           resolvers.TextType,
+		Text: text,
+		Type: resolvers.TextType,
 	}
 }

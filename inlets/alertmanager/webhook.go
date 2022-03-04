@@ -1,4 +1,4 @@
-package alertmanager_webhook
+package alertmanager
 
 import (
 	"context"
@@ -29,14 +29,6 @@ func (i *AlertmanagerInlet) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var m Message
 
-		authHeader := r.Header.Get("authorization")
-		matches := tokenRegex.FindStringSubmatch(authHeader)
-		if len(matches) < 2 {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("missing recipient token"))
-			return
-		}
-
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&m); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -44,7 +36,7 @@ func (i *AlertmanagerInlet) Handler(h http.Handler) http.Handler {
 			return
 		}
 
-		message := transformMessage(&m, matches[1])
+		message := transformMessage(&m)
 
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, config.KeyMessage, message)
@@ -54,7 +46,7 @@ func (i *AlertmanagerInlet) Handler(h http.Handler) http.Handler {
 	})
 }
 
-func transformMessage(in *Message, token string) *model.DefaultMessage {
+func transformMessage(in *Message) *model.DefaultMessage {
 	var sb strings.Builder
 	sb.WriteString("*Alertmanager* wrote:\n\n")
 
@@ -99,8 +91,7 @@ func transformMessage(in *Message, token string) *model.DefaultMessage {
 	}
 
 	return &model.DefaultMessage{
-		RecipientToken: token,
-		Text:           sb.String(),
-		Type:           resolvers.TextType,
+		Text: sb.String(),
+		Type: resolvers.TextType,
 	}
 }

@@ -32,14 +32,14 @@ func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		p = *(params.(*model.MessageParams))
 	}
 
-	token := r.Header.Get("token")
-	if token == "" {
-		token = m.RecipientToken
+	var token string
+	if t := r.Context().Value(config.KeyRecipient); t != nil {
+		token = t.(string)
 	}
 
-	if len(token) == 0 {
+	if token == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("missing recipient_token parameter"))
+		w.Write([]byte("missing recipient token"))
 		return
 	}
 

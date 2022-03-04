@@ -19,9 +19,10 @@ const (
 )
 
 const (
-	KeyUpdateID = "latestUpdateId"
-	KeyMessage  = "message"
-	KeyParams   = "message_params"
+	KeyUpdateID  = "latestUpdateId"
+	KeyMessage   = "message"
+	KeyParams    = "message_params"
+	KeyRecipient = "recipient"
 )
 
 const (

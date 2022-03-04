@@ -1,7 +1,6 @@
-package webmentionio_webhook
+package webmentionio
 
 type WebmentionMessage struct {
-	Secret string `json:"secret" binding:"required"`
 	Source string `json:"source" binding:"required"`
 	Target string `json:"target" binding:"required"`
 }

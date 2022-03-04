@@ -1,4 +1,4 @@
-package bitbucket_webhook
+package bitbucket
 
 import (
 	"context"
@@ -21,7 +21,6 @@ func New() inlets.Inlet {
 
 func (i *BitbucketWebhookInlet) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.URL.Query().Get("token")
 		eventKey := r.Header.Get("X-Event-Key")
 
 		var payload Payload
@@ -33,9 +32,8 @@ func (i *BitbucketWebhookInlet) Handler(h http.Handler) http.Handler {
 		}
 
 		message := &model.DefaultMessage{
-			RecipientToken: token,
-			Text:           buildMessage(eventKey, &payload),
-			Type:           resolvers.TextType,
+			Text: buildMessage(eventKey, &payload),
+			Type: resolvers.TextType,
 		}
 
 		ctx := r.Context()

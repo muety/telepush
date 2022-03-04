@@ -1,4 +1,4 @@
-package alertmanager_webhook
+package alertmanager
 
 type Message struct {
 	Alerts []*Alert
