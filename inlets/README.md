@@ -42,8 +42,8 @@ GET http://localhost:8080/api/messages/<recipient> \
     &disable_link_previews=true 
 ```
 
-## `alertmanager_webhook`
-`/api/inlets/alertmanager_webhook/<recipient>`
+## `alertmanager`
+`/api/inlets/alertmanager/<recipient>`
 
 Accepts, transforms and forwards alerts sent by [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) to a Telegram chat.
 
@@ -69,8 +69,8 @@ receivers:
   - url: 'http://localhost:8080/api/inlets/alertmanager_webhook/5hd9mx'
 ```
 
-## `bitbucket_webhook`
-`/api/inlets/bitbucket_webhook/<recipient>`
+## `bitbucket`
+`/api/inlets/bitbucket/<recipient>`
 
 Accepts, transforms and forwards events sent by [Bitbucket](https://bitbucket.org/) to a Telegram chat.
 
@@ -80,8 +80,8 @@ Requires the `X-Event-Key` header to be set.
 ### Body
 See [Event Payloads](https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html).
 
-## `webmentionio_webhook`
-`/api/inlets/webmentionio_webhook/<recipient>`
+## `webmentionio`
+`/api/inlets/webmentionio/<recipient>`
 
 Accepts, transforms and forwards notifications sent by [Webmention.io](https://webmention.io) to a Telegram chat.
 

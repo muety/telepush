@@ -134,12 +134,12 @@ equivalent to `/api/messages`.
 
 Following inlets are currently available:
 
-| Name         | Description                                                                                                 | Status |
-|--------------|-------------------------------------------------------------------------------------------------------------|--------|
-| `default`      | Simply passes the request through without any changes                                                       | ✅      |
-| `alertmanager_webhook` | Consumes [Alertmanager webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config) | ✅      |
-| `webmentionio_webhook` | Accepts [Webmention.io](https://webmention.io/) webhook requests to notify about a new Webmention of one of your articles | ✅      |
-| `bitbucket_webhook` | Accepts [Bitbucket webhook requests](https://confluence.atlassian.com/bitbucket/tutorial-create-and-trigger-a-webhook-747606432.html) to notify about a pipeline status change | ⏳      |
+| Name           | Description                                                                                                                                                                    | Status |
+|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|
+| `default`      | Simply passes the request through without any changes                                                                                                                          | ✅      |
+| `alertmanager` | Consumes [Alertmanager webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config)                                                                    | ✅      |
+| `webmentionio` | Accepts [Webmention.io](https://webmention.io/) webhook requests to notify about a new Webmention of one of your articles                                                      | ✅      |
+| `bitbucket`    | Accepts [Bitbucket webhook requests](https://confluence.atlassian.com/bitbucket/tutorial-create-and-trigger-a-webhook-747606432.html) to notify about a pipeline status change | ⏳      |
 
 Further documentation about the individual inlets is available [here](/inlets).
 
