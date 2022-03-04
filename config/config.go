@@ -39,6 +39,7 @@ const (
 var cfg *BotConfig
 
 type BotConfig struct {
+	Env          string
 	Token        string
 	Mode         string
 	BaseUrl      string
@@ -105,6 +106,7 @@ func readBlacklist(path string) []string {
 
 func Get() *BotConfig {
 	if cfg == nil {
+		envPtr := flag.String("env", "production", "Environment to run in (dev or production)")
 		tokenPtr := flag.String("token", "", "Your Telegram Bot Token from Botfather")
 		modePtr := flag.String("mode", "poll", "Update mode ('poll' for development, 'webhook' for production)")
 		baseUrlPtr := flag.String("baseUrl", "", "A relative URL different from '/', required to run the bot on a subpath. E.g. to run bot under 'https://exmaple.org/wh2tg' set baseUrl to '/wh2tg'")
@@ -134,6 +136,7 @@ func Get() *BotConfig {
 		}
 
 		cfg = &BotConfig{
+			Env:          *envPtr,
 			Token:        *tokenPtr,
 			Mode:         *modePtr,
 			BaseUrl:      *baseUrlPtr + "/",

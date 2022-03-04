@@ -15,12 +15,18 @@ type indexData struct {
 }
 
 func NewIndexHandler() *IndexHandler {
-	return &IndexHandler{
-		Tpl:    template.Must(template.ParseFiles("views/index.tpl.html")),
-		Config: config.Get(),
-	}
+	h := &IndexHandler{Config: config.Get()}
+	h.loadTemplates()
+	return h
 }
 
 func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if h.Config.Env == "dev" {
+		h.loadTemplates()
+	}
 	h.Tpl.Execute(w, indexData{Config: h.Config})
+}
+
+func (h *IndexHandler) loadTemplates() {
+	h.Tpl = template.Must(template.ParseFiles("views/index.tpl.html"))
 }

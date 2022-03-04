@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Telepush</title>
+    <link rel="icon" href="static/favicon.png">
     <base href="{{ .Config.BaseUrl }}">
     <style>
         html {
@@ -15,8 +16,10 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: calc(100% - 40px);
+            max-width: 550px;
             height: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         footer {
@@ -26,6 +29,11 @@
             width: 100%;
             margin-bottom: 20px;
             font-size: 12px;
+        }
+
+        p {
+            line-height: 22px;
+            text-align: center;
         }
 
         .my-1 {
@@ -42,26 +50,68 @@
             padding: 5px 10px;
             border-radius: 3px;
         }
+
+        .code-small {
+            padding: 3px 6px;
+            font-size: 0.8rem;
+        }
+
+        hr {
+            width: 100%;
+            border: 0;
+            border-top: 1px solid #aaa;
+        }
+
+        .sans {
+            font-family: sans-serif;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
-    <h1 class="my-2">telepush</h1>
-    <img src="static/logo.svg" class="my-2" height="200px"/>
-    <div class="my-1">
-        <span>Bot:</span>
-        <a href="https://t.me/MiddleManBot" class="code">@MiddleManBot</a>
-    </div>
-    <div class="my-1">
-        <span>API Entrypoint:</span>
-        <a href="api" class="code">/api</a>
-    </div>
-    <div class="my-1">
-        <span>GitHub:</span>
-        <a href="https://github.com/muety/telepush" class="code">muety/telepush</a>
-    </div>
+<img src="static/logo.svg" class="my-1" height="200px"/>
+<h1 class="my-1">telepush</h1>
+<p>Send Telegram push notifications easily via HTTP</p>
 
-    <footer>
-        Version: {{ .Config.Version }}
-    </footer>
+<div style="height: 28px"></div>
+
+<h2 class="my-1">Usage</h2>
+<p style="margin-bottom: 0"><strong>Step 1:</strong> <span>Get a token</span></p>
+<p>
+    <span>Start a chat with <a href="https://t.me/MiddleManBot" target="_blank">TelepushBot</a> (or your own bot) and type <span class="code code-small">/start</span> to obtain a recipient token.</span>
+</p>
+<p style="margin-bottom: 0"><strong>Step 2: </strong> <span>Send your message</span></p>
+
+<p class="code code-small" style="width: 100%; text-align: left; padding: 8px 20px;">
+    curl -XPOST \<br>
+    &nbsp;&nbsp;&nbsp;-d '{ "text": "Hello there" }' \<br>
+    &nbsp;&nbsp;&nbsp;<span class="base-url"></span>api/messages
+</p>
+
+<div style="height: 42px"></div>
+<hr>
+<div style="height: 42px"></div>
+
+<div class="my-1">
+    <span>Bot:</span>
+    <a href="https://t.me/MiddleManBot" class="code">@MiddleManBot</a>
+</div>
+<div class="my-1">
+    <span>API Entrypoint:</span>
+    <a href="api" class="code">/api</a>
+</div>
+<div class="my-1">
+    <span>Code & Docs:</span>
+    <a href="https://github.com/muety/telepush" class="code">muety/telepush</a>
+</div>
+
+<footer>
+    Version: {{ .Config.Version }}
+</footer>
+
+<script type="text/javascript">
+    const url = window.location.href
+    document.querySelectorAll('.base-url').forEach(e => e.innerHTML = url)
+</script>
 </body>
 </html>
