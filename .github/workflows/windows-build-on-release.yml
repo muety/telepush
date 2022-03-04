@@ -4,7 +4,6 @@ on:
   release:
     types:
       - released
-      - edited
 jobs:
   build-and-release:
     name: Build and add to release
