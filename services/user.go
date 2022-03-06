@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"github.com/muety/telepush/config"
 	"github.com/muety/telepush/model"
 	"github.com/muety/telepush/store"
 	"strconv"
@@ -13,10 +12,6 @@ type UserService struct {
 }
 
 type Tokens []string
-
-var protectedKeys = map[string]bool{
-	config.KeyUpdateID: true,
-}
 
 func (tokens Tokens) String() string {
 	var str string
@@ -50,11 +45,10 @@ func (s *UserService) ResolveToken(token string) string {
 func (s *UserService) ListTokens(chatId int) Tokens {
 	tokens := make(Tokens, 0)
 	for k, v := range s.store.GetItems() {
-		if _, ok := protectedKeys[k]; ok {
-			continue
-		}
-		if v.(model.StoreObject).ChatId == chatId {
-			tokens = append(tokens, k)
+		if obj, ok := v.(model.StoreObject); ok {
+			if obj.ChatId == chatId {
+				tokens = append(tokens, k)
+			}
 		}
 	}
 	return tokens
