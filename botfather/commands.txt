@@ -1,2 +1,3 @@
-start - Get a token to be used as identifier in HTTP requests
+start - Create a new recipient token to be used in requests
+revoke - Invalidate a previously generated token
 help - Get instructions on how to use this bot

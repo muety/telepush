@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"github.com/muety/telepush/model"
 	"github.com/muety/telepush/store"
 	"strconv"
@@ -10,17 +11,30 @@ type UserService struct {
 	store store.Store
 }
 
+type Tokens []string
+
+var protectedKeys = map[string]bool{
+	"latestUpdateId": true,
+}
+
+func (tokens Tokens) String() string {
+	var str string
+	for i, t := range tokens {
+		str += fmt.Sprintf("*%d:* `%s`\n", i+1, t)
+	}
+	return str
+}
+
 func NewUserService(store store.Store) *UserService {
 	return &UserService{store: store}
 }
 
-func (s *UserService) InvalidateToken(userChatId int) {
-	for k, v := range s.store.GetItems() {
-		entry, ok := v.(model.StoreObject)
-		if ok && entry.ChatId == userChatId {
-			s.store.Delete(k)
-		}
-	}
+func (s *UserService) SetToken(token string, fromUser model.TelegramUser, chatId int) {
+	s.store.Put(token, model.StoreObject{User: fromUser, ChatId: chatId})
+}
+
+func (s *UserService) InvalidateToken(token string) {
+	s.store.Delete(token)
 }
 
 func (s *UserService) ResolveToken(token string) string {
@@ -29,4 +43,18 @@ func (s *UserService) ResolveToken(token string) string {
 		return strconv.Itoa((value.(model.StoreObject)).ChatId)
 	}
 	return ""
+}
+
+// O(n)
+func (s *UserService) ListTokens(chatId int) Tokens {
+	tokens := make(Tokens, 0)
+	for k, v := range s.store.GetItems() {
+		if _, ok := protectedKeys[k]; ok {
+			continue
+		}
+		if v.(model.StoreObject).ChatId == chatId {
+			tokens = append(tokens, k)
+		}
+	}
+	return tokens
 }

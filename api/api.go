@@ -159,7 +159,8 @@ func SendDocument(document *model.TelegramOutDocument) error {
 }
 
 func processUpdate(update model.TelegramUpdate) {
-	text := config.MessageDefaultResponse
+	text := config.MessageDefaultResponse                 // out text
+	messageText := strings.TrimSpace(update.Message.Text) // in text
 	chatId := update.Message.Chat.Id
 
 	if checkBlacklist(chatId) {
@@ -173,15 +174,30 @@ func processUpdate(update model.TelegramUpdate) {
 		return
 	}
 
-	if strings.TrimSpace(update.Message.Text) == config.CmdStart {
+	if cmd := config.CmdStart; cmd.MatchString(messageText) {
 		// create new token
 		token := util.RandomString(6)
-		userService.InvalidateToken(chatId)
-		botStore.Put(token, model.StoreObject{User: update.Message.From, ChatId: chatId})
-
+		userService.SetToken(token, update.Message.From, chatId)
 		text = fmt.Sprintf(config.MessageTokenResponse, token)
 		log.Printf("sending new token %s to %d", token, chatId)
-	} else if strings.TrimSpace(update.Message.Text) == config.CmdHelp {
+	} else if cmd := config.CmdRevoke; cmd.MatchString(messageText) {
+		tokens := userService.ListTokens(chatId)
+
+		if matches := cmd.FindStringSubmatch(messageText); len(matches) > 1 && matches[1] != "" {
+			if idx, _ := strconv.Atoi(matches[1]); idx > 0 && idx <= len(tokens) {
+				userService.InvalidateToken(tokens[idx-1])
+				text = fmt.Sprintf(config.MessageRevokeSuccessful, tokens[idx-1])
+			} else {
+				text = fmt.Sprintf(config.MessageRevokeInvalidIndex, idx)
+			}
+		} else {
+			if len(tokens) == 0 {
+				text = config.MessageRevokeListEmpty
+			} else {
+				text = fmt.Sprintf(config.MessageRevokeList, tokens)
+			}
+		}
+	} else if cmd := config.CmdHelp; cmd.MatchString(messageText) {
 		// print help message
 		text = fmt.Sprintf(config.MessageHelpResponse, botConfig.Version)
 	} else {

@@ -26,14 +26,25 @@ const (
 )
 
 const (
-	CmdStart = "/start"
-	CmdHelp  = "/help"
+	CmdPatternStart  = `/start`
+	CmdPatternRevoke = `/revoke\s?(\d*)$`
+	CmdPatternHelp   = `/help`
+)
+
+var (
+	CmdStart  *regexp.Regexp
+	CmdRevoke *regexp.Regexp
+	CmdHelp   *regexp.Regexp
 )
 
 const (
-	MessageDefaultResponse = "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/muety/telepush."
-	MessageTokenResponse   = "Here is your token, which you can include to request to this bot:\n\n`%s`"
-	MessageHelpResponse    = "For detailed instructions on how to use this bot, please refer to the [official documentation](https://github.com/muety/telepush).\n\nVersion: `%s`"
+	MessageDefaultResponse    = "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/muety/telepush."
+	MessageTokenResponse      = "Successfully created new token: `%s`."
+	MessageRevokeList         = "Currently active tokens:\n\n%s\n\nSend `/revoke <number>` to revoke a certain token."
+	MessageRevokeListEmpty    = "No active tokens. Send `/start` to generate new one."
+	MessageRevokeSuccessful   = "Token `%s` revoked."
+	MessageRevokeInvalidIndex = "%d is not a valid token index."
+	MessageHelpResponse       = "For detailed instructions on how to use this bot, please refer to the [official documentation](https://github.com/muety/telepush).\n\nVersion: `%s`"
 )
 
 var cfg *BotConfig
@@ -57,6 +68,12 @@ type BotConfig struct {
 	DataDir      string
 	Blacklist    []string
 	Version      string
+}
+
+func init() {
+	CmdStart = regexp.MustCompile(CmdPatternStart)
+	CmdRevoke = regexp.MustCompile(CmdPatternRevoke)
+	CmdHelp = regexp.MustCompile(CmdPatternHelp)
 }
 
 func readVersion() string {
