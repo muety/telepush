@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/url"
@@ -59,6 +60,7 @@ type BotConfig struct {
 	KeyPath      string
 	ProxyURI     *url.URL
 	Port         int
+	UrlSecret    string
 	ReqRateLimit int
 	CmdRateLimit int
 	Address      string
@@ -132,6 +134,7 @@ func Get() *BotConfig {
 		keyPathPtr := flag.String("keyPath", "", "Path of your private SSL key when using webhook mode")
 		portPtr := flag.Int("port", 8080, "Port for the webserver to listen on")
 		proxyPtr := flag.String("proxy", "", "Proxy for poll mode, e.g. 'socks5://127.0.0.01:1080'")
+		urlSecretPtr := flag.String("urlSecret", "", "Secret suffix to append to Telegram updates endpoint")
 		reqRateLimitPtr := flag.Int("rateLimit", 100, "Max number of requests per recipient per hour")
 		cmdRateLimitPtr := flag.Int("cmdRateLimit", 10, "Max number of chat commands to execute per hour")
 		addrPtr := flag.String("address", "127.0.0.1", "IPv4 address to bind the webserver to")
@@ -162,6 +165,7 @@ func Get() *BotConfig {
 			KeyPath:      *keyPathPtr,
 			Port:         *portPtr,
 			ProxyURI:     proxyUri,
+			UrlSecret:    *urlSecretPtr,
 			ReqRateLimit: *reqRateLimitPtr,
 			CmdRateLimit: *cmdRateLimitPtr,
 			Address:      *addrPtr,
@@ -183,4 +187,11 @@ func (c *BotConfig) GetApiUrl() string {
 
 func (c *BotConfig) GetStorePath() string {
 	return path.Join(c.DataDir, StoreFile)
+}
+
+func (c *BotConfig) GetUpdatesPath() string {
+	if c.UrlSecret == "" {
+		return "/updates"
+	}
+	return fmt.Sprintf("/updates_%s", c.UrlSecret)
 }

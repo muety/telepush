@@ -27,7 +27,7 @@ func NewGobStore(filePath string) *GobStore {
 	}
 
 	if err := store.load(); err == nil {
-		log.Println("read existing gob store from file")
+		log.Println("Read existing gob store from file")
 	}
 
 	return store

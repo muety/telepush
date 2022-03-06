@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"github.com/muety/telepush/config"
 	"github.com/muety/telepush/model"
 	"github.com/muety/telepush/store"
 	"strconv"
@@ -14,7 +15,7 @@ type UserService struct {
 type Tokens []string
 
 var protectedKeys = map[string]bool{
-	"latestUpdateId": true,
+	config.KeyUpdateID: true,
 }
 
 func (tokens Tokens) String() string {

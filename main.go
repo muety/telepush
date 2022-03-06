@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
 	"github.com/muety/telepush/handlers"
@@ -65,7 +64,7 @@ func listen() {
 	}
 
 	if botConfig.UseHTTPS {
-		fmt.Printf("Listening for HTTPS on %s.\n", s.Addr)
+		log.Printf("Listening for HTTPS on %s.\n", s.Addr)
 		go func() {
 			if err := s.ListenAndServeTLS(botConfig.CertPath, botConfig.KeyPath); err != nil {
 				log.Fatalln(err)
@@ -73,7 +72,7 @@ func listen() {
 		}()
 
 		if s6 != nil {
-			fmt.Printf("Listening for HTTPS on %s.\n", s6.Addr)
+			log.Printf("Listening for HTTPS on %s.\n", s6.Addr)
 			go func() {
 				if err := s6.ListenAndServeTLS(botConfig.CertPath, botConfig.KeyPath); err != nil {
 					log.Fatalln(err)
@@ -81,7 +80,7 @@ func listen() {
 			}()
 		}
 	} else {
-		fmt.Printf("Listening for HTTP on %s.\n", s.Addr)
+		log.Printf("Listening for HTTP on %s.\n", s.Addr)
 		go func() {
 			if err := s.ListenAndServe(); err != nil {
 				log.Fatalln(err)
@@ -89,7 +88,7 @@ func listen() {
 		}()
 
 		if s6 != nil {
-			fmt.Printf("Listening for HTTP on %s.\n", s6.Addr)
+			log.Printf("Listening for HTTP on %s.\n", s6.Addr)
 			go func() {
 				if err := s6.ListenAndServe(); err != nil {
 					log.Fatalln(err)
@@ -126,10 +125,16 @@ func main() {
 	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/webmentionio/{recipient}").Handler(messageChain.Append(webmentionioIn.New().Handler).Then(messageHandler))
 
 	if botConfig.Mode == "webhook" {
-		fmt.Println("Using webhook mode.")
-		apiRouter.Methods(http.MethodPost).Path("/updates").HandlerFunc(api.Webhook)
+		apiRouter.Methods(http.MethodPost).Path(botConfig.GetUpdatesPath()).HandlerFunc(api.Webhook)
+
+		log.Println("Using webhook mode")
+		log.Printf("Updates from Telegram are accepted under '/api%s'. Set the webhook accordingly (see https://core.telegram.org/bots/api#setwebhook)\n", botConfig.GetUpdatesPath())
+		if botConfig.UrlSecret == "" {
+			log.Println("Warning: It is recommended to set '-urlSecret' for enhanced security (can be any random string)")
+		}
 	} else {
-		fmt.Println("Using long-polling mode.")
+		log.Println("Using long-polling mode")
+		log.Println("Warning: For production use, webhook mode is recommended")
 		api.Poll()
 	}
 

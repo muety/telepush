@@ -74,10 +74,10 @@ $ docker volume create telepush_data
 $ docker run -d \
     -p 8080:8080 \
     -v telepush_data:/srv/data \
-    -e "APP_TOKEN=<YOUR_BOTFATHER_TOKEN>" \
-    -e "APP_MODE=webhook" \
     --name telepush \
-    ghcr.io/muety/telepush:latest
+    ghcr.io/muety/telepush \
+    -mode webhook \
+    -token <YOUR_BOTFATHER_TOKEN>
 ```
 
 #### 🛠 Option 2.2: Compile from source
@@ -97,8 +97,16 @@ $ ./telepush -token <YOUR_BOTFATHER_TOKEN> -mode webhook
 
 You can either run the bot in long-polling- or webhook mode (`-mode [webhook|poll]`). For production use the latter
 option is recommended for [various reasons](https://core.telegram.org/bots/webhooks). However, you'll need a server with
-a static IP and a TLS certificate. Either use `-useHttps` or set up a reverse proxy like nginx
-or [Caddy](https://caddyserver.com) to handle encryption.
+a static IP and a TLS certificate.
+
+More details about webhook setup can be found in [__Marvin's Marvellous Guide to All Things Webhook__](https://core.telegram.org/bots/webhooks).
+
+#### 🔓 HTTPS
+In webhook mode, Telegram requires your [updates endpoint](https://core.telegram.org/bots/api#getting-updates) to use HTTPS. To enable such, either run Telepush **behind a reverse proxy** (like [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)), that terminates TLS.
+
+Or, let Telepush itself handle TLS. You'll need a **certificate** for this, so either get one from [Let's Encrypt](https://letsencrypt.org/) or [create a self-signed one](https://www.linode.com/docs/guides/create-a-self-signed-tls-certificate/), then use `-useHttps` in combination with `-certPath` and `-keyPath` pointed to your certificate and private key files respectively.
+
+For self-signed certificates, you'll need to pass your public key to Telegram's `setWebhook` method in addition, see [these instructions](https://core.telegram.org/bots/webhooks#how-do-i-set-a-webhook-for-either-type).
 
 ## 🔧 Configuration options
 
@@ -107,6 +115,7 @@ or [Caddy](https://caddyserver.com) to handle encryption.
 * `-disableIPv6` (`bool`) – Whether to disable listening on both IPv4 and IPv6 interfaces. Defaults to `false`.
 * `-port` (`int`) – TCP port to listen on. Defaults to `8080`.
 * `-proxy` (`string`) – Proxy connection string to be used for long-polling mode. Defaults to none.
+* `-urlSecret` (`string`) – Random suffix to append to your updates route called by Telegram's servers to prevent spam. Defaults to none.
 * `-useHttps` (`bool`) – Whether to use HTTPS. Defaults to `false`.
 * `-certPath` (`string`) – Path of your SSL certificate when using webhook mode with `useHttp`. Default to none.
 * `-keyPath` (`string`) – Path of your private SSL key when using webhook mode with `useHttp`. Default to none.
@@ -115,6 +124,8 @@ or [Caddy](https://caddyserver.com) to handle encryption.
 * `-rateLimit` (`int`) – Maximum number of messages to be delivered to each recipient per hour. Defaults to `100`.
 * `-metrics` (`bool`) – Whether to expose [Prometheus](https://prometheus.io) metrics under `/metrics`. Defaults
   to `false`.
+
+When using the Docker image, you can alternatively set most of the above config options via **environment variables** (passed to `docker run` using `-e`), e.g. `APP_USE_HTTPS=true`, `APP_CERT_PATH=/etc/telepush.crt`, etc. For details, see [`entrypoint.sh`](docker/entrypoint.sh).
 
 ## 📥 Inlets
 
