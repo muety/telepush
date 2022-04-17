@@ -25,7 +25,7 @@ func NewUserService(store store.Store) *UserService {
 	return &UserService{store: store}
 }
 
-func (s *UserService) SetToken(token string, fromUser model.TelegramUser, chatId int) {
+func (s *UserService) SetToken(token string, fromUser model.TelegramUser, chatId int64) {
 	s.store.Put(token, model.StoreObject{User: fromUser, ChatId: chatId})
 }
 
@@ -36,13 +36,13 @@ func (s *UserService) InvalidateToken(token string) {
 func (s *UserService) ResolveToken(token string) string {
 	value := s.store.Get(token)
 	if value != nil {
-		return strconv.Itoa((value.(model.StoreObject)).ChatId)
+		return strconv.FormatInt((value.(model.StoreObject)).ChatId, 10)
 	}
 	return ""
 }
 
 // O(n)
-func (s *UserService) ListTokens(chatId int) Tokens {
+func (s *UserService) ListTokens(chatId int64) Tokens {
 	tokens := make(Tokens, 0)
 	for k, v := range s.store.GetItems() {
 		if obj, ok := v.(model.StoreObject); ok {

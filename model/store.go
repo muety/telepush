@@ -2,5 +2,5 @@ package model
 
 type StoreObject struct {
 	User   TelegramUser `json:"user"`
-	ChatId int          `json:"chat_id"`
+	ChatId int64        `json:"chat_id"`
 }

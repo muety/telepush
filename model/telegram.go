@@ -8,7 +8,7 @@ import (
 
 // Only required fields are implemented
 type TelegramUser struct {
-	Id        int    `json:"id"`
+	Id        int64  `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
@@ -16,7 +16,7 @@ type TelegramUser struct {
 
 // Only required fields are implemented
 type TelegramChat struct {
-	Id   int    `json:"id"`
+	Id   int64  `json:"id"`
 	Type string `json:"type"`
 }
 
@@ -42,16 +42,16 @@ type TelegramInputFile struct {
 
 // Only required fields are implemented
 type TelegramInMessage struct {
-	MessageId int          `json:"message_id"`
+	MessageId int64        `json:"message_id"`
 	From      TelegramUser `json:"from"`
-	Date      int          `json:"date"`
+	Date      int64        `json:"date"`
 	Chat      TelegramChat `json:"chat"`
 	Text      string       `json:"text"`
 }
 
 // Only required fields are implemented
 type TelegramUpdate struct {
-	UpdateId int               `json:"update_id"`
+	UpdateId int64             `json:"update_id"`
 	Message  TelegramInMessage `json:"message"`
 }
 

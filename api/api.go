@@ -11,7 +11,7 @@ import (
 	"github.com/muety/telepush/services"
 	"github.com/muety/telepush/store"
 	"github.com/muety/telepush/util"
-	"github.com/n1try/limiter/v3"
+	limiter "github.com/n1try/limiter/v3"
 	memst "github.com/n1try/limiter/v3/drivers/store/memory"
 	"io/ioutil"
 	"log"
@@ -205,7 +205,7 @@ func processUpdate(update model.TelegramUpdate) {
 	}
 
 	if err := SendMessage(&model.TelegramOutMessage{
-		ChatId:             strconv.Itoa(chatId),
+		ChatId:             strconv.FormatInt(chatId, 10),
 		Text:               text,
 		ParseMode:          "Markdown",
 		DisableLinkPreview: true,
@@ -214,9 +214,9 @@ func processUpdate(update model.TelegramUpdate) {
 	}
 }
 
-func checkBlacklist(senderId int) bool {
+func checkBlacklist(senderId int64) bool {
 	for _, id := range botConfig.Blacklist {
-		if sid, err := strconv.Atoi(id); err == nil && sid == senderId {
+		if sid, err := strconv.ParseInt(id, 10, 0); err == nil && sid == senderId {
 			return true
 		}
 	}
