@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/muety/telepush/config"
+	"github.com/muety/telepush/views"
 	"html/template"
 	"net/http"
 )
@@ -28,5 +29,5 @@ func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *IndexHandler) loadTemplates() {
-	h.Tpl = template.Must(template.ParseFiles("views/index.tpl.html"))
+	h.Tpl = template.Must(template.ParseFS(views.GetTemplatesFS(), "*.tpl.html"))
 }

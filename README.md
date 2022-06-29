@@ -83,11 +83,8 @@ $ docker run -d \
 #### 🛠 Option 2.2: Compile from source
 
 ```bash
-# Clone repo
-$ git clone github.com/muety/telepush
-
-# Build
-$ go build
+# Install
+$ go install github.com/muety/telepush@latest
 
 # Run (webhook mode)
 $ ./telepush -token <YOUR_BOTFATHER_TOKEN> -mode webhook

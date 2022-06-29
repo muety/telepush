@@ -1,6 +1,7 @@
 package config
 
 import (
+	_ "embed"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -37,6 +38,9 @@ var (
 	CmdRevoke *regexp.Regexp
 	CmdHelp   *regexp.Regexp
 )
+
+//go:embed version.txt
+var Version string
 
 const (
 	MessageDefaultResponse    = "Please use the _/start_ command to fetch a new token.\n\nFurther information at https://github.com/muety/telepush."
@@ -76,21 +80,6 @@ func init() {
 	CmdStart = regexp.MustCompile(CmdPatternStart)
 	CmdRevoke = regexp.MustCompile(CmdPatternRevoke)
 	CmdHelp = regexp.MustCompile(CmdPatternHelp)
-}
-
-func readVersion() string {
-	file, err := os.Open("version.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return string(bytes)
 }
 
 func readBlacklist(path string) []string {
@@ -174,7 +163,7 @@ func Get() *BotConfig {
 			Metrics:      *metricsPtr,
 			DataDir:      *dataDirPtr,
 			Blacklist:    readBlacklist(*blacklistPtr),
-			Version:      readVersion(),
+			Version:      Version,
 		}
 	}
 
@@ -194,4 +183,8 @@ func (c *BotConfig) GetUpdatesPath() string {
 		return "/updates"
 	}
 	return fmt.Sprintf("/updates_%s", c.UrlSecret)
+}
+
+func (c *BotConfig) IsDev() bool {
+	return strings.HasPrefix(c.Env, "dev")
 }

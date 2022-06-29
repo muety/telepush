@@ -8,6 +8,8 @@ import (
 	bitbucketIn "github.com/muety/telepush/inlets/bitbucket"
 	webmentionioIn "github.com/muety/telepush/inlets/webmentionio"
 	"github.com/muety/telepush/services"
+	"github.com/muety/telepush/util"
+	"github.com/muety/telepush/views"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net"
@@ -104,6 +106,9 @@ func exitGracefully() {
 }
 
 func main() {
+	log.Printf("Environment: %s\n", botConfig.Env)
+	log.Printf("Version: %s\n", botConfig.Version)
+
 	// Initialize Router
 	rootRouter := mux.NewRouter().StrictSlash(true)
 	apiRouter := rootRouter.PathPrefix("/api").Subrouter()
@@ -142,7 +147,8 @@ func main() {
 		rootRouter.Methods(http.MethodGet).Path("/metrics").Handler(promhttp.Handler())
 	}
 
-	rootRouter.Methods(http.MethodGet).PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("views/static/"))))
+	staticFs := util.NeuteredFileSystem{FS: views.GetStaticFilesFS()}
+	rootRouter.Methods(http.MethodGet).PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.FS(staticFs))))
 	rootRouter.Methods(http.MethodGet).PathPrefix("/").Handler(indexHandler)
 
 	// Start server
