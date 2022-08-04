@@ -168,6 +168,11 @@ func processUpdate(update model.TelegramUpdate) {
 		return
 	}
 
+	if !checkWhitelist(chatId) {
+		log.Printf("update not from whitelisted chat id '%d'\n", chatId)
+		return
+	}
+
 	// check rate limit
 	if limitCtx, _ := cmdRateLimiter.Get(context.Background(), fmt.Sprintf("%d-%s", chatId, update.Message.Text)); limitCtx.Reached {
 		log.Printf("command rate limit reached for chat '%d'\n", chatId)
@@ -216,6 +221,19 @@ func processUpdate(update model.TelegramUpdate) {
 
 func checkBlacklist(senderId int64) bool {
 	for _, id := range botConfig.Blacklist {
+		if id == senderId {
+			return true
+		}
+	}
+	return false
+}
+
+func checkWhitelist(senderId int64) bool {
+	// Not in whitelist mode
+	if len(botConfig.Whitelist) == 0 {
+		return true
+	}
+	for _, id := range botConfig.Whitelist {
 		if id == senderId {
 			return true
 		}

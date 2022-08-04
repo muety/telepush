@@ -74,6 +74,7 @@ type BotConfig struct {
 	Metrics      bool
 	DataDir      string
 	Blacklist    []int64
+	Whitelist    []int64
 	Version      string
 }
 
@@ -83,7 +84,7 @@ func init() {
 	CmdHelp = regexp.MustCompile(CmdPatternHelp)
 }
 
-func readBlacklist(path string) []int64 {
+func readIdlist(path string) []int64 {
 	if path == "" {
 		return []int64{}
 	}
@@ -135,6 +136,7 @@ func Get() *BotConfig {
 		metricsPtr := flag.Bool("metrics", false, "Whether or not to expose Prometheus metrics under '/metrics'")
 		dataDirPtr := flag.String("dataDir", ".", "File system location where to store persistent data")
 		blacklistPtr := flag.String("blacklist", "", "Path to a user id blacklist file (e.g. 'blacklist.txt')")
+		whitelistPtr := flag.String("whitelist", "", "Path to a user id whitelist file (e.g. 'whitelist.txt')")
 
 		flag.Parse()
 
@@ -165,7 +167,8 @@ func Get() *BotConfig {
 			Disable6:     *disable6Ptr,
 			Metrics:      *metricsPtr,
 			DataDir:      *dataDirPtr,
-			Blacklist:    readBlacklist(*blacklistPtr),
+			Blacklist:    readIdlist(*blacklistPtr),
+			Whitelist:    readIdlist(*whitelistPtr),
 			Version:      Version,
 		}
 	}
