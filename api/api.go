@@ -216,7 +216,7 @@ func processUpdate(update model.TelegramUpdate) {
 
 func checkBlacklist(senderId int64) bool {
 	for _, id := range botConfig.Blacklist {
-		if sid, err := strconv.ParseInt(id, 10, 0); err == nil && sid == senderId {
+		if id == senderId {
 			return true
 		}
 	}

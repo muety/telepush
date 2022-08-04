@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -72,7 +73,7 @@ type BotConfig struct {
 	Disable6     bool
 	Metrics      bool
 	DataDir      string
-	Blacklist    []string
+	Blacklist    []int64
 	Version      string
 }
 
@@ -82,9 +83,9 @@ func init() {
 	CmdHelp = regexp.MustCompile(CmdPatternHelp)
 }
 
-func readBlacklist(path string) []string {
+func readBlacklist(path string) []int64 {
 	if path == "" {
-		return []string{}
+		return []int64{}
 	}
 
 	file, err := os.Open(path)
@@ -100,13 +101,15 @@ func readBlacklist(path string) []string {
 
 	re := regexp.MustCompile(UserIdRegex)
 	lines := strings.Split(string(bytes), "\n")
-	blacklist := make([]string, 0, len(lines))
+	blacklist := make([]int64, 0, len(lines))
 
 	for _, l := range lines {
 		if !re.MatchString(l) {
 			continue
 		}
-		blacklist = append(blacklist, l)
+		if sid, err := strconv.ParseInt(l, 10, 0); err == nil {
+			blacklist = append(blacklist, sid)
+		}
 	}
 
 	return blacklist
