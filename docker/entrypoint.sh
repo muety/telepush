@@ -32,6 +32,10 @@ if [[ "$APP_BLACKLIST" != "" ]]; then
   CMD_ARGS="$CMD_ARGS -blacklist $APP_BLACKLIST"
 fi
 
+if [[ "$APP_WHITELIST" != "" ]]; then
+  CMD_ARGS="$CMD_ARGS -whitelist $APP_WHITELIST"
+fi
+
 if [[ "$APP_USE_HTTPS" != "" && "$APP_USE_HTTPS" != "false" ]]; then
   CMD_ARGS="$CMD_ARGS -useHttps -certPath $APP_CERT_PATH -keyPath $APP_KEY_PATH"
 fi
