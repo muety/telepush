@@ -160,6 +160,10 @@ They include:
 * `telepush_messages_total{origin="string", type="string"}`
 * `telepush_requests_total{success="string"}`
 
+## 🐞 Troubleshooting
+### Error: `panic: template: pattern matches no files: *.tpl.html`
+When running Telepush as a single executable, you **must not use dev mode** unless Telepush's source code is located inside the same directory. Make sure to not pass `-env dev` in this case.
+
 ## 📓 License
 
 MIT @ [Ferdinand Mütsch](https://muetsch.io)
