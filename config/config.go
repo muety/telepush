@@ -50,7 +50,7 @@ const (
 	MessageRevokeListEmpty    = "No active tokens. Send `/start` to generate new one."
 	MessageRevokeSuccessful   = "Token `%s` revoked."
 	MessageRevokeInvalidIndex = "%d is not a valid token index."
-	MessageHelpResponse       = "For detailed instructions on how to use this bot, please refer to the [official documentation](https://github.com/muety/telepush).\n\nVersion: `%s`"
+	MessageHelpResponse       = "For detailed instructions on how to use this bot, please refer to the [official documentation](https://github.com/muety/telepush).\n\n*Your ID:* `%d`\n*Server version:* `%s`"
 )
 
 var cfg *BotConfig

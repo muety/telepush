@@ -204,7 +204,7 @@ func processUpdate(update model.TelegramUpdate) {
 		}
 	} else if cmd := config.CmdHelp; cmd.MatchString(messageText) {
 		// print help message
-		text = fmt.Sprintf(config.MessageHelpResponse, botConfig.Version)
+		text = fmt.Sprintf(config.MessageHelpResponse, chatId, botConfig.Version)
 	} else {
 		log.Printf("got unknown command: '%s' from chat '%d'\n", update.Message.Text, chatId)
 	}

@@ -117,8 +117,8 @@ For self-signed certificates, you'll need to pass your public key to Telegram's 
 * `-certPath` (`string`) – Path of your SSL certificate when using webhook mode with `useHttp`. Default to none.
 * `-keyPath` (`string`) – Path of your private SSL key when using webhook mode with `useHttp`. Default to none.
 * `-dataDir` (`string`) – File system location where to store persistent data. Defaults to `.`.
-* `-blacklist` (`string`) – Path to a user id blacklist file. Defaults to `blacklist.txt`.
-* `-whitelist` (`string`) – Path to a user id whitelist file. Defaults to `whitelist.txt`.
+* `-blacklist` (`string`) – Path to a user id blacklist file (send `/help` to get your id). Defaults to `blacklist.txt`.
+* `-whitelist` (`string`) – Path to a user id whitelist file (send `/help` to get your id). Defaults to `whitelist.txt`.
 * `-rateLimit` (`int`) – Maximum number of messages to be delivered to each recipient per hour. Defaults to `100`.
 * `-metrics` (`bool`) – Whether to expose [Prometheus](https://prometheus.io) metrics under `/metrics`. Defaults
   to `false`.
