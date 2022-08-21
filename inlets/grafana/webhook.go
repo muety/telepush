@@ -14,13 +14,13 @@ import (
 	"github.com/muety/telepush/util"
 )
 
-type AlertmanagerInlet struct{}
+type GrafanaInlet struct{}
 
 func New() inlets.Inlet {
-	return &AlertmanagerInlet{}
+	return &GrafanaInlet{}
 }
 
-func (i *AlertmanagerInlet) Handler(h http.Handler) http.Handler {
+func (i *GrafanaInlet) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var m Message
 
@@ -43,7 +43,7 @@ func (i *AlertmanagerInlet) Handler(h http.Handler) http.Handler {
 
 func transformMessage(in *Message) *model.DefaultMessage {
 	var sb strings.Builder
-	sb.WriteString("*Alertmanager* wrote:\n\n")
+	sb.WriteString("*Grafana* wrote:\n\n")
 
 	for i, a := range in.Alerts {
 		// Status
@@ -78,6 +78,11 @@ func transformMessage(in *Message) *model.DefaultMessage {
 				v = util.EscapeMarkdown(v)
 				sb.WriteString(fmt.Sprintf("– `%s` = `%s`\n", k, v))
 			}
+		}
+
+		if a.ValueString != "" {
+			sb.WriteString(fmt.Sprintf("*📌 Value String:*\n"))
+			sb.WriteString(fmt.Sprintf("`%s`\n", a.ValueString))
 		}
 
 		if i < len(in.Alerts)-1 {

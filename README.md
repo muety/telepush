@@ -147,6 +147,7 @@ Following inlets are currently available:
 |----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|
 | `default`      | Simply passes the request through without any changes                                                                                                                          | ✅      |
 | `alertmanager` | Consumes [Alertmanager webhook requests](https://prometheus.io/docs/alerting/configuration/#webhook_config)                                                                    | ✅      |
+| `grafana`      | Consumes [Grafana webhook requests](https://grafana.com/docs/grafana/latest/alerting/contact-points/notifiers/webhook-notifier/)                                               | ✅      |
 | `webmentionio` | Accepts [Webmention.io](https://webmention.io/) webhook requests to notify about a new Webmention of one of your articles                                                      | ✅      |
 | `bitbucket`    | Accepts [Bitbucket webhook requests](https://confluence.atlassian.com/bitbucket/tutorial-create-and-trigger-a-webhook-747606432.html) to notify about a pipeline status change | ⏳      |
 

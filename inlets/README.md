@@ -69,6 +69,13 @@ receivers:
   - url: 'http://localhost:8080/api/inlets/alertmanager_webhook/5hd9mx'
 ```
 
+## `grafana`
+`/api/inlets/grafana/<recipient>`
+
+Accepts, transforms and forwards alerts sent by [Grafana](https://grafana.com/docs/grafana/latest/alerting/) to a Telegram chat.
+
+Create a new contact point with `POST` method and URL `https://telepush.dev/api/inlets/grafana/<recipient>`. Also see [webhook-notifier](https://grafana.com/docs/grafana/latest/alerting/contact-points/notifiers/webhook-notifier/).
+
 ## `bitbucket`
 `/api/inlets/bitbucket/<recipient>`
 

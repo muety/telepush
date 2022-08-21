@@ -6,6 +6,7 @@ import (
 	"github.com/muety/telepush/handlers"
 	alertmanagerIn "github.com/muety/telepush/inlets/alertmanager"
 	bitbucketIn "github.com/muety/telepush/inlets/bitbucket"
+	grafanaIn "github.com/muety/telepush/inlets/grafana"
 	webmentionioIn "github.com/muety/telepush/inlets/webmentionio"
 	"github.com/muety/telepush/services"
 	"github.com/muety/telepush/util"
@@ -126,6 +127,7 @@ func main() {
 	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/messages/{recipient}").Handler(messageChain.Append(defaultIn.New().Handler).Then(messageHandler))
 	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/default/{recipient}").Handler(messageChain.Append(defaultIn.New().Handler).Then(messageHandler))
 	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/alertmanager/{recipient}").Handler(messageChain.Append(alertmanagerIn.New().Handler).Then(messageHandler))
+	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/grafana/{recipient}").Handler(messageChain.Append(grafanaIn.New().Handler).Then(messageHandler))
 	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/bitbucket/{recipient}").Handler(messageChain.Append(bitbucketIn.New().Handler).Then(messageHandler))
 	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/webmentionio/{recipient}").Handler(messageChain.Append(webmentionioIn.New().Handler).Then(messageHandler))
 
