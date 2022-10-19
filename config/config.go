@@ -18,7 +18,7 @@ const (
 	BaseURL        = "https://api.telegram.org/bot"
 	StoreFile      = "store.gob"
 	PollTimeoutSec = 60
-	UserIdRegex    = "(?m)^\\d+$"
+	UserIdRegex    = "(?m)^-?\\d+$"
 )
 
 const (

@@ -169,7 +169,7 @@ func processUpdate(update model.TelegramUpdate) {
 	}
 
 	if !checkWhitelist(chatId) {
-		log.Printf("update not from whitelisted chat id '%d'\n", chatId)
+		log.Printf("got update not from whitelisted chat id '%d'\n", chatId)
 		return
 	}
 
