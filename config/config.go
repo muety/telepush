@@ -141,6 +141,10 @@ func Get() *BotConfig {
 		flag.Parse()
 
 		if *tokenPtr == "" {
+			tokenEnv := os.Getenv("token")
+			tokenPtr = &tokenEnv
+		}
+		if *tokenPtr == "" {
 			log.Fatalln("token missing")
 		}
 
