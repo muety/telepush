@@ -141,9 +141,10 @@ func Get() *BotConfig {
 		flag.Parse()
 
 		if *tokenPtr == "" {
-			tokenEnv := os.Getenv("token")
+			tokenEnv := os.Getenv("TELEPUSH_TOKEN")
 			tokenPtr = &tokenEnv
 		}
+
 		if *tokenPtr == "" {
 			log.Fatalln("token missing")
 		}
