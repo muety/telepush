@@ -7,7 +7,7 @@
 
 <p align="center">
 <img src="https://badges.fw-web.space/github/license/muety/telepush">
-<a href="mailto:ferdinand@muetsch.io?subject=Thanks for creating MailWhale" target="_blank"><img src="https://badges.fw-web.space/badge/say%20thanks-%F0%9F%99%8F-%23159CE4"></a>
+<a href="mailto:ferdinand@muetsch.io?subject=Thanks for creating Telepush" target="_blank"><img src="https://badges.fw-web.space/badge/say%20thanks-%F0%9F%99%8F-%23159CE4"></a>
 <a href="https://wakapi.dev" target="_blank"><img src="https://badges.fw-web.space/endpoint?url=https://wakapi.dev/api/compat/shields/v1/n1try/interval:any/project:telepush&color=blue"></a>
 <a href="https://sonarcloud.io/dashboard?id=muety_telegram-middleman-bot"><img src="https://sonarcloud.io/api/project_badges/measure?project=muety_telegram-middleman-bot&metric=security_rating"></a>
 </p>
