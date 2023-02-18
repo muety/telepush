@@ -32,10 +32,11 @@ type `/start` to obtain a recipient token.
 Messages are sent via `POST` to **`https://telepush.dev/api/[[inlets/<inlet_name>]|messages]/<recipient>`**.
 
 ```bash
+RECIPIENT_TONEN=... # The token you received using /start.
 curl -XPOST \
      -H 'Content-Type: application/json' \
      -d '{ "text": "*Hello World!* (yes, this is Markdown)" }' \
-     'https://telepush.dev/api/messages/<recipient>'
+     "https://telepush.dev/api/messages/${RECIPIENT_TONEN}"
 ```
 
 When hosting your own instance, replace the URL respectively.
