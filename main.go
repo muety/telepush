@@ -151,7 +151,7 @@ func main() {
 
 	staticFs := util.NeuteredFileSystem{FS: views.GetStaticFilesFS()}
 	rootRouter.Methods(http.MethodGet).PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.FS(staticFs))))
-	rootRouter.Methods(http.MethodGet).PathPrefix("/").Handler(indexHandler)
+	rootRouter.Methods(http.MethodGet).Path("/").Handler(indexHandler)
 
 	// Start server
 	http.Handle("/", middleware.WithTrailingSlash()(rootRouter))
