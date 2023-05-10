@@ -124,6 +124,8 @@ func main() {
 
 	// Register Routes
 	messageChain := alice.New(middleware.WithToken("recipient", config.KeyRecipient))
+	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/messages").HandlerFunc(api.NotFound)
+	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/default").HandlerFunc(api.NotFound)
 	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/messages/{recipient}").Handler(messageChain.Append(defaultIn.New().Handler).Then(messageHandler))
 	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/default/{recipient}").Handler(messageChain.Append(defaultIn.New().Handler).Then(messageHandler))
 	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/alertmanager/{recipient}").Handler(messageChain.Append(alertmanagerIn.New().Handler).Then(messageHandler))
