@@ -21,8 +21,6 @@ jobs:
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v2
-      - name: Available platforms
-
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
