@@ -54,7 +54,7 @@ jobs:
         working-directory: ./dist
         if: "${{ matrix.alias != 'win' }}"
         run: |
-          zip -9 telepush_${{ matrix.alias }}_amd64.zip *
+          zip -9 -r telepush_${{ matrix.alias }}_amd64.zip *
 
       - name: Upload built executable to release
         uses: softprops/action-gh-release@v1
