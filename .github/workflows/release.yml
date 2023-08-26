@@ -8,6 +8,7 @@ on:
 jobs:
   build-and-release:
     name: Build and add to Release
+    runs-on: ${{ matrix.platform }}
 
     strategy:
       fail-fast: false
@@ -21,13 +22,11 @@ jobs:
           - platform: windows-latest
             alias: win
 
-    runs-on: ${{ matrix.platform }}
     steps:
-
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.19
+          go-version: ^1.21
         id: go
 
       - name: Check out code into the Go module directory
@@ -36,16 +35,28 @@ jobs:
       - name: Get dependencies
         run: go get
 
-      - name: Build
-        run: go build -v -o telepush_${{ matrix.alias }}_amd64 .
+      - name: Prepare
+        run: |
+          mkdir -p dist/
+          cp -R inlets.d dist/
 
-      - name: Upload built executable to release (Win)
+      - name: Build
+        working-directory: ./dist
+        run: go build -v -ldflags '-w -s' -o telepush_${{ matrix.alias }}_amd64 ../
+
+      - name: Compress working folder (Windows PowerShell)
+        working-directory: ./dist
+        if: "${{ matrix.alias == 'win' }}"
+        run: |
+          Compress-Archive -Path .\* -DestinationPath telepush_${{ matrix.alias }}_amd64.zip
+
+      - name: Compress working folder
+        working-directory: ./dist
+        if: "${{ matrix.alias != 'win' }}"
+        run: |
+          zip -9 telepush_${{ matrix.alias }}_amd64.zip *
+
+      - name: Upload built executable to release
         uses: softprops/action-gh-release@v1
-        if: runner.os == 'Windows'
         with:
-          files: telepush_${{ matrix.alias }}_amd64.exe
-      - name: Upload built executable to release (Linux / Mac)
-        uses: softprops/action-gh-release@v1
-        if: runner.os != 'Windows'
-        with:
-          files: telepush_${{ matrix.alias }}_amd64
+          files: ./dist/*.zip
