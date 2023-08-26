@@ -157,7 +157,7 @@ Following inlets are currently available:
 | `webmentionio` | Accepts [Webmention.io](https://webmention.io/) webhook requests to notify about a new Webmention of one of your articles                                                      | ✅      |
 | `bitbucket`    | Accepts [Bitbucket webhook requests](https://confluence.atlassian.com/bitbucket/tutorial-create-and-trigger-a-webhook-747606432.html) to notify about a pipeline status change | ⏳      |
 
-Further documentation about the individual inlets is available [here](/inlets).
+You can also **define your own, custom inlets** in YAML. Further documentation on this and about the individual pre-existing inlets is available [here](/inlets).
 
 ## 📊 Metrics
 

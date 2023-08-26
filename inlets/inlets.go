@@ -5,9 +5,7 @@ import (
 	"path/filepath"
 )
 
-// TODO: watch inlets.d folder and reload automatically
-// TODO: documentation
-// TODO: testing
+// TODO: watch inlets.d folder and reload automatically (#61)
 
 import (
 	"gopkg.in/yaml.v2"

@@ -1,4 +1,17 @@
 # Inlets
+Inlets are endpoints that accept messages in different formats. Most of the time, when sending messages, you will use the `default` inlet. However, Telepush also supports to accept webhook payloads from third-party applications, such as Prometheus Alertmanager, Bitbucket, and others. The according inlets are responsible for receiving messages in the respective formats and translating them into Telegram text messages.
+
+Telepush comes with a couple of pre-configured inlets. However, you can easily **define your own**.
+
+## Creating custom inlets
+Inlets can be written in code (Go) (e.g. see the [`default`](default)) inlet or in a config-based fashion with YAML (recommended). Inlet configs are placed inside the [inlets.d](../inlets.d) folder and require a couple of different properties, such as a name and a template. See [`example.yaml`](../inlets.d) for an easy to understand example inlet definition. 
+
+For each inlet, you will write a [Go template](https://pkg.go.dev/text/template) to define the resulting Telegram message's text. Inside the template, you'll have access to `.Message`, containing the incoming requests' body payload (as plain text or a nested map in case of JSON content).
+
+Whenever adding or updating an inlet, you will have to restart Telepush (however, see [#61](https://github.com/muety/telepush/issues/61)).
+
+---
+
 ## `default`
 `/api/inlets/default/<recipient>`
 
