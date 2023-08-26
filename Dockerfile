@@ -9,6 +9,7 @@ FROM alpine
 WORKDIR /app
 COPY --from=0 /data/telepush telepush
 COPY --from=0 /data/views views
+COPY --from=0 /data/inlets.d inlets.d
 COPY --from=0 /data/docker/entrypoint.sh entrypoint.sh
 
 ENV APP_MODE "webhook"

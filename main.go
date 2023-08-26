@@ -113,10 +113,11 @@ func main() {
 	defaultInlets := []inlets.Inlet{
 		defaultIn.New(),
 	}
+	log.Printf("Loaded %d programatic inlets\n", len(defaultInlets))
 
 	// Load config-defined inlets
-	customInlets := inlets.LoadInlets("inlets.d")
-	log.Printf("Loaded %d config-defined inlets\n", len(customInlets))
+	configInlets := inlets.LoadInlets(botConfig.InletsDir)
+	log.Printf("Loaded %d config-based inlets\n", len(configInlets))
 
 	// Initialize Router
 	rootRouter := mux.NewRouter().StrictSlash(true)
@@ -133,20 +134,17 @@ func main() {
 	// Register Routes
 	messageChain := alice.New(middleware.WithToken("recipient", config.KeyRecipient))
 
-	// Default-inlet routes
+	// Inlet routes
+	allInlets := make([]inlets.Inlet, 0, len(defaultInlets)+len(configInlets))
+	allInlets = append(allInlets, defaultInlets...)
+	allInlets = append(allInlets, configInlets...)
+
 	apiRouter.Methods(defaultInlets[0].SupportedMethods()...).Path("/messages/{recipient}").Handler(messageChain.Append(defaultInlets[0].Handler).Then(messageHandler))
 	log.Printf("Registered [%s] /api/messages/{recipient}\n", strings.Join(defaultInlets[0].SupportedMethods(), ","))
 
-	for _, in := range defaultInlets {
+	for _, in := range allInlets {
 		pattern := fmt.Sprintf("/inlets/%s/{recipient}", in.Name())
 		apiRouter.Methods(in.SupportedMethods()...).Path(pattern).Handler(messageChain.Append(in.Handler).Then(messageHandler))
-		log.Printf("Registered [%s] /api%s\n", strings.Join(in.SupportedMethods(), ","), pattern)
-	}
-
-	// Custom-inlet routes
-	for _, in := range customInlets {
-		pattern := fmt.Sprintf("/inlets/%s/{recipient}", in.Name())
-		apiRouter.Methods(http.MethodGet, http.MethodPost).Path(pattern).Handler(messageChain.Append(in.Handler).Then(messageHandler))
 		log.Printf("Registered [%s] /api%s\n", strings.Join(in.SupportedMethods(), ","), pattern)
 	}
 

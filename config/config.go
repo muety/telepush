@@ -73,6 +73,7 @@ type BotConfig struct {
 	Disable6     bool
 	Metrics      bool
 	DataDir      string
+	InletsDir    string
 	Blacklist    []int64
 	Whitelist    []int64
 	Version      string
@@ -135,6 +136,7 @@ func Get() *BotConfig {
 		disable6Ptr := flag.Bool("disableIPv6", false, "Set if your device doesn't support IPv6. address6 will be ignored if this is set.")
 		metricsPtr := flag.Bool("metrics", false, "Whether or not to expose Prometheus metrics under '/metrics'")
 		dataDirPtr := flag.String("dataDir", ".", "File system location where to store persistent data")
+		inletsPtr := flag.String("inlets", "inlets.d", "Path to folder containing config-based inlet definitions in YAML format")
 		blacklistPtr := flag.String("blacklist", "", "Path to a user id blacklist file (e.g. 'blacklist.txt')")
 		whitelistPtr := flag.String("whitelist", "", "Path to a user id whitelist file (e.g. 'whitelist.txt')")
 
@@ -152,6 +154,10 @@ func Get() *BotConfig {
 		proxyUri, err := url.Parse(*proxyPtr)
 		if err != nil {
 			log.Println("failed to parse proxy uri")
+		}
+
+		if _, err := os.Stat(*inletsPtr); err != nil {
+			log.Fatalln("specified inlets directory does does exist")
 		}
 
 		cfg = &BotConfig{
@@ -172,6 +178,7 @@ func Get() *BotConfig {
 			Disable6:     *disable6Ptr,
 			Metrics:      *metricsPtr,
 			DataDir:      *dataDirPtr,
+			InletsDir:    *inletsPtr,
 			Blacklist:    readIdlist(*blacklistPtr),
 			Whitelist:    readIdlist(*whitelistPtr),
 			Version:      Version,
