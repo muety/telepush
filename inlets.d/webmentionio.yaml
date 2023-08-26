@@ -1,0 +1,9 @@
+# Accepts, transforms and forwards notifications sent by [Webmention.io](https://webmention.io) to a Telegram chat.
+# For details, see https://github.com/muety/telepush/blob/master/inlets/README.md.
+
+name: webmentionio
+content_type: application/json
+template: |
+  *Webmention Watcher wrote:*
+  
+  Your article at {{ escapemd .Message.target }} was mentioned at {{ escapemd .Message.source }}.

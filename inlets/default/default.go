@@ -14,7 +14,13 @@ import (
 
 type DefaultInlet struct{}
 
-const defaultOrigin = "Telepush"
+func (i *DefaultInlet) SupportedMethods() []string {
+	return []string{http.MethodPost, http.MethodGet}
+}
+
+func (i *DefaultInlet) Name() string {
+	return "default"
+}
 
 func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +38,7 @@ func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
 		}
 
 		if len(m.Origin) == 0 {
-			m.Origin = defaultOrigin
+			m.Origin = model.DefaultOrigin
 		}
 
 		m.Text = "*" + util.EscapeMarkdown(m.Origin) + "* wrote:\n\n" + m.Text

@@ -1,0 +1,14 @@
+# A simple greeting example to create config-based inlets.
+# Example:
+# curl -XPOST \
+#   -H 'Content-Type: application/json' \
+#   -H "X-Greeting: Hi" \
+#   -d '{ "name": "Ferdi" }' \
+#   "http://localhost:3000/api/inlets/example/e21f2a"
+
+name: example
+content_type: application/json
+header_vars:
+  greeting: X-Greeting
+template: |
+  {{ if .Vars.greeting }}{{ .Vars.greeting }}{{ else }}Hello{{ end }} {{ .Message.name }}!

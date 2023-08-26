@@ -1,5 +1,7 @@
 package model
 
+const DefaultOrigin = "Telepush"
+
 type DefaultMessage struct {
 	Text     string `json:"text"`
 	Origin   string `json:"origin"`

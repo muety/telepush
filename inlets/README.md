@@ -93,7 +93,7 @@ See [Event Payloads](https://confluence.atlassian.com/bitbucket/event-payloads-7
 Accepts, transforms and forwards notifications sent by [Webmention.io](https://webmention.io) to a Telegram chat.
 
 ### Body
-An example payload looks as follows, however, only `secret`, `source` and `target` are utilized.
+An example payload looks as follows, however, only `source` and `target` are utilized.
 ```json
 {
   "source": "http://rhiaro.co.uk/2015/11/1446953889",

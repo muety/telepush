@@ -1,0 +1,29 @@
+# Accepts, transforms and forwards alerts sent by [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) to a Telegram chat.
+# See [webhook_config](https://prometheus.io/docs/alerting/configuration/#webhook_config).
+# For details, see https://github.com/muety/telepush/blob/master/inlets/README.md.
+
+name: alertmanager
+content_type: application/json
+template: |
+  *Alertmanager wrote:*
+  
+  {{ range .Message.alerts }}
+  {{ $emoji := "" }}
+  {{ if eq .status "firing" }}
+  {{ $emoji = "❗️" }}
+  {{ else if eq .status "resolved" }}
+  {{ $emoji = "✅" }}
+  {{ end }}
+  *⌛️ Status:* {{ .status $emoji }}
+  *🔗 Source*: [Link]({{ .Url }})
+  *🏷 Labels:*
+  {{ range $k, $v := .labels }}
+  - `{{ escapemd $k }}` = `{{ escapemd $v }}`
+  {{ end }}
+  *📝 Annotations:*
+  {{ range $k, $v := .annotations }}
+  - `{{ escapemd $k }}` = `{{ escapemd $v }}`
+  {{ end }}
+  ---
+  
+  {{ end }}

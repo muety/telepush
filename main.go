@@ -1,13 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
 	"github.com/muety/telepush/handlers"
-	alertmanagerIn "github.com/muety/telepush/inlets/alertmanager"
-	bitbucketIn "github.com/muety/telepush/inlets/bitbucket"
-	grafanaIn "github.com/muety/telepush/inlets/grafana"
-	webmentionioIn "github.com/muety/telepush/inlets/webmentionio"
+	"github.com/muety/telepush/inlets"
 	"github.com/muety/telepush/services"
 	"github.com/muety/telepush/util"
 	"github.com/muety/telepush/views"
@@ -18,6 +16,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -110,6 +109,15 @@ func main() {
 	log.Printf("Environment: %s\n", botConfig.Env)
 	log.Printf("Version: %s\n", botConfig.Version)
 
+	// Initialize default inlets
+	defaultInlets := []inlets.Inlet{
+		defaultIn.New(),
+	}
+
+	// Load config-defined inlets
+	customInlets := inlets.LoadInlets("inlets.d")
+	log.Printf("Loaded %d config-defined inlets\n", len(customInlets))
+
 	// Initialize Router
 	rootRouter := mux.NewRouter().StrictSlash(true)
 	apiRouter := rootRouter.PathPrefix("/api").Subrouter()
@@ -124,13 +132,25 @@ func main() {
 
 	// Register Routes
 	messageChain := alice.New(middleware.WithToken("recipient", config.KeyRecipient))
-	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/messages/{recipient}").Handler(messageChain.Append(defaultIn.New().Handler).Then(messageHandler))
-	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/default/{recipient}").Handler(messageChain.Append(defaultIn.New().Handler).Then(messageHandler))
-	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/alertmanager/{recipient}").Handler(messageChain.Append(alertmanagerIn.New().Handler).Then(messageHandler))
-	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/grafana/{recipient}").Handler(messageChain.Append(grafanaIn.New().Handler).Then(messageHandler))
-	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/bitbucket/{recipient}").Handler(messageChain.Append(bitbucketIn.New().Handler).Then(messageHandler))
-	apiRouter.Methods(http.MethodGet, http.MethodPost).Path("/inlets/webmentionio/{recipient}").Handler(messageChain.Append(webmentionioIn.New().Handler).Then(messageHandler))
 
+	// Default-inlet routes
+	apiRouter.Methods(defaultInlets[0].SupportedMethods()...).Path("/messages/{recipient}").Handler(messageChain.Append(defaultInlets[0].Handler).Then(messageHandler))
+	log.Printf("Registered [%s] /api/messages/{recipient}\n", strings.Join(defaultInlets[0].SupportedMethods(), ","))
+
+	for _, in := range defaultInlets {
+		pattern := fmt.Sprintf("/inlets/%s/{recipient}", in.Name())
+		apiRouter.Methods(in.SupportedMethods()...).Path(pattern).Handler(messageChain.Append(in.Handler).Then(messageHandler))
+		log.Printf("Registered [%s] /api%s\n", strings.Join(in.SupportedMethods(), ","), pattern)
+	}
+
+	// Custom-inlet routes
+	for _, in := range customInlets {
+		pattern := fmt.Sprintf("/inlets/%s/{recipient}", in.Name())
+		apiRouter.Methods(http.MethodGet, http.MethodPost).Path(pattern).Handler(messageChain.Append(in.Handler).Then(messageHandler))
+		log.Printf("Registered [%s] /api%s\n", strings.Join(in.SupportedMethods(), ","), pattern)
+	}
+
+	// Other API routes
 	if botConfig.Mode == "webhook" {
 		apiRouter.Methods(http.MethodPost).Path(botConfig.GetUpdatesPath()).HandlerFunc(api.Webhook)
 

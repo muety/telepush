@@ -1,0 +1,33 @@
+# Accepts, transforms and forwards alerts sent by [Grafana](https://grafana.com/docs/grafana/latest/alerting/) to a Telegram chat.
+# Also see [webhook-notifier](https://grafana.com/docs/grafana/latest/alerting/contact-points/notifiers/webhook-notifier/).
+# For details, see https://github.com/muety/telepush/blob/master/inlets/README.md.
+
+name: grafana
+content_type: application/json
+template: |
+  *Grafana wrote:*
+  
+  {{ range .Message.alerts }}
+  {{ $emoji := "" }}
+  {{ if eq .status "firing" }}
+  {{ $emoji = "❗️" }}
+  {{ else if eq .status "resolved" }}
+  {{ $emoji = "✅" }}
+  {{ end }}
+  *⌛️ Status:* {{ .status $emoji }}
+  *🔗 Source*: [Link]({{ .Url }})
+  *🏷 Labels:*
+  {{ range $k, $v := .labels }}
+  - `{{ escapemd $k }}` = `{{ escapemd $v }}`
+  {{ end }}
+  *📝 Annotations:*
+  {{ range $k, $v := .annotations }}
+  - `{{ escapemd $k }}` = `{{ escapemd $v }}`
+  {{ end }}
+  {{ if .valueString }}
+  *📌 Value String:*
+  `{{ .valueString }}`
+  {{ end }}
+  ---
+  
+  {{ end }}

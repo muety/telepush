@@ -10,6 +10,7 @@ require (
 	github.com/n1try/limiter/v3 v3.5.0
 	github.com/orcaman/concurrent-map v1.0.0
 	github.com/prometheus/client_golang v1.13.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
