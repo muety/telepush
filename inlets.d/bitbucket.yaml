@@ -1,6 +1,7 @@
 # Accepts, transforms and forwards events sent by [Bitbucket](https://bitbucket.org/) to a Telegram chat.
-# Requires the `X-Event-Key` header to be set.
-# Body payload: https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html
+# Only pipeline status change events are implemented currently (see https://github.com/muety/telepush/pull/10).
+# Requires the `X-Event-Key` header to be set..
+# Body payload: https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html.
 # For details, see https://github.com/muety/telepush/blob/master/inlets/README.md.
 
 name: bitbucket
@@ -8,17 +9,16 @@ content_type: application/json
 header_vars:
   event_key: X-Event-Key
 template: |
-  {{ if or (eq .Vars.event_key "repo:commit_status_created") (eq .Vars.event_key "repo:commit_status_updated") }}
-  {{ $emoji := "" }}
-  {{ if eq .Message.commit_status.state "INPROGRESS" }}
-  {{ $emoji = "⌛️" }}
-  {{ else if eq .Message.commit_status.state "SUCCESSFUL" }}
-  {{ $emoji = "✅" }}
-  {{ else if eq .Message.commit_status.state "FAILED" }}
-  {{ $emoji = "❌" }}
-  {{ end }}
-  {{ $emoji }} *{{ escapemd .Message.repository.name }}*: [{{ .Message.commit_status.state }}]({{ .Message.commit_status.url }})
-  {{ escapemd .Message.commit_status.name }}
-  {{ else }}
-  Event {{ .Vars.event_key }} triggered.
-  {{ end }}
+  {{- if or (eq .Vars.event_key "repo:commit_status_created") (eq .Vars.event_key "repo:commit_status_updated") }}
+  {{- $emoji := "" }}
+  {{- if eq .Message.commit_status.state "INPROGRESS" }}
+  {{- $emoji = "⌛️" }}
+  {{- else if eq .Message.commit_status.state "SUCCESSFUL" }}
+  {{- $emoji = "✅" }}
+  {{- else if eq .Message.commit_status.state "FAILED" }}
+  {{- $emoji = "❌" }}
+  {{- end }}
+  Bitbucket [pipeline]({{ .Message.commit_status.url }}) status of a [commit]({{ .Message.commit_status.links.commit.href }}) in [{{ .Message.repository.name }}]({{ .Message.repository.links.self.href }}) on Bitbucket has changed to {{$emoji}} `{{ .Message.commit_status.state }}`.
+  {{- else }}
+  Bitbucket event of type {{ .Vars.event_key }} triggered.
+  {{- end }}

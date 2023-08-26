@@ -3,6 +3,7 @@
 
 name: webmentionio
 content_type: application/json
+header_vars:
 template: |
   *Webmention Watcher wrote:*
   

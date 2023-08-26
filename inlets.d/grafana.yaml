@@ -4,30 +4,29 @@
 
 name: grafana
 content_type: application/json
+header_vars:
 template: |
   *Grafana wrote:*
   
   {{ range .Message.alerts }}
-  {{ $emoji := "" }}
-  {{ if eq .status "firing" }}
-  {{ $emoji = "❗️" }}
-  {{ else if eq .status "resolved" }}
-  {{ $emoji = "✅" }}
-  {{ end }}
-  *⌛️ Status:* {{ .status $emoji }}
+  {{- $emoji := "" }}
+  {{- if eq .status "firing" }}
+  {{- $emoji = "❗️" }}
+  {{- else if eq .status "resolved" }}
+  {{- $emoji = "✅" }}
+  {{- end }}
+  *⌛️ Status:* {{ .status }} {{ $emoji }}
   *🔗 Source*: [Link]({{ .Url }})
   *🏷 Labels:*
-  {{ range $k, $v := .labels }}
-  - `{{ escapemd $k }}` = `{{ escapemd $v }}`
-  {{ end }}
+  {{- range $k, $v := .labels }}
+  - `{{ $k }}` = `{{ $v }}`
+  {{- end }}
   *📝 Annotations:*
-  {{ range $k, $v := .annotations }}
-  - `{{ escapemd $k }}` = `{{ escapemd $v }}`
-  {{ end }}
-  {{ if .valueString }}
+  {{- range $k, $v := .annotations }}
+  - `{{ $k }}` = `{{ $v }}`
+  {{- end }}
+  {{- if .valueString }}
   *📌 Value String:*
-  `{{ .valueString }}`
-  {{ end }}
-  ---
-  
+  `{{- .valueString }}`
+  {{- end }}
   {{ end }}
