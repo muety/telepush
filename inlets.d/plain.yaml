@@ -1,0 +1,8 @@
+# Plain text inlet, as simple as it gets.
+# Example:
+# curl -XPOST -d 'Hello World' "http://localhost:3000/api/inlets/plain/e21f2a"
+
+name: plain
+content_type: text/plain
+header_vars:
+template: '{{ .Message }}'

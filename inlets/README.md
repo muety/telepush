@@ -14,32 +14,16 @@ Forwards a basic text message or a file to a Telegram chat.
 ```
 
 #### Body (File Message)
-```json
-{
-    "file": "<base64string>",
-    "filename": "<string>",
-    "type": "<string: TEXT|FILE>",
-    "origin": "<string>"
-}
-```
+Not yet implemented.
 
-Optionally, you can pass sending options with your message:
-```json
-{
-    ...
-    "options": {
-        "disable_link_previews": true
-    }
-}
-```
+## `plain`
+`/api/inlets/plain/<recipient>`
 
-**Alternatively**, the default inlet's payload can be passed as _query parameters_ of a `GET` request (see [#29](https://github.com/muety/telepush/issues/29)), e.g.:
+Forwards a plain string (`text/plain`) of text to a Telegram chat.
+
+#### Body (Text Message)
 ```
-GET http://localhost:8080/api/messages/<recipient> \
-    ?text=Just a test \
-    &origin=Some Script \
-    &type=TEXT \
-    &disable_link_previews=true 
+<string>
 ```
 
 ## `alertmanager`
