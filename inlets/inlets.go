@@ -45,7 +45,7 @@ func LoadInlets(dir string) []Inlet {
 		}
 
 		if _, ok := names[inletConfig.Name]; ok {
-			log.Printf("Warning: Ignoring inlet definition from '%s', because name was found twice\n")
+			log.Printf("Warning: Ignoring inlet definition from '%s', because name '%s' was found twice\n", c, inletConfig.Name)
 			continue
 		}
 		names[inletConfig.Name] = true

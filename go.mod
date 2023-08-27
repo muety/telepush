@@ -3,6 +3,8 @@ module github.com/muety/telepush
 go 1.18
 
 require (
+	github.com/bep/debounce v1.2.1
+	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/justinas/alice v1.2.0
 	github.com/leandro-lugaresi/hub v1.1.1

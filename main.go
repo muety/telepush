@@ -20,6 +20,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/bep/debounce"
+	"github.com/fsnotify/fsnotify"
 	"github.com/muety/telepush/api"
 	"github.com/muety/telepush/config"
 	defaultIn "github.com/muety/telepush/inlets/default"
@@ -109,16 +111,6 @@ func main() {
 	log.Printf("Environment: %s\n", botConfig.Env)
 	log.Printf("Version: %s\n", botConfig.Version)
 
-	// Initialize default inlets
-	defaultInlets := []inlets.Inlet{
-		defaultIn.New(),
-	}
-	log.Printf("Loaded %d programatic inlets\n", len(defaultInlets))
-
-	// Load config-defined inlets
-	configInlets := inlets.LoadInlets(botConfig.InletsDir)
-	log.Printf("Loaded %d config-based inlets\n", len(configInlets))
-
 	// Initialize Router
 	rootRouter := mux.NewRouter().StrictSlash(true)
 	apiRouter := rootRouter.PathPrefix("/api").Subrouter()
@@ -126,6 +118,11 @@ func main() {
 		middleware.WithEventLogging(),
 		middleware.WithRateLimit(),
 	)
+
+	inletsRouterSwapper := &util.RouterSwapper{Prefix: "/api"}
+	apiRouter.MatcherFunc(func(r *http.Request, m *mux.RouteMatch) bool {
+		return strings.HasPrefix(r.URL.Path, "/api/messages/") || strings.HasPrefix(r.URL.Path, "/api/inlets/")
+	}).Handler(inletsRouterSwapper)
 
 	// Initialize Handlers
 	indexHandler := handlers.NewIndexHandler()
@@ -135,18 +132,29 @@ func main() {
 	messageChain := alice.New(middleware.WithToken("recipient", config.KeyRecipient))
 
 	// Inlet routes
-	allInlets := make([]inlets.Inlet, 0, len(defaultInlets)+len(configInlets))
-	allInlets = append(allInlets, defaultInlets...)
-	allInlets = append(allInlets, configInlets...)
+	setupInlets(inletsRouterSwapper, &messageChain, messageHandler)
 
-	apiRouter.Methods(defaultInlets[0].SupportedMethods()...).Path("/messages/{recipient}").Handler(messageChain.Append(defaultInlets[0].Handler).Then(messageHandler))
-	log.Printf("Registered [%s] /api/messages/{recipient}\n", strings.Join(defaultInlets[0].SupportedMethods(), ","))
-
-	for _, in := range allInlets {
-		pattern := fmt.Sprintf("/inlets/%s/{recipient}", in.Name())
-		apiRouter.Methods(in.SupportedMethods()...).Path(pattern).Handler(messageChain.Append(in.Handler).Then(messageHandler))
-		log.Printf("Registered [%s] /api%s\n", strings.Join(in.SupportedMethods(), ","), pattern)
+	// Watch for inlet config changes
+	inletWatcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatalf("Failed to create inlet config watcher, %v\n", err)
 	}
+	defer inletWatcher.Close()
+	if err := inletWatcher.Add(botConfig.InletsDir); err != nil {
+		log.Printf("Warning: failed to start watcher on '%s': %v,\n", botConfig.InletsDir, err)
+	}
+
+	go func() {
+		debounced := debounce.New(250 * time.Millisecond)
+		for {
+			if event, ok := <-inletWatcher.Events; ok && strings.HasSuffix(event.Name, ".yaml") {
+				debounced(func() {
+					log.Printf("%s has changed (%v), reloading inlets\n", event.Name, event.Op)
+					setupInlets(inletsRouterSwapper, &messageChain, messageHandler)
+				})
+			}
+		}
+	}()
 
 	// Other API routes
 	if botConfig.Mode == "webhook" {
@@ -183,4 +191,32 @@ func main() {
 
 	<-c
 	exitGracefully()
+}
+
+func setupInlets(routerSwapper *util.RouterSwapper, routingChain *alice.Chain, handler *handlers.MessageHandler) {
+	router := mux.NewRouter().PathPrefix(routerSwapper.Prefix).Subrouter()
+	routerSwapper.Swap(router)
+
+	// Initialize default inlets
+	defaultInlets := []inlets.Inlet{
+		defaultIn.New(),
+	}
+	log.Printf("Loaded %d programatic inlets\n", len(defaultInlets))
+
+	// Load config-defined inlets
+	configInlets := inlets.LoadInlets(botConfig.InletsDir)
+	log.Printf("Loaded %d config-based inlets\n", len(configInlets))
+
+	allInlets := make([]inlets.Inlet, 0, len(defaultInlets)+len(configInlets))
+	allInlets = append(allInlets, defaultInlets...)
+	allInlets = append(allInlets, configInlets...)
+
+	router.Methods(defaultInlets[0].SupportedMethods()...).Path("/messages/{recipient}").Handler(routingChain.Append(defaultInlets[0].Handler).Then(handler))
+	log.Printf("Registered [%s] /api/messages/{recipient}\n", strings.Join(defaultInlets[0].SupportedMethods(), ","))
+
+	for _, in := range allInlets {
+		pattern := fmt.Sprintf("/inlets/%s/{recipient}", in.Name())
+		router.Methods(in.SupportedMethods()...).Path(pattern).Handler(routingChain.Append(in.Handler).Then(handler))
+		log.Printf("Registered [%s] /api%s\n", strings.Join(in.SupportedMethods(), ","), pattern)
+	}
 }

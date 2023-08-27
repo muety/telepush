@@ -8,7 +8,7 @@ Inlets can be written in code (Go) (e.g. see the [`default`](default)) inlet or 
 
 For each inlet, you will write a [Go template](https://pkg.go.dev/text/template) to define the resulting Telegram message's text. Inside the template, you'll have access to `.Message`, containing the incoming requests' body payload (as plain text or a nested map in case of JSON content).
 
-Whenever adding or updating an inlet, you will have to restart Telepush (however, see [#61](https://github.com/muety/telepush/issues/61)).
+Whenever adding or updating an inlet, Telepush will automatically reload its config.
 
 ---
 
