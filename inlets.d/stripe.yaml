@@ -1,0 +1,19 @@
+# Accepts, transforms and forwards webhook events sent by [Stripe](https://stripe.com) to a Telegram chat.
+# Only the following ones are implemented, currently:
+# - customer.subscription.created
+# - customer.subscription.updated
+# More about Stripe webhooks: https://stripe.com/docs/webhooks.
+# For details, see https://github.com/muety/telepush/blob/master/inlets/README.md.
+
+name: stripe
+content_type: application/json
+header_vars:
+template: |
+  {{- if eq .Message.type "customer.subscription.created" }}
+  Got a new Stripe subscription:
+  {{- range .Message.data.object.items.data }}
+  - Product `{{ .plan.product }}` - {{ div .plan.amount 100 }} {{ .plan.currency }} / {{ .plan.interval }} ([link](https://api.stripe.com/{{ $.Message.data.object.items.url }}))
+  {{ end }}
+  {{- else if eq .Message.type "customer.subscription.updated" }}
+  Subscription `{{ .Message.data.object.id }}` ([link](https://api.stripe.com/{{ .Message.data.object.items.url }})) changed status to `{{ .Message.data.object.status }}`
+  {{- end }}

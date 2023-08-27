@@ -17,6 +17,7 @@ import (
 
 var templateFuncs = template.FuncMap{
 	"escapemd": util.EscapeMarkdown,
+	"div":      util.Div,
 }
 
 type InletConfig struct {
