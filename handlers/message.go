@@ -83,10 +83,10 @@ func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else if err := resolver.Resolve(recipientId, m, &p); err != nil {
 		statusCode := parseStatusCode(err, http.StatusInternalServerError)
 
-		if statusCode == 403 {
+		if statusCode == http.StatusForbidden {
 			// user has probably blocked the bot -> invalidate token
 			h.userService.InvalidateToken(token)
-			log.Printf("invalidating token '%s' for chat '%s', because got 403 from telegram", token, recipientId)
+			log.Printf("invalidating token '%s' for chat '%s', because got 403 from telegram\n", token, recipientId)
 			err = errors.New("error: got 403 from telegram, invalidating your token, text the bot to generate a new one")
 		}
 
