@@ -39,6 +39,12 @@ func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(m.Text) > 4096 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("message too long (max is 4096 characters)"))
+		return
+	}
+
 	if params := r.Context().Value(config.KeyParams); params != nil {
 		p = *(params.(*model.MessageParams))
 	}
