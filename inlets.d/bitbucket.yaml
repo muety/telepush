@@ -1,6 +1,6 @@
 # Accepts, transforms and forwards events sent by [Bitbucket](https://bitbucket.org/) to a Telegram chat.
 # Only pipeline status change events are implemented currently (see https://github.com/muety/telepush/pull/10).
-# Requires the `X-Event-Key` header to be set..
+# Requires the `X-Event-Key` header to be set.
 # Body payload: https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html.
 # For details, see https://github.com/muety/telepush/blob/master/inlets/README.md.
 

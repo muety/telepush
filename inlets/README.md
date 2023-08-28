@@ -78,11 +78,29 @@ Create a new contact point with `POST` method and URL `https://telepush.dev/api/
 
 Accepts, transforms and forwards events sent by [Bitbucket](https://bitbucket.org/) to a Telegram chat.
 
+#### Limitations
+* Currently, only these events are implemented:
+  * `repo:commit_status_created`
+  * `repo:commit_status_updated`
+
 #### Parameters
 Requires the `X-Event-Key` header to be set. 
 
 ### Body
-See [Event Payloads](https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html).
+See [Events](https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html).
+
+## `stripe`
+`/api/inlets/stripe/<recipient>`
+
+Accepts, transforms and forwards events sent by [Stripe](https://stripe.com/docs/webhooks) to a Telegram chat.
+
+#### Limitations
+* Currently, only these events are implemented:
+    * `customer.subscription.created`
+    * `customer.subscription.updated`
+
+### Body
+See [Event](https://stripe.com/docs/api/events).
 
 ## `webmentionio`
 `/api/inlets/webmentionio/<recipient>`
