@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/muety/telepush/config"
 	"github.com/muety/telepush/model"
 	"github.com/muety/telepush/resolvers"
 	"github.com/muety/telepush/services"
+	"log"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -79,7 +81,16 @@ func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusAccepted)
 		return
 	} else if err := resolver.Resolve(recipientId, m, &p); err != nil {
-		w.WriteHeader(parseStatusCode(err, http.StatusInternalServerError))
+		statusCode := parseStatusCode(err, http.StatusInternalServerError)
+
+		if statusCode == 403 {
+			// user has probably blocked the bot -> invalidate token
+			h.userService.InvalidateToken(token)
+			log.Printf("invalidating token '%s' for chat '%s', because got 403 from telegram", token, recipientId)
+			err = errors.New("error: got 403 from telegram, invalidating your token, text the bot to generate a new one")
+		}
+
+		w.WriteHeader(statusCode)
 		w.Write([]byte(err.Error()))
 		return
 	}

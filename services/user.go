@@ -5,11 +5,15 @@ import (
 	"github.com/muety/telepush/model"
 	"github.com/muety/telepush/store"
 	"strconv"
+	"sync"
 )
 
 type UserService struct {
 	store store.Store
 }
+
+var instance *UserService // singleton
+var once sync.Once
 
 type Tokens []string
 
@@ -22,7 +26,10 @@ func (tokens Tokens) String() string {
 }
 
 func NewUserService(store store.Store) *UserService {
-	return &UserService{store: store}
+	once.Do(func() {
+		instance = &UserService{store: store}
+	})
+	return instance
 }
 
 func (s *UserService) SetToken(token string, fromUser model.TelegramUser, chatId int64) {
