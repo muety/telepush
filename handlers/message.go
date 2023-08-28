@@ -6,7 +6,16 @@ import (
 	"github.com/muety/telepush/resolvers"
 	"github.com/muety/telepush/services"
 	"net/http"
+	"regexp"
+	"strconv"
+	"strings"
 )
+
+var telegramApiErrorRegexp *regexp.Regexp
+
+func init() {
+	telegramApiErrorRegexp = regexp.MustCompile(`telegram api returned status (\d{3}):`)
+}
 
 type MessageHandler struct {
 	userService *services.UserService
@@ -60,7 +69,31 @@ func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go resolver.Resolve(recipientId, m, &p)
+	var async bool
+	if asyncParam := r.URL.Query().Get("async"); strings.ToLower(asyncParam) == "true" || asyncParam == "1" {
+		async = true
+	}
 
-	w.WriteHeader(http.StatusAccepted)
+	if async {
+		go resolver.Resolve(recipientId, m, &p)
+		w.WriteHeader(http.StatusAccepted)
+		return
+	} else if err := resolver.Resolve(recipientId, m, &p); err != nil {
+		w.WriteHeader(parseStatusCode(err, http.StatusInternalServerError))
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// very hacky!
+func parseStatusCode(err error, fallback int) int {
+	if matches := telegramApiErrorRegexp.FindStringSubmatch(err.Error()); len(matches) > 1 {
+		if statusCode, err := strconv.Atoi(matches[1]); err == nil {
+			return statusCode
+		}
+		return fallback
+	}
+	return fallback
 }
