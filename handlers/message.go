@@ -6,11 +6,13 @@ import (
 	"github.com/muety/telepush/model"
 	"github.com/muety/telepush/resolvers"
 	"github.com/muety/telepush/services"
+	"github.com/muety/telepush/util"
 	"log"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 var telegramApiErrorRegexp *regexp.Regexp
@@ -39,10 +41,13 @@ func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(m.Text) > 4096 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("message too long (max is 4096 characters)"))
-		return
+	if utf8.RuneCountInString(m.Text) > 4096 {
+		if !config.Get().TruncateMsgs {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("message too long (max is 4096 characters)"))
+			return
+		}
+		m.Text = util.TruncateInRunes(m.Text, 4096)
 	}
 
 	if params := r.Context().Value(config.KeyParams); params != nil {

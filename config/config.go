@@ -68,6 +68,7 @@ type BotConfig struct {
 	UrlSecret    string
 	ReqRateLimit int
 	CmdRateLimit int
+	TruncateMsgs bool
 	Address      string
 	Address6     string
 	Disable6     bool
@@ -131,6 +132,7 @@ func Get() *BotConfig {
 		urlSecretPtr := flag.String("urlSecret", "", "Secret suffix to append to Telegram updates endpoint")
 		reqRateLimitPtr := flag.Int("rateLimit", 100, "Max number of requests per recipient per hour")
 		cmdRateLimitPtr := flag.Int("cmdRateLimit", 10, "Max number of chat commands to execute per hour")
+		truncateMsgsPtr := flag.Bool("truncateMsgs", false, "Truncate too long messages to 4096 characters instead of rejecting them")
 		addrPtr := flag.String("address", "127.0.0.1", "IPv4 address to bind the webserver to")
 		addr6Ptr := flag.String("address6", "::1", "IPv6 address to bind the webserver to")
 		disable6Ptr := flag.Bool("disableIPv6", false, "Set if your device doesn't support IPv6. address6 will be ignored if this is set.")
@@ -173,6 +175,7 @@ func Get() *BotConfig {
 			UrlSecret:    *urlSecretPtr,
 			ReqRateLimit: *reqRateLimitPtr,
 			CmdRateLimit: *cmdRateLimitPtr,
+			TruncateMsgs: *truncateMsgsPtr,
 			Address:      *addrPtr,
 			Address6:     *addr6Ptr,
 			Disable6:     *disable6Ptr,
