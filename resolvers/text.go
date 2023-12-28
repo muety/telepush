@@ -27,7 +27,7 @@ func (r TextResolver) Resolve(recipientId string, m *model.Message, params *mode
 	err := api.SendMessage(&model.TelegramOutMessage{
 		ChatId:             recipientId,
 		Text:               m.Text,
-		ParseMode:          "Markdown",
+		ParseMode:          params.ParseMode(),
 		DisableLinkPreview: disableLinkPreview,
 	})
 

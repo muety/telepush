@@ -161,6 +161,15 @@ Following inlets are currently available:
 
 You can also **define your own, custom inlets** in YAML. Further documentation on this and about the individual pre-existing inlets is available [here](/inlets).
 
+For all inlets, the following options are available to be passed as query parameters:
+
+| Parameter               | Description                                                                       |
+|-------------------------|-----------------------------------------------------------------------------------|
+| `disable_link_previews` | Disable a preview version of web links detected in the message. Default: `false`. |
+| `disable_markdown`      | Disable the message being attempted to be parsed as Markdown. Default: `false`.   |
+
+Example: `POST https://telepush.dev/api/inlets/default?disable_markdown=true&disable_link_previews=true`.
+
 ## 📊 Metrics
 
 Fundamental [Prometheus](https://prometheus) metrics are exposed under `/metrics`, if the `-metrics` flag gets passed.

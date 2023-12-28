@@ -17,4 +17,12 @@ type MessageWithOptions struct {
 
 type MessageOptions struct {
 	DisableLinkPreviews bool `json:"disable_link_previews" mapstructure:"disable_link_previews"`
+	DisableMarkdown     bool `json:"disable_markdown" mapstructure:"disable_markdown"`
+}
+
+func (o *MessageOptions) ParseMode() string {
+	if o.DisableMarkdown {
+		return ""
+	}
+	return "Markdown"
 }

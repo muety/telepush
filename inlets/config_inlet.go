@@ -83,7 +83,10 @@ func (c *ConfigInlet) Handler(h http.Handler) http.Handler {
 
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, config.KeyMessage, message)
-		ctx = context.WithValue(ctx, config.KeyParams, &model.MessageOptions{DisableLinkPreviews: true})
+		ctx = context.WithValue(ctx, config.KeyParams, &model.MessageOptions{
+			DisableLinkPreviews: strings.ToLower(r.URL.Query().Get("disable_link_previews")) == "true",
+			DisableMarkdown:     strings.ToLower(r.URL.Query().Get("disable_markdown")) == "true",
+		})
 
 		h.ServeHTTP(w, r.WithContext(ctx))
 	})

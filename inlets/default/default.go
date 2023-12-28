@@ -8,6 +8,7 @@ import (
 	"github.com/muety/telepush/model"
 	"github.com/muety/telepush/util"
 	"net/http"
+	"strings"
 
 	"github.com/muety/telepush/inlets"
 )
@@ -37,6 +38,15 @@ func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
 			return
 		}
 
+		// make query params take precedence
+		q := r.URL.Query()
+		if strings.ToLower(q.Get("disable_link_previews")) == "true" {
+			m.Options.DisableLinkPreviews = true
+		}
+		if strings.ToLower(q.Get("disable_markdown")) == "true" {
+			m.Options.DisableMarkdown = true
+		}
+
 		if len(m.Origin) == 0 {
 			m.Origin = model.DefaultOrigin
 		}
@@ -60,7 +70,7 @@ func (i *DefaultInlet) tryParseBody(r *http.Request) (m model.MessageWithOptions
 func (i *DefaultInlet) tryParseQuery(r *http.Request) (m model.MessageWithOptions, err error) {
 	query := r.URL.Query()
 	queryParams := make(map[string]string)
-	for k := range r.URL.Query() {
+	for k := range query {
 		queryParams[k] = query.Get(k)
 	}
 	decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{

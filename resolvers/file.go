@@ -27,7 +27,7 @@ func (r FileResolver) Resolve(recipientId string, m *model.Message, params *mode
 	err = api.SendDocument(&model.TelegramOutDocument{
 		ChatId:    recipientId,
 		Caption:   "*" + m.Origin + "* sent a document",
-		ParseMode: "Markdown",
+		ParseMode: params.ParseMode(),
 		Document: &model.TelegramInputFile{
 			Name: m.Filename,
 			Data: decodedFile,
