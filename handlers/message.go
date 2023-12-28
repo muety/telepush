@@ -30,11 +30,11 @@ func NewMessageHandler(userService *services.UserService) *MessageHandler {
 }
 
 func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var m *model.DefaultMessage
-	var p model.MessageParams
+	var m *model.Message
+	var p model.MessageOptions
 
 	if message := r.Context().Value(config.KeyMessage); message != nil {
-		m = message.(*model.DefaultMessage)
+		m = message.(*model.Message)
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("failed to parse message"))
@@ -51,7 +51,7 @@ func (h *MessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if params := r.Context().Value(config.KeyParams); params != nil {
-		p = *(params.(*model.MessageParams))
+		p = *(params.(*model.MessageOptions))
 	}
 
 	var token string

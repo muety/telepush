@@ -10,14 +10,14 @@ import (
 
 type TextResolver struct{}
 
-func (r TextResolver) IsValid(m *model.DefaultMessage) error {
+func (r TextResolver) IsValid(m *model.Message) error {
 	if len(m.Text) == 0 {
 		return errors.New("text parameter missing")
 	}
 	return nil
 }
 
-func (r TextResolver) Resolve(recipientId string, m *model.DefaultMessage, params *model.MessageParams) error {
+func (r TextResolver) Resolve(recipientId string, m *model.Message, params *model.MessageOptions) error {
 	defer logMessage(m)
 	var disableLinkPreview bool
 	if params != nil {

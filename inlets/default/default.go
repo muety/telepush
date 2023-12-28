@@ -24,7 +24,7 @@ func (i *DefaultInlet) Name() string {
 
 func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var m model.ExtendedMessage
+		var m model.MessageWithOptions
 		var err error
 
 		m, err = i.tryParseBody(r)
@@ -44,20 +44,20 @@ func (i *DefaultInlet) Handler(h http.Handler) http.Handler {
 		m.Text = "*" + util.EscapeMarkdown(m.Origin) + "* wrote:\n\n" + m.Text
 
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, config.KeyMessage, &m.DefaultMessage)
+		ctx = context.WithValue(ctx, config.KeyMessage, &m.Message)
 		ctx = context.WithValue(ctx, config.KeyParams, &m.Options)
 
 		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-func (i *DefaultInlet) tryParseBody(r *http.Request) (m model.ExtendedMessage, err error) {
+func (i *DefaultInlet) tryParseBody(r *http.Request) (m model.MessageWithOptions, err error) {
 	dec := json.NewDecoder(r.Body)
 	err = dec.Decode(&m)
 	return m, err
 }
 
-func (i *DefaultInlet) tryParseQuery(r *http.Request) (m model.ExtendedMessage, err error) {
+func (i *DefaultInlet) tryParseQuery(r *http.Request) (m model.MessageWithOptions, err error) {
 	query := r.URL.Query()
 	queryParams := make(map[string]string)
 	for k := range r.URL.Query() {

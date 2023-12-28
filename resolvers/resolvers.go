@@ -12,8 +12,8 @@ const (
 )
 
 type MessageResolver interface {
-	IsValid(*model.DefaultMessage) error
-	Resolve(string, *model.DefaultMessage, *model.MessageParams) error
+	IsValid(*model.Message) error
+	Resolve(string, *model.Message, *model.MessageOptions) error
 }
 
 func GetResolver(ttype string) MessageResolver {
@@ -24,7 +24,7 @@ func GetResolver(ttype string) MessageResolver {
 	return &TextResolver{}
 }
 
-func logMessage(m *model.DefaultMessage) {
+func logMessage(m *model.Message) {
 	ttype := m.Type
 	if ttype == "" {
 		ttype = TextType

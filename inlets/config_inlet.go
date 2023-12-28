@@ -75,7 +75,7 @@ func (c *ConfigInlet) Handler(h http.Handler) http.Handler {
 			return
 		}
 
-		message := &model.DefaultMessage{
+		message := &model.Message{
 			Text:   responseText,
 			Type:   resolvers.TextType,
 			Origin: c.getOrigin(payload, r),
@@ -83,7 +83,7 @@ func (c *ConfigInlet) Handler(h http.Handler) http.Handler {
 
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, config.KeyMessage, message)
-		ctx = context.WithValue(ctx, config.KeyParams, &model.MessageParams{DisableLinkPreviews: true})
+		ctx = context.WithValue(ctx, config.KeyParams, &model.MessageOptions{DisableLinkPreviews: true})
 
 		h.ServeHTTP(w, r.WithContext(ctx))
 	})
