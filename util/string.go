@@ -10,5 +10,5 @@ func TruncateInRunes(s string, n int) string {
 	if n <= 3 {
 		return string(r[:n])
 	}
-	return string(r[:n-1]) + "..."
+	return string(r[:n-3]) + "..."
 }
