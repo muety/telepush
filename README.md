@@ -81,7 +81,10 @@ $ docker run -d \
     -token <YOUR_BOTFATHER_TOKEN>
 ```
 
-#### 🛠 Option 2.2: Compile from source
+#### 🐋 Option 2.2: With Kubernetes
+See [here](https://github.com/muety/telepush/issues/68#issue-2073400161).
+
+#### 🛠 Option 2.3: Compile from source
 
 ```bash
 # Install
