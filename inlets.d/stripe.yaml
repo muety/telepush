@@ -15,5 +15,5 @@ template: |
   - Product `{{ .plan.product }}` - {{ div .plan.amount 100 }} {{ .plan.currency }} / {{ .plan.interval }} ([link](https://api.stripe.com/{{ $.Message.data.object.items.url }}))
   {{ end }}
   {{- else if eq .Message.type "customer.subscription.updated" }}
-  Subscription `{{ .Message.data.object.id }}` ([link](https://api.stripe.com/{{ .Message.data.object.items.url }})) changed status to `{{ .Message.data.object.status }}`
+  Subscription `{{ .Message.data.object.id }}` ([link](https://api.stripe.com/{{ .Message.data.object.items.url }})) changed status to `{{ .Message.data.object.status }}` {{- if .Message.data.object.canceled_at }} (canceled){{- end }}
   {{- end }}
