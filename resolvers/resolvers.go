@@ -24,7 +24,7 @@ func GetResolver(ttype string) MessageResolver {
 	return &TextResolver{}
 }
 
-func logMessage(m *model.Message) {
+func logMessage(m *model.Message, recipientId string) {
 	ttype := m.Type
 	if ttype == "" {
 		ttype = TextType
@@ -33,8 +33,9 @@ func logMessage(m *model.Message) {
 	config.GetHub().Publish(hub.Message{
 		Name: config.EventOnMessageDelivered,
 		Fields: map[string]interface{}{
-			"origin": m.Origin,
-			"type":   ttype,
+			config.FieldMessageOrigin:    m.Origin,
+			config.FieldMessageType:      ttype,
+			config.FieldMessageRecipient: recipientId,
 		},
 	})
 }

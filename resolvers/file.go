@@ -18,7 +18,7 @@ func (r FileResolver) IsValid(m *model.Message) error {
 }
 
 func (r FileResolver) Resolve(recipientId string, m *model.Message, params *model.MessageOptions) error {
-	defer logMessage(m)
+	defer logMessage(m, recipientId)
 	decodedFile, err := b64.StdEncoding.DecodeString(m.File)
 	if err != nil {
 		return err

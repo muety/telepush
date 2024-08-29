@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/leandro-lugaresi/hub"
 	"github.com/muety/telepush/config"
 	"github.com/muety/telepush/model"
 	"github.com/muety/telepush/services"
@@ -24,6 +25,7 @@ import (
 var (
 	botStore       store.Store
 	botConfig      *config.BotConfig
+	eventHub       *hub.Hub
 	client         *http.Client
 	cmdRateLimiter *limiter.Limiter
 	userService    *services.UserService
@@ -33,6 +35,7 @@ func init() {
 	// get config
 	botConfig = config.Get()
 	botStore = config.GetStore()
+	eventHub = config.GetHub()
 
 	// init services
 	userService = services.NewUserService(botStore)
@@ -185,6 +188,15 @@ func processUpdate(update model.TelegramUpdate) {
 		userService.SetToken(token, update.Message.From, chatId)
 		text = fmt.Sprintf(config.MessageTokenResponse, token)
 		log.Printf("sending new token %s to %d", token, chatId)
+
+		config.GetHub().Publish(hub.Message{
+			Name: config.EventOnTokenIssued,
+			Fields: map[string]interface{}{
+				config.FieldTokenToken: token,
+				config.FieldTokenChat:  chatId,
+				config.FieldTokenUser:  update.Message.From.Id,
+			},
+		})
 	} else if cmd := config.CmdRevoke; cmd.MatchString(messageText) {
 		tokens := userService.ListTokens(chatId)
 
